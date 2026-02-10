@@ -1,0 +1,7 @@
+{
+  "name": "MotorCheck V2.0",
+  "description": "Aplicación de gestión y mantenimiento vehicular con diseño Dark Glass.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
