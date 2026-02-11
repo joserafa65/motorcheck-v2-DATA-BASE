@@ -93,7 +93,7 @@ const Settings: React.FC<SettingsProps> = ({ onNavigate }) => {
   const handleReset = async () => {
     if (
       confirm(
-        '¡ATENCIÓN! Esto borrará TODOS los datos, registros y configuraciones tanto en LOCAL como en la NUBE.\n\nEsto es útil si cambias de vehículo y quieres empezar desde cero.\n\n¿Estás seguro?'
+        'Esta acción borrará toda la información actual del vehículo y su historial, tanto la almacenada en tu teléfono como la de la nube.\n\nEs ideal si cambiaste de vehículo o deseas comenzar de cero nuevamente.\n\n¿Confirmas que deseas continuar?'
       )
     ) {
       try {
