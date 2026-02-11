@@ -7,6 +7,7 @@ const KEYS = {
   SERVICE_LOGS: 'motorcheck_services',
   SERVICE_DEFS: 'motorcheck_service_defs',
   ONBOARDING_COMPLETED: 'motorcheck_onboarding_completed',
+  AUTH_COMPLETED: 'motorcheck_auth_completed',
 };
 
 export const StorageService = {
@@ -93,6 +94,20 @@ export const StorageService = {
       localStorage.setItem(KEYS.ONBOARDING_COMPLETED, 'true');
     } catch (e) {
       console.error("Error saving onboarding status", e);
+    }
+  },
+  hasCompletedAuth: (): boolean => {
+    try {
+      return localStorage.getItem(KEYS.AUTH_COMPLETED) === 'true';
+    } catch (e) {
+      return false;
+    }
+  },
+  setAuthCompleted: () => {
+    try {
+      localStorage.setItem(KEYS.AUTH_COMPLETED, 'true');
+    } catch (e) {
+      console.error("Error saving auth status", e);
     }
   }
 };

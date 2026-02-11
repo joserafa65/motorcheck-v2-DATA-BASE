@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Capacitor } from '@capacitor/core';
 import { Purchases, LOG_LEVEL } from '@revenuecat/purchases-capacitor';
+import { AuthProvider } from './contexts/AuthContext';
 import { VehicleProvider } from './contexts/VehicleContext';
 import Dashboard from './pages/Dashboard';
 import Fuel from './pages/Fuel';
@@ -9,6 +10,7 @@ import History from './pages/History';
 import Stats from './pages/Stats';
 import Settings from './pages/Settings';
 import Onboarding from './pages/Onboarding';
+import Auth from './pages/Auth';
 import { AnimatedSplash } from './components/AnimatedSplash';
 import {
   Home,
@@ -19,12 +21,14 @@ import {
 } from 'lucide-react';
 import { StorageService } from './services/storage';
 import { NotificationService } from './services/notifications';
+import { dbClient } from './services/database';
 
 let splashAlreadyShown = false;
 const App: React.FC = () => {
   const [currentView, setCurrentView] = useState('dashboard');
   const [viewParams, setViewParams] = useState<any>({});
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [showAuth, setShowAuth] = useState(false);
   const [isReady, setIsReady] = useState(false);
   const [showSplash, setShowSplash] = useState(!splashAlreadyShown);
 
@@ -55,9 +59,28 @@ const App: React.FC = () => {
 }, []);
   // INIT APP
   useEffect(() => {
-    const hasCompleted = StorageService.hasCompletedOnboarding();
-    setShowOnboarding(!hasCompleted);
-    setIsReady(true);
+    const initApp = async () => {
+      const hasCompletedOnboarding = StorageService.hasCompletedOnboarding();
+
+      if (!hasCompletedOnboarding) {
+        setShowOnboarding(true);
+        setShowAuth(false);
+      } else {
+        const { data: { session } } = await dbClient.auth.getSession();
+
+        if (!session) {
+          setShowAuth(true);
+          setShowOnboarding(false);
+        } else {
+          setShowAuth(false);
+          setShowOnboarding(false);
+        }
+      }
+
+      setIsReady(true);
+    };
+
+    initApp();
   }, []);
 
   // 🔔 NOTIFICACIONES (seguro, sin splash)
@@ -74,6 +97,12 @@ const App: React.FC = () => {
   const handleOnboardingComplete = () => {
     StorageService.setOnboardingCompleted();
     setShowOnboarding(false);
+    setShowAuth(true);
+  };
+
+  const handleAuthComplete = () => {
+    StorageService.setAuthCompleted();
+    setShowAuth(false);
   };
 
   const handleSplashFinish = () => {
@@ -91,6 +120,10 @@ const App: React.FC = () => {
 
   if (showOnboarding) {
     return <Onboarding onComplete={handleOnboardingComplete} />;
+  }
+
+  if (showAuth) {
+    return <Auth onAuthComplete={handleAuthComplete} />;
   }
 
   const handleNavigation = (view: string, params: any = {}) => {
@@ -149,37 +182,39 @@ const App: React.FC = () => {
   );
 
   return (
-    <VehicleProvider>
-      <div className="relative min-h-screen overflow-hidden selection:bg-blue-500/30">
+    <AuthProvider>
+      <VehicleProvider>
+        <div className="relative min-h-screen overflow-hidden selection:bg-blue-500/30">
 
-        {/* Background Gradients */}
-        <div className="fixed top-[-10%] left-[-10%] w-[50%] h-[50%] bg-blue-500/20 dark:bg-blue-900/20 rounded-full blur-[100px] pointer-events-none" />
-        <div className="fixed bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-purple-500/10 dark:bg-purple-900/10 rounded-full blur-[100px] pointer-events-none" />
+          {/* Background Gradients */}
+          <div className="fixed top-[-10%] left-[-10%] w-[50%] h-[50%] bg-blue-500/20 dark:bg-blue-900/20 rounded-full blur-[100px] pointer-events-none" />
+          <div className="fixed bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-purple-500/10 dark:bg-purple-900/10 rounded-full blur-[100px] pointer-events-none" />
 
-        {/* CONTENT */}
-        <div
-          className="relative z-10 max-w-lg mx-auto px-4 pb-28 overflow-y-auto"
-          style={{ paddingTop: 'env(safe-area-inset-top)' }}
-        >
-          {renderView()}
-        </div>
-
-        {/* BOTTOM NAV */}
-        <div className="fixed bottom-0 left-0 right-0 z-50">
+          {/* CONTENT */}
           <div
-            className="max-w-lg mx-auto bg-white/80 dark:bg-black/80 backdrop-blur-xl border-t border-gray-200 dark:border-white/10 flex justify-between px-6 pt-2 shadow-lg"
-            style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+            className="relative z-10 max-w-lg mx-auto px-4 pb-28 overflow-y-auto"
+            style={{ paddingTop: 'env(safe-area-inset-top)' }}
           >
-            <NavItem view="dashboard" icon={Home} label="Inicio" />
-            <NavItem view="services" icon={Wrench} label="Servicios" />
-            <NavItem view="history" icon={ClipboardList} label="Historial" />
-            <NavItem view="stats" icon={BarChart2} label="Estad." />
-            <NavItem view="settings" icon={SettingsIcon} label="Ajustes" />
+            {renderView()}
           </div>
-        </div>
 
-      </div>
-    </VehicleProvider>
+          {/* BOTTOM NAV */}
+          <div className="fixed bottom-0 left-0 right-0 z-50">
+            <div
+              className="max-w-lg mx-auto bg-white/80 dark:bg-black/80 backdrop-blur-xl border-t border-gray-200 dark:border-white/10 flex justify-between px-6 pt-2 shadow-lg"
+              style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+            >
+              <NavItem view="dashboard" icon={Home} label="Inicio" />
+              <NavItem view="services" icon={Wrench} label="Servicios" />
+              <NavItem view="history" icon={ClipboardList} label="Historial" />
+              <NavItem view="stats" icon={BarChart2} label="Estad." />
+              <NavItem view="settings" icon={SettingsIcon} label="Ajustes" />
+            </div>
+          </div>
+
+        </div>
+      </VehicleProvider>
+    </AuthProvider>
   );
 };
 
