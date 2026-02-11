@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { AuthProvider } from './contexts/AuthContext';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { SubscriptionProvider } from './contexts/SubscriptionContext';
 import { VehicleProvider } from './contexts/VehicleContext';
 import Dashboard from './pages/Dashboard';
@@ -20,14 +20,14 @@ import {
 } from 'lucide-react';
 import { StorageService } from './services/storage';
 import { NotificationService } from './services/notifications';
-import { dbClient } from './services/database';
 
 let splashAlreadyShown = false;
-const App: React.FC = () => {
+
+const AppContent: React.FC = () => {
+  const { session, loading: authLoading } = useAuth();
   const [currentView, setCurrentView] = useState('dashboard');
   const [viewParams, setViewParams] = useState<any>({});
   const [showOnboarding, setShowOnboarding] = useState(false);
-  const [showAuth, setShowAuth] = useState(false);
   const [isReady, setIsReady] = useState(false);
   const [showSplash, setShowSplash] = useState(!splashAlreadyShown);
 
@@ -35,48 +35,27 @@ const App: React.FC = () => {
   useEffect(() => {
     const initApp = async () => {
       const hasCompletedOnboarding = StorageService.hasCompletedOnboarding();
-
-      if (!hasCompletedOnboarding) {
-        setShowOnboarding(true);
-        setShowAuth(false);
-      } else {
-        const { data: { session } } = await dbClient.auth.getSession();
-
-        if (!session) {
-          setShowAuth(true);
-          setShowOnboarding(false);
-        } else {
-          setShowAuth(false);
-          setShowOnboarding(false);
-        }
-      }
-
+      setShowOnboarding(!hasCompletedOnboarding);
       setIsReady(true);
     };
 
     initApp();
   }, []);
 
-  // 🔔 NOTIFICACIONES (seguro, sin splash)
+  // 🔔 NOTIFICACIONES
   useEffect(() => {
-    if (!showOnboarding && isReady) {
+    if (session && !showOnboarding && isReady) {
       NotificationService.requestPermission().then(result => {
         if (result === 'granted') {
           // NO registrar listeners ahora (evitamos crashes)
         }
       });
     }
-  }, [showOnboarding, isReady]);
+  }, [session, showOnboarding, isReady]);
 
   const handleOnboardingComplete = () => {
     StorageService.setOnboardingCompleted();
     setShowOnboarding(false);
-    setShowAuth(true);
-  };
-
-  const handleAuthComplete = () => {
-    StorageService.setAuthCompleted();
-    setShowAuth(false);
   };
 
   const handleSplashFinish = () => {
@@ -139,25 +118,27 @@ const App: React.FC = () => {
     </button>
   );
 
+  // Determine what to show based on state
+  const shouldShowOnboarding = !authLoading && isReady && showOnboarding;
+  const shouldShowAuth = !authLoading && isReady && !showOnboarding && !session;
+  const shouldShowApp = !authLoading && isReady && !showOnboarding && session;
+
   return (
-    <AuthProvider>
-      <SubscriptionProvider>
-        {showSplash && <AnimatedSplash onFinish={handleSplashFinish} />}
+    <>
+      {showSplash && <AnimatedSplash onFinish={handleSplashFinish} />}
 
-        {!showSplash && !isReady && null}
+      {!showSplash && (authLoading || !isReady) && null}
 
-        {!showSplash && isReady && showOnboarding && (
-          <Onboarding onComplete={handleOnboardingComplete} />
-        )}
+      {!showSplash && shouldShowOnboarding && (
+        <Onboarding onComplete={handleOnboardingComplete} />
+      )}
 
-        {!showSplash && isReady && !showOnboarding && showAuth && (
-          <Auth onAuthComplete={handleAuthComplete} />
-        )}
+      {!showSplash && shouldShowAuth && <Auth />}
 
-        {!showSplash && isReady && !showOnboarding && !showAuth && (
+      {!showSplash && shouldShowApp && (
+        <SubscriptionProvider>
           <VehicleProvider>
             <div className="relative min-h-screen overflow-hidden selection:bg-blue-500/30">
-
               {/* Background Gradients */}
               <div className="fixed top-[-10%] left-[-10%] w-[50%] h-[50%] bg-blue-500/20 dark:bg-blue-900/20 rounded-full blur-[100px] pointer-events-none" />
               <div className="fixed bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-purple-500/10 dark:bg-purple-900/10 rounded-full blur-[100px] pointer-events-none" />
@@ -183,11 +164,18 @@ const App: React.FC = () => {
                   <NavItem view="settings" icon={SettingsIcon} label="Ajustes" />
                 </div>
               </div>
-
             </div>
           </VehicleProvider>
-        )}
-      </SubscriptionProvider>
+        </SubscriptionProvider>
+      )}
+    </>
+  );
+};
+
+const App: React.FC = () => {
+  return (
+    <AuthProvider>
+      <AppContent />
     </AuthProvider>
   );
 };

@@ -2,13 +2,9 @@ import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { Mail, Lock, LogIn, UserPlus, AlertCircle } from 'lucide-react';
 
-interface AuthProps {
-  onAuthComplete: () => void;
-}
-
 type AuthMode = 'signin' | 'signup';
 
-const Auth: React.FC<AuthProps> = ({ onAuthComplete }) => {
+const Auth: React.FC = () => {
   const { signUpEmail, signInEmail, signInGoogle, signInApple } = useAuth();
 
   const [mode, setMode] = useState<AuthMode>('signup');
@@ -55,8 +51,6 @@ const Auth: React.FC<AuthProps> = ({ onAuthComplete }) => {
         } else {
           setError(result.error.message);
         }
-      } else {
-        onAuthComplete();
       }
     } catch (err) {
       setError('Ocurrió un error. Intenta nuevamente.');
