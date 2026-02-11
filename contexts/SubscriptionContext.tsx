@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Purchases, CustomerInfo, PurchasesOffering } from '@revenuecat/purchases-capacitor';
+import { Capacitor } from '@capacitor/core';
 import { useAuth } from './AuthContext';
 import { TrialService } from '../services/trial';
 
@@ -53,17 +54,35 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
     try {
       setLoading(true);
 
-      await initializeRevenueCat();
+      const isWeb = Capacitor.getPlatform() === 'web';
+      console.log('Platform detected:', Capacitor.getPlatform());
 
-      await Purchases.logIn({ appUserID: userId });
-      console.log('RevenueCat user logged in:', userId);
+      let hasActiveEntitlement = false;
 
-      const { customerInfo: info } = await Purchases.getCustomerInfo();
-      setCustomerInfo(info);
+      if (!isWeb) {
+        await initializeRevenueCat();
 
-      const hasActiveEntitlement = info.entitlements.active['premium'] !== undefined;
-      setEntitlementActive(hasActiveEntitlement);
-      console.log('RevenueCat entitlement active:', hasActiveEntitlement);
+        await Purchases.logIn({ appUserID: userId });
+        console.log('RevenueCat user logged in:', userId);
+
+        const { customerInfo: info } = await Purchases.getCustomerInfo();
+        setCustomerInfo(info);
+
+        hasActiveEntitlement = info.entitlements.active['premium'] !== undefined;
+        setEntitlementActive(hasActiveEntitlement);
+        console.log('RevenueCat entitlement active:', hasActiveEntitlement);
+
+        const { offerings: availableOfferings } = await Purchases.getOfferings();
+        if (availableOfferings.current) {
+          setOfferings(availableOfferings.current.availablePackages);
+          console.log('Available offerings loaded:', availableOfferings.current.availablePackages.length);
+        }
+      } else {
+        console.log('Web platform: Skipping RevenueCat initialization');
+        setEntitlementActive(false);
+        setCustomerInfo(null);
+        setOfferings(null);
+      }
 
       await TrialService.initializeTrial(userId);
       console.log('Trial initialized for user:', userId);
@@ -81,6 +100,7 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
       setShowPaywall(shouldShowPaywall);
 
       console.log('=== SUBSCRIPTION STATUS ===');
+      console.log('Platform:', Capacitor.getPlatform());
       console.log('User ID:', userId);
       console.log('Entitlement Active:', hasActiveEntitlement);
       console.log('Trial Active:', trialActive);
@@ -88,12 +108,6 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
       console.log('Days Remaining:', trialStatus.daysRemaining);
       console.log('Show Paywall:', shouldShowPaywall);
       console.log('===========================');
-
-      const { offerings: availableOfferings } = await Purchases.getOfferings();
-      if (availableOfferings.current) {
-        setOfferings(availableOfferings.current.availablePackages);
-        console.log('Available offerings loaded:', availableOfferings.current.availablePackages.length);
-      }
 
     } catch (error) {
       console.error('Error checking subscription status:', error);
@@ -119,6 +133,13 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
   }, [user?.id]);
 
   const purchase = async (packageToPurchase: any): Promise<{ success: boolean; error?: string }> => {
+    const isWeb = Capacitor.getPlatform() === 'web';
+
+    if (isWeb) {
+      console.log('Purchase not available on web platform');
+      return { success: false, error: 'Purchases are only available on mobile devices' };
+    }
+
     try {
       const { customerInfo: info } = await Purchases.purchasePackage({
         aPackage: packageToPurchase,
@@ -148,6 +169,13 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
   };
 
   const restore = async (): Promise<{ success: boolean; error?: string }> => {
+    const isWeb = Capacitor.getPlatform() === 'web';
+
+    if (isWeb) {
+      console.log('Restore not available on web platform');
+      return { success: false, error: 'Restore is only available on mobile devices' };
+    }
+
     try {
       const { customerInfo: info } = await Purchases.restorePurchases();
       setCustomerInfo(info);
