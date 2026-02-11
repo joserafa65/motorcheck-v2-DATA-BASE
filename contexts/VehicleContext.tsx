@@ -3,6 +3,8 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { FuelLog, ServiceDefinition, ServiceLog, ServiceStatus, VehicleSettings, PREDEFINED_SERVICES_GAS, DEFAULT_VEHICLE } from '../types';
 import { StorageService } from '../services/storage';
 import { NotificationService } from '../services/notifications';
+import { useAuth } from './AuthContext';
+import { backupVehicle, backupFuelLogs, backupServiceLogs, backupServiceDefinitions, migrateLocalToCloud, shouldMigrate } from '../services/cloudBackup';
 
 interface VehicleContextType {
   vehicle: VehicleSettings;
@@ -30,6 +32,7 @@ interface VehicleContextType {
 const VehicleContext = createContext<VehicleContextType | undefined>(undefined);
 
 export const VehicleProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { user } = useAuth();
   const [vehicle, setVehicle] = useState<VehicleSettings>(StorageService.getVehicle());
   const [fuelLogs, setFuelLogs] = useState<FuelLog[]>(StorageService.getFuelLogs());
   const [serviceLogs, setServiceLogs] = useState<ServiceLog[]>(StorageService.getServiceLogs());
@@ -49,10 +52,40 @@ export const VehicleProvider: React.FC<{ children: React.ReactNode }> = ({ child
   }, [vehicle.theme]);
 
   // Persist changes
-  useEffect(() => StorageService.saveVehicle(vehicle), [vehicle]);
-  useEffect(() => StorageService.saveFuelLogs(fuelLogs), [fuelLogs]);
-  useEffect(() => StorageService.saveServiceLogs(serviceLogs), [serviceLogs]);
-  useEffect(() => StorageService.saveServiceDefinitions(serviceDefinitions), [serviceDefinitions]);
+  useEffect(() => {
+    StorageService.saveVehicle(vehicle);
+    if (user?.id) {
+      backupVehicle(vehicle, user.id);
+    }
+  }, [vehicle, user?.id]);
+
+  useEffect(() => {
+    StorageService.saveFuelLogs(fuelLogs);
+    if (user?.id) {
+      backupFuelLogs(fuelLogs, user.id);
+    }
+  }, [fuelLogs, user?.id]);
+
+  useEffect(() => {
+    StorageService.saveServiceLogs(serviceLogs);
+    if (user?.id) {
+      backupServiceLogs(serviceLogs, user.id);
+    }
+  }, [serviceLogs, user?.id]);
+
+  useEffect(() => {
+    StorageService.saveServiceDefinitions(serviceDefinitions);
+    if (user?.id) {
+      backupServiceDefinitions(serviceDefinitions, user.id);
+    }
+  }, [serviceDefinitions, user?.id]);
+
+  // Migrate local data to cloud on first login
+  useEffect(() => {
+    if (user?.id && shouldMigrate()) {
+      migrateLocalToCloud(user.id, vehicle, fuelLogs, serviceLogs, serviceDefinitions);
+    }
+  }, [user?.id]);
 
   // Calculate Statuses
   useEffect(() => {
