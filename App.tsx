@@ -11,6 +11,7 @@ import Settings from './pages/Settings';
 import Onboarding from './pages/Onboarding';
 import Auth from './pages/Auth';
 import { AnimatedSplash } from './components/AnimatedSplash';
+import { Paywall } from './components/Paywall';
 import {
   Home,
   Wrench,
@@ -139,7 +140,7 @@ const SubscriptionGate: React.FC<{
   currentView: string;
   handleNavigation: (view: string, params?: any) => void;
 }> = ({ renderView, currentView, handleNavigation }) => {
-  const { loading, showPaywall } = useSubscription();
+  const { loading, showPaywall, offerings, purchase, restore } = useSubscription();
 
   if (loading) {
     return (
@@ -150,27 +151,7 @@ const SubscriptionGate: React.FC<{
   }
 
   if (showPaywall) {
-    return (
-      <div className="fixed inset-0 bg-black overflow-hidden">
-        <div className="fixed top-[-10%] left-[-10%] w-[50%] h-[50%] bg-blue-500/20 rounded-full blur-[100px] pointer-events-none" />
-        <div className="fixed bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-purple-500/10 rounded-full blur-[100px] pointer-events-none" />
-
-        <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-6 text-center">
-          <div className="max-w-md">
-            <div className="text-6xl mb-6">🔒</div>
-            <h1 className="text-3xl font-bold text-white mb-4">
-              Tu periodo de prueba terminó
-            </h1>
-            <p className="text-xl text-gray-300 mb-8">
-              Necesitas activar Premium para continuar
-            </p>
-            <div className="text-gray-400">
-              <p>Paywall UI próximamente...</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
+    return <Paywall offerings={offerings} onPurchase={purchase} onRestore={restore} />;
   }
 
   const NavItem = ({ view, params, icon: Icon, label }: any) => (
