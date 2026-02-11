@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useVehicle } from '../contexts/VehicleContext';
+import { useAuth } from '../contexts/AuthContext';
 import {
   Button,
   Input,
@@ -10,7 +11,7 @@ import {
 } from '../components/UI';
 import { UnitSystem } from '../types';
 import { PDFExportService } from '../services/pdfExport';
-import { Moon, Sun, Download, ShieldAlert } from 'lucide-react';
+import { Moon, Sun, Download, ShieldAlert, User, LogOut, LogIn } from 'lucide-react';
 
 interface SettingsProps {
   onNavigate: (view: string) => void;
@@ -19,6 +20,7 @@ interface SettingsProps {
 const Settings: React.FC<SettingsProps> = ({ onNavigate }) => {
   const { vehicle, fuelLogs, serviceLogs, updateVehicle, resetAll } =
     useVehicle();
+  const { user, signOut } = useAuth();
 
   const [formData, setFormData] = useState(vehicle);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
@@ -96,6 +98,15 @@ const Settings: React.FC<SettingsProps> = ({ onNavigate }) => {
       resetAll();
       window.location.reload();
     }
+  };
+
+  const handleSignOut = async () => {
+    await signOut();
+    onNavigate('auth');
+  };
+
+  const handleSignIn = () => {
+    onNavigate('auth');
   };
 
   return (
@@ -240,6 +251,44 @@ const Settings: React.FC<SettingsProps> = ({ onNavigate }) => {
             </>
           )}
         </Button>
+
+        {/* Cuenta */}
+        <Card className="p-4">
+          <div className="flex items-center gap-2 mb-4">
+            <User size={20} className="text-blue-500" />
+            <h3 className="text-lg font-bold text-blue-500 uppercase tracking-wider">
+              Cuenta
+            </h3>
+          </div>
+
+          {user ? (
+            <div className="space-y-4">
+              <div className="p-3 bg-gray-100 dark:bg-white/5 rounded-xl">
+                <p className="text-xs text-gray-500 dark:text-gray-400 mb-1 font-medium">
+                  Sesión activa
+                </p>
+                <p className="text-sm font-bold text-gray-900 dark:text-white break-all">
+                  {user.email}
+                </p>
+              </div>
+              <Button
+                onClick={handleSignOut}
+                className="bg-gray-600 hover:bg-gray-500 py-4 text-lg font-bold w-full"
+              >
+                <LogOut size={22} />
+                Cerrar Sesión
+              </Button>
+            </div>
+          ) : (
+            <Button
+              onClick={handleSignIn}
+              className="bg-blue-600 hover:bg-blue-500 py-4 text-lg font-bold w-full"
+            >
+              <LogIn size={22} />
+              Iniciar Sesión / Cambiar de Cuenta
+            </Button>
+          )}
+        </Card>
 
         {/* Zona de peligro */}
         <div className="pt-8 border-t border-gray-300 dark:border-white/10">
