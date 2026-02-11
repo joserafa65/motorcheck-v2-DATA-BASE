@@ -12,6 +12,7 @@ import {
 import { UnitSystem } from '../types';
 import { PDFExportService } from '../services/pdfExport';
 import { Moon, Sun, Download, ShieldAlert, User, LogOut, LogIn } from 'lucide-react';
+import { dbClient } from '../services/database';
 
 interface SettingsProps {
   onNavigate: (view: string) => void;
@@ -89,14 +90,63 @@ const Settings: React.FC<SettingsProps> = ({ onNavigate }) => {
     }
   };
 
-  const handleReset = () => {
+  const handleReset = async () => {
     if (
       confirm(
-        '¡ATENCIÓN! Esto borrará TODOS los datos, registros y configuraciones. ¿Estás seguro?'
+        '¡ATENCIÓN! Esto borrará TODOS los datos, registros y configuraciones tanto en LOCAL como en la NUBE.\n\nEsto es útil si cambias de vehículo y quieres empezar desde cero.\n\n¿Estás seguro?'
       )
     ) {
-      resetAll();
-      window.location.reload();
+      try {
+        // Delete cloud data if user is authenticated
+        if (user?.id) {
+          // Delete all vehicles and their related data for this user
+          const { error: vehiclesError } = await dbClient
+            .from('vehicles')
+            .delete()
+            .eq('user_id', user.id);
+
+          if (vehiclesError) {
+            console.error('Error deleting vehicles:', vehiclesError);
+          }
+
+          // Delete fuel logs
+          const { error: fuelError } = await dbClient
+            .from('fuel_logs')
+            .delete()
+            .eq('user_id', user.id);
+
+          if (fuelError) {
+            console.error('Error deleting fuel logs:', fuelError);
+          }
+
+          // Delete service definitions
+          const { error: defsError } = await dbClient
+            .from('service_definitions')
+            .delete()
+            .eq('user_id', user.id);
+
+          if (defsError) {
+            console.error('Error deleting service definitions:', defsError);
+          }
+
+          // Delete service logs
+          const { error: logsError } = await dbClient
+            .from('service_logs')
+            .delete()
+            .eq('user_id', user.id);
+
+          if (logsError) {
+            console.error('Error deleting service logs:', logsError);
+          }
+        }
+
+        // Delete local data
+        resetAll();
+        window.location.reload();
+      } catch (error) {
+        console.error('Error resetting data:', error);
+        alert('Hubo un error al borrar los datos. Por favor, intenta de nuevo.');
+      }
     }
   };
 
