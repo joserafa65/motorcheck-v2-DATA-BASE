@@ -10,6 +10,7 @@ interface AuthContextType {
   signInEmail: (email: string, password: string) => Promise<{ error: AuthError | null }>;
   signInGoogle: () => Promise<{ error: AuthError | null }>;
   signInApple: () => Promise<{ error: AuthError | null }>;
+  resetPassword: (email: string) => Promise<{ error: AuthError | null }>;
   signOut: () => Promise<void>;
 }
 
@@ -104,6 +105,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const resetPassword = async (email: string) => {
+    try {
+      const { error } = await dbClient.auth.resetPasswordForEmail(email, {
+        redirectTo: window.location.origin,
+      });
+      return { error };
+    } catch (error) {
+      return { error: error as AuthError };
+    }
+  };
+
   const signOut = async () => {
     await dbClient.auth.signOut();
     setUser(null);
@@ -120,6 +132,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         signInEmail,
         signInGoogle,
         signInApple,
+        resetPassword,
         signOut,
       }}
     >
