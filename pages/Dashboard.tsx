@@ -3,7 +3,7 @@ import React, { useMemo, useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useVehicle } from '../contexts/VehicleContext';
 import { Card, Button } from '../components/UI';
-import { AlertTriangle, CheckCircle, TrendingUp, ChevronRight, Calendar, Gauge, CreditCard, History, Fuel, Wrench, X, Flag, Clock, AlertOctagon } from 'lucide-react';
+import { AlertTriangle, CheckCircle, TrendingUp, ChevronRight, Calendar, Gauge, CreditCard, History, Fuel, Wrench, X, Flag, Clock, AlertOctagon, Settings } from 'lucide-react';
 import { CURRENCY_FORMATTER, DATE_FORMATTER, roundToTwo } from '../constants';
 import { ServiceStatus, UnitSystem } from '../types';
 
@@ -143,6 +143,13 @@ const Dashboard: React.FC<{ onNavigate: (view: string, params?: any) => void }> 
                            <span className="bg-white/20 backdrop-blur-sm px-2 py-0.5 rounded text-xs font-bold">{vehicle.year || '----'}</span>
                            <span className="opacity-50">|</span>
                            <span className="uppercase tracking-wide text-xs font-bold">{vehicle.plate || '--- ---'}</span>
+                       </div>
+                       <div className="flex justify-center mt-3">
+                           <Settings
+                               size={20}
+                               className="p-2 rounded-full opacity-60 hover:opacity-100 transition-opacity cursor-pointer text-white"
+                               onClick={() => onNavigate('settings')}
+                           />
                        </div>
                    </div>
                    <div className="text-right">
