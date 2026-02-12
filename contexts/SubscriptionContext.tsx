@@ -96,7 +96,7 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
       setDaysRemaining(trialStatus.daysRemaining);
       console.log('Trial status:', trialStatus);
 
-      const shouldShowPaywall = true;
+      const shouldShowPaywall = !hasActiveEntitlement && !trialActive;
       setShowPaywall(shouldShowPaywall);
 
       console.log('=== SUBSCRIPTION STATUS ===');
