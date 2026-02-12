@@ -29,15 +29,30 @@ export const Button: React.FC<React.ButtonHTMLAttributes<HTMLButtonElement> & { 
   );
 };
 
-export const Input: React.FC<React.InputHTMLAttributes<HTMLInputElement> & { label: string }> = ({ label, className = '', ...props }) => (
-  <div className="mb-5 animate-enter">
-    <label className="block text-sm font-medium text-muted mb-2 tracking-wide">{label}</label>
-    <input 
-      className={`glass-input w-full rounded-xl px-4 py-3.5 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all text-base ${className}`}
-      {...props} 
-    />
-  </div>
-);
+export const Input: React.FC<React.InputHTMLAttributes<HTMLInputElement> & { label: string }> = ({ label, className = '', ...props }) => {
+  const getInputMode = (): 'numeric' | 'decimal' | undefined => {
+    if (props.type !== 'number') return undefined;
+
+    const step = props.step;
+    if (!step || step === '1') return 'numeric';
+
+    const stepValue = parseFloat(step as string);
+    if (!isNaN(stepValue) && stepValue < 1) return 'decimal';
+
+    return 'numeric';
+  };
+
+  return (
+    <div className="mb-5 animate-enter">
+      <label className="block text-sm font-medium text-muted mb-2 tracking-wide">{label}</label>
+      <input
+        className={`glass-input w-full rounded-xl px-4 py-3.5 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all text-base ${className}`}
+        inputMode={getInputMode()}
+        {...props}
+      />
+    </div>
+  );
+};
 
 export const Select: React.FC<React.SelectHTMLAttributes<HTMLSelectElement> & { label: string, options: {value: string, label: string}[] }> = ({ label, options, className = '', ...props }) => (
   <div className="mb-5 animate-enter">

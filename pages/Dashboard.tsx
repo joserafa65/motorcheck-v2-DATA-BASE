@@ -321,7 +321,7 @@ const Dashboard: React.FC<{ onNavigate: (view: string, params?: any) => void }> 
                     <p className="text-sm text-gray-500 mt-1.5 font-medium">Kilometraje actual</p>
                 </div>
                 <div className="relative mb-6">
-                    <input type="number" value={odoInput} onChange={(e) => setOdoInput(e.target.value)} className="w-full bg-gray-50 dark:bg-black/40 border-2 border-gray-200 dark:border-white/10 focus:border-blue-500 rounded-2xl py-4 px-4 text-center text-3xl font-mono font-black text-gray-900 dark:text-white outline-none transition-colors" placeholder={vehicle.currentOdometer.toString()} autoFocus />
+                    <input type="number" inputMode="numeric" value={odoInput} onChange={(e) => setOdoInput(e.target.value)} className="w-full bg-gray-50 dark:bg-black/40 border-2 border-gray-200 dark:border-white/10 focus:border-blue-500 rounded-2xl py-4 px-4 text-center text-3xl font-mono font-black text-gray-900 dark:text-white outline-none transition-colors" placeholder={vehicle.currentOdometer.toString()} autoFocus />
                     <span className="absolute right-4 top-1/2 -translate-y-1/2 text-base text-gray-400 font-black">km</span>
                 </div>
                 <Button onClick={handleSaveOdo} className="text-lg font-bold shadow-blue-900/30">Guardar</Button>
