@@ -134,7 +134,7 @@ const Dashboard: React.FC<{ onNavigate: (view: string, params?: any) => void }> 
                </div>
                <Settings
                    size={96}
-                   className="opacity-50 hover:opacity-100 transition-opacity cursor-pointer text-white drop-shadow-lg"
+                   className="opacity-30 hover:opacity-100 transition-opacity cursor-pointer text-white drop-shadow-lg"
                    onClick={() => onNavigate('settings')}
                />
            </div>
