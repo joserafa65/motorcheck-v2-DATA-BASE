@@ -132,9 +132,14 @@ const Dashboard: React.FC<{ onNavigate: (view: string, params?: any) => void }> 
                <div className="bg-black/30 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10 shadow-lg">
                    <span className="text-xs font-bold text-white/90 uppercase tracking-wide">MotorCheck</span>
                </div>
+               <Settings
+                   size={96}
+                   className="opacity-50 hover:opacity-100 transition-opacity cursor-pointer text-white drop-shadow-lg"
+                   onClick={() => onNavigate('settings')}
+               />
            </div>
            <div className="absolute bottom-0 left-0 right-0 p-4 z-20">
-               <div className="flex justify-between items-end mb-4">
+               <div className="flex justify-between items-end">
                    <div>
                        <h1 className="text-2xl font-black text-white leading-none mb-1.5 shadow-black drop-shadow-md tracking-tight truncate max-w-[180px]">
                            {vehicle.brand || 'Tu'} {vehicle.model || 'Vehículo'}
@@ -151,13 +156,6 @@ const Dashboard: React.FC<{ onNavigate: (view: string, params?: any) => void }> 
                            {vehicle.currentOdometer.toLocaleString()} <span className="text-xs text-white/50 font-sans">km</span>
                        </div>
                    </div>
-               </div>
-               <div className="flex justify-center">
-                   <Settings
-                       size={24}
-                       className="p-2 rounded-full opacity-60 hover:opacity-100 transition-opacity cursor-pointer text-white"
-                       onClick={() => onNavigate('settings')}
-                   />
                </div>
            </div>
       </div>
