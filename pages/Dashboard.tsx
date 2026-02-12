@@ -134,7 +134,7 @@ const Dashboard: React.FC<{ onNavigate: (view: string, params?: any) => void }> 
                </div>
            </div>
            <div className="absolute bottom-0 left-0 right-0 p-4 z-20">
-               <div className="flex justify-between items-end">
+               <div className="flex justify-between items-end mb-4">
                    <div>
                        <h1 className="text-2xl font-black text-white leading-none mb-1.5 shadow-black drop-shadow-md tracking-tight truncate max-w-[180px]">
                            {vehicle.brand || 'Tu'} {vehicle.model || 'Vehículo'}
@@ -144,13 +144,6 @@ const Dashboard: React.FC<{ onNavigate: (view: string, params?: any) => void }> 
                            <span className="opacity-50">|</span>
                            <span className="uppercase tracking-wide text-xs font-bold">{vehicle.plate || '--- ---'}</span>
                        </div>
-                       <div className="flex justify-center mt-3">
-                           <Settings
-                               size={20}
-                               className="p-2 rounded-full opacity-60 hover:opacity-100 transition-opacity cursor-pointer text-white"
-                               onClick={() => onNavigate('settings')}
-                           />
-                       </div>
                    </div>
                    <div className="text-right">
                        <div className="text-xs text-white/60 uppercase tracking-wide mb-0.5 font-bold">Kilometraje</div>
@@ -158,6 +151,13 @@ const Dashboard: React.FC<{ onNavigate: (view: string, params?: any) => void }> 
                            {vehicle.currentOdometer.toLocaleString()} <span className="text-xs text-white/50 font-sans">km</span>
                        </div>
                    </div>
+               </div>
+               <div className="flex justify-center">
+                   <Settings
+                       size={24}
+                       className="p-2 rounded-full opacity-60 hover:opacity-100 transition-opacity cursor-pointer text-white"
+                       onClick={() => onNavigate('settings')}
+                   />
                </div>
            </div>
       </div>
