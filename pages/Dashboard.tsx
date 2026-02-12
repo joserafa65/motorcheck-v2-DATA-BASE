@@ -132,11 +132,13 @@ const Dashboard: React.FC<{ onNavigate: (view: string, params?: any) => void }> 
                <div className="bg-black/30 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10 shadow-lg">
                    <span className="text-xs font-bold text-white/90 uppercase tracking-wide">MotorCheck</span>
                </div>
-               <Settings
-                   size={65}
-                   className="opacity-30 hover:opacity-100 transition-opacity cursor-pointer text-white drop-shadow-lg"
-                   onClick={() => onNavigate('settings')}
-               />
+               {!vehicle.photoUrl && (
+                   <Settings
+                       size={65}
+                       className="opacity-30 hover:opacity-100 transition-opacity cursor-pointer text-white drop-shadow-lg"
+                       onClick={() => onNavigate('settings')}
+                   />
+               )}
            </div>
            <div className="absolute bottom-0 left-0 right-0 p-4 z-20">
                <div className="flex justify-between items-end">
