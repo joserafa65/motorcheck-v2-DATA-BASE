@@ -213,8 +213,10 @@ export const Paywall: React.FC<PaywallProps> = ({ offerings, onPurchase, onResto
           {/* Legal */}
           <div className="mt-8 pt-6 border-t border-white/10">
             <p className="text-gray-500 text-xs text-center mb-3 leading-relaxed">
-              La suscripción se renueva automáticamente. Puedes cancelar en cualquier momento desde tu cuenta de Apple o Google.
-            </p>
+  Las suscripciones se renuevan automáticamente a menos que se cancelen al menos 24 horas antes del final del período actual.
+  El pago se cargará a tu cuenta de Apple ID al confirmar la compra.
+  Puedes gestionar o cancelar tu suscripción en Ajustes &gt; Apple ID &gt; Suscripciones.
+</p>
             <div className="flex items-center justify-center gap-4 text-xs">
               <a
                 href="https://labappstudio.com/motorcheck#terminos"
