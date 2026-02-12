@@ -111,6 +111,13 @@ const Auth: React.FC = () => {
       <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-6 py-12">
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
+            <div className="flex justify-center mb-6">
+              <img
+                src="/MOTOR_CHECK_LOGO_ICON_07_ALPHA.png"
+                alt="MotorCheck"
+                className="w-24 h-24"
+              />
+            </div>
             <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
               {mode === 'signup' ? 'Crea tu cuenta' : 'Bienvenido de nuevo'}
             </h1>
