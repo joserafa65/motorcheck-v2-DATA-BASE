@@ -80,19 +80,7 @@ export const Paywall: React.FC<PaywallProps> = ({ offerings, onPurchase, onResto
     'Exportación de reportes PDF',
   ];
 
-if (!offerings) {
-  return (
-    <div className="fixed inset-0 z-50 bg-black flex items-center justify-center">
-      <div className="text-center text-white">
-        <h1 className="text-2xl font-bold mb-4">
-          Vista previa Paywall (Web)
-        </h1>
-        <p className="text-gray-400">
-          En web no se cargan productos reales.
-        </p>
-      </div>
-    </div>
-  );
+  if (!offerings || offerings.length === 0) {
     return (
       <div className="fixed inset-0 z-50 bg-gradient-to-br from-gray-900 via-black to-gray-900 flex items-center justify-center p-6">
         <div className="text-center">
