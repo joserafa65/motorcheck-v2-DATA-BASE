@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { ArrowLeft, Camera, X, Image as ImageIcon, RotateCw, Check, ZoomIn, Move } from 'lucide-react';
-import { compressImage } from '../services/imageUtils';
+import { compressImage, capturePhoto } from '../services/imageUtils';
 
 export const Card: React.FC<{ children: React.ReactNode; className?: string; onClick?: () => void, style?: React.CSSProperties }> = ({ children, className = '', onClick, style }) => (
   <div onClick={onClick} style={style} className={`glass-panel rounded-2xl p-5 shadow-lg ${onClick ? 'cursor-pointer hover:bg-white/50 dark:hover:bg-white/5 active:scale-[0.99]' : ''} ${className}`}>
@@ -323,19 +323,50 @@ const ImageCropper: React.FC<{
   );
 };
 
-export const PhotoInput: React.FC<{ 
-    value?: string, 
-    onChange: (base64: string) => void, 
+export const PhotoInput: React.FC<{
+    value?: string,
+    onChange: (base64: string) => void,
     onRemove: () => void,
     aspectRatio?: number // Optional: If provided, enables cropping
 }> = ({ value, onChange, onRemove, aspectRatio }) => {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [isProcessing, setIsProcessing] = useState(false);
-    
+
     // Cropper State
     const [tempImage, setTempImage] = useState<string | null>(null);
     const [showCropper, setShowCropper] = useState(false);
-  
+
+    const handleCaptureClick = async () => {
+        setIsProcessing(true);
+        try {
+            // Try to use native camera first (iOS/Android)
+            const capturedImage = await capturePhoto();
+
+            if (capturedImage) {
+                // Image captured via native camera API
+                if (aspectRatio) {
+                    // Show cropper for aspect ratio adjustment
+                    setTempImage(capturedImage);
+                    setShowCropper(true);
+                    setIsProcessing(false);
+                } else {
+                    // Use directly without cropping
+                    onChange(capturedImage);
+                    setIsProcessing(false);
+                }
+            } else {
+                // Fallback to file input (web platform or user cancelled)
+                setIsProcessing(false);
+                fileInputRef.current?.click();
+            }
+        } catch (err) {
+            console.error("Camera error", err);
+            setIsProcessing(false);
+            // Fallback to file input on error
+            fileInputRef.current?.click();
+        }
+    };
+
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
       if (e.target.files && e.target.files[0]) {
         setIsProcessing(true);
@@ -401,9 +432,9 @@ export const PhotoInput: React.FC<{
             />
       
             {!value ? (
-              <button 
+              <button
                 type="button"
-                onClick={() => fileInputRef.current?.click()}
+                onClick={handleCaptureClick}
                 disabled={isProcessing}
                 className="w-full h-36 border-2 border-dashed border-gray-300 dark:border-white/20 rounded-xl flex flex-col items-center justify-center gap-3 text-gray-500 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors active:scale-[0.98]"
               >
@@ -419,20 +450,20 @@ export const PhotoInput: React.FC<{
             ) : (
               <div className="relative w-full h-56 rounded-xl overflow-hidden group animate-enter border border-gray-200 dark:border-white/10 shadow-sm bg-black">
                 <img src={value} alt="Preview" className="w-full h-full object-cover" />
-                
+
                 {/* Overlay Actions */}
                 <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                     <div className="flex gap-4">
                         <button
                             type="button"
-                            onClick={() => fileInputRef.current?.click()}
+                            onClick={handleCaptureClick}
                             className="bg-white/20 backdrop-blur-md p-3 rounded-full text-white hover:bg-white/30 transition-all"
                             title="Cambiar Foto"
                         >
                             <Camera size={24} />
                         </button>
-                        <button 
-                            type="button" 
+                        <button
+                            type="button"
                             onClick={() => { if(confirm("¿Eliminar foto?")) onRemove(); }}
                             className="bg-red-500 p-3 rounded-full text-white hover:scale-110 transition-transform shadow-lg"
                             title="Eliminar Foto"
