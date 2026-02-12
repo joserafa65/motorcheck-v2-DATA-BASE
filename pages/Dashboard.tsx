@@ -133,7 +133,7 @@ const Dashboard: React.FC<{ onNavigate: (view: string, params?: any) => void }> 
                    <span className="text-xs font-bold text-white/90 uppercase tracking-wide">MotorCheck</span>
                </div>
                <Settings
-                   size={96}
+                   size={65}
                    className="opacity-30 hover:opacity-100 transition-opacity cursor-pointer text-white drop-shadow-lg"
                    onClick={() => onNavigate('settings')}
                />
