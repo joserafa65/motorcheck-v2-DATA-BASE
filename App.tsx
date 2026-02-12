@@ -10,6 +10,7 @@ import Stats from './pages/Stats';
 import Settings from './pages/Settings';
 import Onboarding from './pages/Onboarding';
 import Auth from './pages/Auth';
+import ResetPassword from './pages/ResetPassword';
 import { AnimatedSplash } from './components/AnimatedSplash';
 import { Paywall } from './components/Paywall';
 import {
@@ -31,6 +32,10 @@ const AppContent: React.FC = () => {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [isReady, setIsReady] = useState(false);
   const [showSplash, setShowSplash] = useState(!splashAlreadyShown);
+
+  // Check if we're on the reset-password route
+  const isResetPasswordRoute = window.location.pathname === '/reset-password' ||
+    (window.location.hash.includes('access_token') && window.location.hash.includes('type=recovery'));
 
   // INIT APP
   useEffect(() => {
@@ -104,6 +109,11 @@ const AppContent: React.FC = () => {
         return <Dashboard onNavigate={handleNavigation} />;
     }
   };
+
+  // If we're on the reset-password route, show that page immediately
+  if (isResetPasswordRoute && isReady) {
+    return <ResetPassword />;
+  }
 
   // Determine what to show based on state
   const shouldShowOnboarding = !authLoading && isReady && showOnboarding;
