@@ -236,14 +236,9 @@ const ImageCropper: React.FC<{
   };
 
   return (
-    <div className="fixed inset-0 z-[200] bg-black flex flex-col h-screen animate-in fade-in duration-300">
-        {/* Header */}
-        <div className="flex-shrink-0 pt-6 pb-4 px-4">
-            <h3 className="text-white font-bold text-center text-lg">Ajustar Imagen</h3>
-        </div>
-
-        {/* Canvas Area - Takes available space */}
-        <div className="flex-1 flex items-center justify-center px-4 min-h-0">
+    <div className="fixed inset-0 z-[9999] bg-black flex flex-col">
+        {/* Zona imagen */}
+        <div className="flex-1 flex items-center justify-center px-4">
             <div
                 className="relative overflow-hidden rounded-xl shadow-2xl border border-white/10 bg-zinc-900 touch-none w-full"
                 style={{
@@ -262,49 +257,51 @@ const ImageCropper: React.FC<{
                 />
                 <div className="absolute inset-0 pointer-events-none border-2 border-white/20 rounded-xl"></div>
 
-                {/* Drag Hint Overlay (fades out) */}
+                {/* Drag Hint Overlay */}
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-0 animate-pulse">
                     <Move className="text-white/50" size={48} />
                 </div>
             </div>
         </div>
 
-        {/* Controls - Center area */}
-        <div className="flex-shrink-0 px-4 py-4 space-y-4 max-w-lg mx-auto w-full">
-            {/* Scale Slider */}
-            <div className="flex items-center gap-4">
-                <ZoomIn size={20} className="text-gray-400 flex-shrink-0" />
-                <input
-                    type="range"
-                    min="0.5"
-                    max="3"
-                    step="0.05"
-                    value={scale}
-                    onChange={(e) => setScale(parseFloat(e.target.value))}
-                    className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-blue-500"
-                    title="Zoom"
-                />
-            </div>
+        {/* Zona sliders */}
+        <div className="flex-shrink-0 p-4 border-t border-white/10 bg-black">
+            <div className="max-w-lg mx-auto space-y-4">
+                {/* Scale Slider */}
+                <div className="flex items-center gap-4">
+                    <ZoomIn size={20} className="text-gray-400 flex-shrink-0" />
+                    <input
+                        type="range"
+                        min="0.5"
+                        max="3"
+                        step="0.05"
+                        value={scale}
+                        onChange={(e) => setScale(parseFloat(e.target.value))}
+                        className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-blue-500"
+                        title="Zoom"
+                    />
+                </div>
 
-            {/* Rotation Slider */}
-            <div className="flex items-center gap-4">
-                <RotateCw size={20} className="text-gray-400 flex-shrink-0" />
-                <input
-                    type="range"
-                    min="0"
-                    max="360"
-                    step="1"
-                    value={rotation}
-                    onChange={(e) => setRotation(parseFloat(e.target.value))}
-                    className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-blue-500"
-                    title="Rotación"
-                />
+                {/* Rotation Slider */}
+                <div className="flex items-center gap-4">
+                    <RotateCw size={20} className="text-gray-400 flex-shrink-0" />
+                    <input
+                        type="range"
+                        min="0"
+                        max="360"
+                        step="1"
+                        value={rotation}
+                        onChange={(e) => setRotation(parseFloat(e.target.value))}
+                        className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-blue-500"
+                        title="Rotación"
+                    />
+                </div>
             </div>
         </div>
 
-        {/* Footer - Fixed Actions */}
-        <div className="flex-shrink-0 border-t border-white/10 bg-black/50 backdrop-blur-sm">
-            <div className="flex items-center justify-center gap-6 px-4 py-6 max-w-lg mx-auto w-full">
+        {/* Zona botones */}
+        <div className="flex-shrink-0 p-4 border-t border-white/10 bg-black">
+            <div className="max-w-lg mx-auto flex items-center justify-center gap-6">
                 <button
                     onClick={onCancel}
                     className="px-6 py-3 rounded-xl font-bold text-gray-300 hover:text-white transition-colors"
