@@ -11,8 +11,9 @@ import {
 } from '../components/UI';
 import { UnitSystem } from '../types';
 import { PDFExportService } from '../services/pdfExport';
-import { Moon, Sun, Download, ShieldAlert, User, LogOut, LogIn } from 'lucide-react';
+import { Moon, Sun, Download, ShieldAlert, User, LogOut, LogIn, FileText, Scale } from 'lucide-react';
 import { dbClient } from '../services/database';
+import { Capacitor } from '@capacitor/core';
 
 interface SettingsProps {
   onNavigate: (view: string) => void;
@@ -157,6 +158,22 @@ const Settings: React.FC<SettingsProps> = ({ onNavigate }) => {
 
   const handleSignIn = () => {
     onNavigate('auth');
+  };
+
+  const openExternalUrl = async (url: string) => {
+    if (Capacitor.isNativePlatform()) {
+      // On native platforms, try to use Browser plugin
+      try {
+        const { Browser } = await import('@capacitor/browser');
+        await Browser.open({ url });
+      } catch (error) {
+        // Fallback if Browser plugin is not available
+        window.open(url, '_blank');
+      }
+    } else {
+      // On web, use window.open
+      window.open(url, '_blank', 'noopener,noreferrer');
+    }
   };
 
   return (
@@ -338,6 +355,49 @@ const Settings: React.FC<SettingsProps> = ({ onNavigate }) => {
               Iniciar Sesión / Cambiar de Cuenta
             </Button>
           )}
+        </Card>
+
+        {/* Legal */}
+        <Card className="p-4">
+          <button
+            onClick={() => openExternalUrl('https://labappstudio.com/motorcheck#privacidad')}
+            className="w-full flex items-center justify-between p-4 rounded-xl hover:bg-gray-100 dark:hover:bg-white/5 transition-all group"
+          >
+            <div className="flex items-center gap-3">
+              <FileText size={20} className="text-gray-600 dark:text-gray-400" />
+              <span className="text-gray-900 dark:text-white font-medium">
+                Política de Privacidad
+              </span>
+            </div>
+            <svg
+              className="w-5 h-5 text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300 transition-colors"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+
+          <button
+            onClick={() => openExternalUrl('https://labappstudio.com/motorcheck#terminos')}
+            className="w-full flex items-center justify-between p-4 rounded-xl hover:bg-gray-100 dark:hover:bg-white/5 transition-all group"
+          >
+            <div className="flex items-center gap-3">
+              <Scale size={20} className="text-gray-600 dark:text-gray-400" />
+              <span className="text-gray-900 dark:text-white font-medium">
+                Términos de Uso
+              </span>
+            </div>
+            <svg
+              className="w-5 h-5 text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300 transition-colors"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
         </Card>
 
         {/* Zona de peligro */}
