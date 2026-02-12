@@ -93,7 +93,6 @@ if (!offerings) {
       </div>
     </div>
   );
-}
     return (
       <div className="fixed inset-0 z-50 bg-gradient-to-br from-gray-900 via-black to-gray-900 flex items-center justify-center p-6">
         <div className="text-center">
