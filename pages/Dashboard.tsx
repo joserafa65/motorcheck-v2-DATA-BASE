@@ -126,17 +126,17 @@ const Dashboard: React.FC<{ onNavigate: (view: string, params?: any) => void }> 
               <div className="w-full h-full bg-gradient-to-br from-blue-900 via-zinc-900 to-black relative">
                  <div className="absolute inset-0 opacity-20" style={{backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '32px 32px'}}></div>
                  <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent"></div>
+                 <Settings
+                     size={60}
+                     className="absolute top-4 right-4 opacity-40 hover:opacity-100 transition-opacity cursor-pointer text-white drop-shadow-lg z-20"
+                     onClick={() => onNavigate('settings')}
+                 />
               </div>
            )}
            <div className="absolute top-0 left-0 right-0 p-4 flex justify-between items-start z-20">
                <div className="bg-black/30 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10 shadow-lg">
                    <span className="text-xs font-bold text-white/90 uppercase tracking-wide">MotorCheck</span>
                </div>
-               <Settings
-                   size={96}
-                   className="opacity-50 hover:opacity-100 transition-opacity cursor-pointer text-white drop-shadow-lg"
-                   onClick={() => onNavigate('settings')}
-               />
            </div>
            <div className="absolute bottom-0 left-0 right-0 p-4 z-20">
                <div className="flex justify-between items-end">
