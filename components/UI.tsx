@@ -235,92 +235,89 @@ const ImageCropper: React.FC<{
     }
   };
 
-  return (
-    <div className="fixed inset-0 z-[200] bg-black flex flex-col items-center justify-center p-4 animate-in fade-in duration-300">
-        <div className="w-full max-w-lg">
-            <h3 className="text-white font-bold text-center mb-6 text-lg">Ajustar Imagen</h3>
-            
-            {/* Canvas Container */}
-            <div 
-                className="relative overflow-hidden rounded-xl shadow-2xl border border-white/10 bg-zinc-900 touch-none mx-auto"
-                style={{
-                    width: '100%',
-                    maxWidth: '600px',
-                    aspectRatio: `${aspectRatio}`
-                }}
-                onPointerDown={handlePointerDown}
-                onPointerMove={handlePointerMove}
-                onPointerUp={handlePointerUp}
-                onPointerLeave={handlePointerUp}
-            >
-                <canvas 
-                    ref={canvasRef} 
-                    className="w-full h-full object-contain pointer-events-none"
-                />
-                <div className="absolute inset-0 pointer-events-none border-2 border-white/20 rounded-xl"></div>
-                
-                {/* Drag Hint Overlay (fades out) */}
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-0 animate-pulse">
-                    <Move className="text-white/50" size={48} />
-                </div>
-            </div>
+return (
+  <div className="fixed inset-0 z-[200] bg-black flex flex-col">
 
-            {/* Controls */}
-            <div className="mt-8 space-y-6">
-                
-                <div className="space-y-4">
-                    {/* Scale Slider */}
-                    <div className="flex items-center gap-4 px-4">
-                        <ZoomIn size={20} className="text-gray-400" />
-                        <input 
-                            type="range" 
-                            min="0.5" 
-                            max="3" 
-                            step="0.05" 
-                            value={scale}
-                            onChange={(e) => setScale(parseFloat(e.target.value))}
-                            className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-blue-500"
-                            title="Zoom"
-                        />
-                    </div>
-
-                    {/* Rotation Slider */}
-                    <div className="flex items-center gap-4 px-4">
-                        <RotateCw size={20} className="text-gray-400" />
-                        <input 
-                            type="range" 
-                            min="0" 
-                            max="360" 
-                            step="1" 
-                            value={rotation}
-                            onChange={(e) => setRotation(parseFloat(e.target.value))}
-                            className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-blue-500"
-                            title="Rotación"
-                        />
-                    </div>
-                </div>
-
-                {/* Actions Row */}
-                <div className="flex items-center justify-center gap-6">
-                    <button 
-                        onClick={onCancel}
-                        className="px-6 py-3 rounded-xl font-bold text-gray-300 hover:text-white transition-colors"
-                    >
-                        Cancelar
-                    </button>
-
-                    <button 
-                        onClick={handleSave}
-                        className="px-8 py-3 rounded-xl font-bold bg-blue-600 text-white hover:bg-blue-500 shadow-lg shadow-blue-500/20 active:scale-95 transition-all flex items-center gap-2"
-                    >
-                        <Check size={20} />
-                        <span>Guardar</span>
-                    </button>
-                </div>
-            </div>
-        </div>
+    {/* Header */}
+    <div className="shrink-0 px-6 pt-6 pb-4 text-center">
+      <h3 className="text-white font-bold text-lg">
+        Ajustar Imagen
+      </h3>
     </div>
-  );
+
+    {/* Canvas Area */}
+    <div className="flex-1 flex items-center justify-center px-4">
+      <div
+        className="relative w-full max-w-lg overflow-hidden rounded-xl border border-white/10 bg-zinc-900 touch-none"
+        style={{ aspectRatio: `${aspectRatio}` }}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerLeave={handlePointerUp}
+      >
+        <canvas
+          ref={canvasRef}
+          className="w-full h-full object-contain pointer-events-none"
+        />
+        <div className="absolute inset-0 pointer-events-none border-2 border-white/20 rounded-xl"></div>
+      </div>
+    </div>
+
+    {/* Controls */}
+    <div className="shrink-0 px-6 pb-6 space-y-6">
+
+      <div className="space-y-4">
+
+        <div className="flex items-center gap-4">
+          <ZoomIn size={20} className="text-gray-400" />
+          <input
+            type="range"
+            min="0.5"
+            max="3"
+            step="0.05"
+            value={scale}
+            onChange={(e) => setScale(parseFloat(e.target.value))}
+            className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-blue-500"
+          />
+        </div>
+
+        <div className="flex items-center gap-4">
+          <RotateCw size={20} className="text-gray-400" />
+          <input
+            type="range"
+            min="0"
+            max="360"
+            step="1"
+            value={rotation}
+            onChange={(e) => setRotation(parseFloat(e.target.value))}
+            className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-blue-500"
+          />
+        </div>
+
+      </div>
+
+      {/* Actions */}
+      <div className="flex justify-between items-center">
+        <button
+          onClick={onCancel}
+          className="px-6 py-3 font-bold text-gray-300 hover:text-white transition-colors"
+        >
+          Cancelar
+        </button>
+
+        <button
+          onClick={handleSave}
+          className="px-8 py-3 rounded-xl font-bold bg-blue-600 text-white hover:bg-blue-500 active:scale-95 transition-all flex items-center gap-2"
+        >
+          <Check size={20} />
+          Guardar
+        </button>
+      </div>
+
+    </div>
+
+  </div>
+);
 };
 
 export const PhotoInput: React.FC<{
