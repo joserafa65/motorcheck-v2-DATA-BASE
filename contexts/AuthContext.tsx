@@ -108,7 +108,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const resetPassword = async (email: string) => {
     try {
       const { error } = await dbClient.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password`,
+    redirectTo: 'https://labappstudio.com/reset-password',
       });
       return { error };
     } catch (error) {
