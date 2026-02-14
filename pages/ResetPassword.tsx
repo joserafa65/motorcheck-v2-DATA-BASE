@@ -1,6 +1,3 @@
-useEffect(() => {
-  console.log("SUPABASE URL:", import.meta.env.VITE_SUPABASE_URL);
-}, []);
 import React, { useState, useEffect, useRef } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 import { dbClient } from '../services/database';
