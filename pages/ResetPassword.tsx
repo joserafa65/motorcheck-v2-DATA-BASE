@@ -13,18 +13,39 @@ const ResetPassword: React.FC = () => {
   const [initLoading, setInitLoading] = useState(true);
 
   useEffect(() => {
-    const init = async () => {
+    const handleRecovery = async () => {
       try {
-        // Dejamos que Supabase procese automáticamente el token del link
-        await dbClient.auth.getSession();
+        const hash = window.location.hash;
+
+        if (hash && hash.includes('access_token')) {
+          const hashParams = new URLSearchParams(hash.substring(1));
+
+          const access_token = hashParams.get('access_token');
+          const refresh_token = hashParams.get('refresh_token');
+
+          if (access_token && refresh_token) {
+            const { error } = await dbClient.auth.setSession({
+              access_token,
+              refresh_token,
+            });
+
+            if (error) {
+              setError('Enlace inválido o expirado.');
+            }
+          } else {
+            setError('Enlace inválido.');
+          }
+        } else {
+          setError('Modo: sin token');
+        }
       } catch (err) {
-        console.error('Error inicializando sesión:', err);
+        setError('Error procesando enlace.');
       } finally {
         setInitLoading(false);
       }
     };
 
-    init();
+    handleRecovery();
   }, []);
 
   const validatePassword = (password: string): boolean => {
@@ -53,7 +74,7 @@ const ResetPassword: React.FC = () => {
       });
 
       if (error) {
-        setError('Enlace inválido o expirado.');
+        setError('Error actualizando contraseña.');
       } else {
         setSuccess(true);
         setTimeout(() => {
