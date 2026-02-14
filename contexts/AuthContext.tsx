@@ -1,5 +1,3 @@
-authcontexts.tsx
-
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { dbClient } from '../services/database';
 import type { User, Session, AuthError } from '@supabase/supabase-js';
