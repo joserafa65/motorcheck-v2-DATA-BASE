@@ -33,9 +33,8 @@ const AppContent: React.FC = () => {
   const [isReady, setIsReady] = useState(false);
   const [showSplash, setShowSplash] = useState(!splashAlreadyShown);
 
-  // Check if we're on the reset-password route
-  const isResetPasswordRoute = window.location.pathname === '/reset-password' ||
-    (window.location.hash.includes('access_token') && window.location.hash.includes('type=recovery'));
+  // ✅ SOLO depende del pathname
+  const isResetPasswordRoute = window.location.pathname === '/reset-password';
 
   // INIT APP
   useEffect(() => {
@@ -53,7 +52,7 @@ const AppContent: React.FC = () => {
     if (session && !showOnboarding && isReady) {
       NotificationService.requestPermission().then(result => {
         if (result === 'granted') {
-          // NO registrar listeners ahora (evitamos crashes)
+          // listeners si los quieres luego
         }
       });
     }
@@ -110,12 +109,11 @@ const AppContent: React.FC = () => {
     }
   };
 
-  // If we're on the reset-password route, show that page immediately
-  if (isResetPasswordRoute && isReady) {
+  // ✅ ResetPassword tiene prioridad absoluta
+  if (isResetPasswordRoute) {
     return <ResetPassword />;
   }
 
-  // Determine what to show based on state
   const shouldShowOnboarding = !authLoading && isReady && showOnboarding;
   const shouldShowAuth = !authLoading && isReady && !showOnboarding && !session;
   const shouldShowApp = !authLoading && isReady && !showOnboarding && session;
@@ -181,11 +179,9 @@ const SubscriptionGate: React.FC<{
   return (
     <VehicleProvider>
       <div className="relative min-h-screen overflow-hidden selection:bg-blue-500/30">
-        {/* Background Gradients */}
         <div className="fixed top-[-10%] left-[-10%] w-[50%] h-[50%] bg-blue-500/20 dark:bg-blue-900/20 rounded-full blur-[100px] pointer-events-none" />
         <div className="fixed bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-purple-500/10 dark:bg-purple-900/10 rounded-full blur-[100px] pointer-events-none" />
 
-        {/* CONTENT */}
         <div
           className="relative z-10 max-w-lg mx-auto px-4 pb-28 overflow-y-auto"
           style={{ paddingTop: 'env(safe-area-inset-top)' }}
@@ -193,7 +189,6 @@ const SubscriptionGate: React.FC<{
           {renderView()}
         </div>
 
-        {/* BOTTOM NAV */}
         <div className="fixed bottom-0 left-0 right-0 z-50">
           <div
             className="max-w-lg mx-auto bg-white/80 dark:bg-black/80 backdrop-blur-xl border-t border-gray-200 dark:border-white/10 flex justify-between px-6 pt-2 shadow-lg"
