@@ -22,98 +22,69 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    dbClient.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
+    let unsub: any;
 
-    const { data: { subscription } } = dbClient.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      setUser(session?.user ?? null);
+    const initAuth = async () => {
+      const { data } = await dbClient.auth.getSession();
+      setSession(data.session);
+      setUser(data.session?.user ?? null);
       setLoading(false);
-    });
 
-    return () => subscription.unsubscribe();
+      // solo escucha cambios después de la inicialización
+      unsub = dbClient.auth.onAuthStateChange((_event, session) => {
+        setSession(session);
+        setUser(session?.user ?? null);
+      }).subscription;
+    };
+
+    initAuth();
+
+    return () => {
+      if (unsub && typeof unsub.unsubscribe === "function") {
+        unsub.unsubscribe();
+      }
+    };
   }, []);
 
   const signUpEmail = async (email: string, password: string) => {
-    try {
-      const { data, error } = await dbClient.auth.signUp({
-        email,
-        password,
-      });
-
-      if (error) return { error };
-
-      if (data.session) {
-        setSession(data.session);
-        setUser(data.user);
-      }
-
-      return { error: null };
-    } catch (error) {
-      return { error: error as AuthError };
+    const { data, error } = await dbClient.auth.signUp({ email, password });
+    if (error) return { error };
+    if (data.session) {
+      setSession(data.session);
+      setUser(data.user);
     }
+    return { error: null };
   };
 
   const signInEmail = async (email: string, password: string) => {
-    try {
-      const { data, error } = await dbClient.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (error) return { error };
-
-      setSession(data.session);
-      setUser(data.user);
-
-      return { error: null };
-    } catch (error) {
-      return { error: error as AuthError };
-    }
+    const { data, error } = await dbClient.auth.signInWithPassword({ email, password });
+    if (error) return { error };
+    setSession(data.session);
+    setUser(data.user);
+    return { error: null };
   };
 
   const signInGoogle = async () => {
-    try {
-      const { data, error } = await dbClient.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: window.location.origin,
-        },
-      });
-
-      return { error };
-    } catch (error) {
-      return { error: error as AuthError };
-    }
+    const { error } = await dbClient.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: window.location.origin },
+    });
+    return { error };
   };
 
   const signInApple = async () => {
-    try {
-      const { data, error } = await dbClient.auth.signInWithOAuth({
-        provider: 'apple',
-        options: {
-          redirectTo: window.location.origin,
-        },
-      });
-
-      return { error };
-    } catch (error) {
-      return { error: error as AuthError };
-    }
+    const { error } = await dbClient.auth.signInWithOAuth({
+      provider: 'apple',
+      options: { redirectTo: window.location.origin },
+    });
+    return { error };
   };
 
   const resetPassword = async (email: string) => {
-    try {
-      const { error } = await dbClient.auth.resetPasswordForEmail(email, {
-    redirectTo: 'https://labappstudio.com/reset-password',
-      });
-      return { error };
-    } catch (error) {
-      return { error: error as AuthError };
-    }
+    const { error } = await dbClient.auth.resetPasswordForEmail(email, {
+      redirectTo: 'https://labappstudio.com/reset-password',
+    });
+    return { error };
   };
 
   const signOut = async () => {
@@ -123,19 +94,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        session,
-        loading,
-        signUpEmail,
-        signInEmail,
-        signInGoogle,
-        signInApple,
-        resetPassword,
-        signOut,
-      }}
-    >
+    <AuthContext.Provider value={{ user, session, loading, signUpEmail, signInEmail, signInGoogle, signInApple, resetPassword, signOut }}>
       {children}
     </AuthContext.Provider>
   );
@@ -143,8 +102,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+  if (!context) {
+    throw new Error('useAuth must be used within AuthProvider');
   }
   return context;
 };
