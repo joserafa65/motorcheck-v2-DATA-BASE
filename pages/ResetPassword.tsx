@@ -13,12 +13,16 @@ const ResetPassword: React.FC = () => {
   const [initLoading, setInitLoading] = useState(true);
 
   useEffect(() => {
+    let hasRun = false;
+
     const handleRecovery = async () => {
+      if (hasRun) return;
+      hasRun = true;
+
       try {
         const hash = window.location.hash;
 
-        if (!hash) {
-          setError('Modo: sin token');
+        if (!hash || !hash.includes('access_token')) {
           setInitLoading(false);
           return;
         }
@@ -42,6 +46,9 @@ const ResetPassword: React.FC = () => {
         if (error) {
           setError('Error estableciendo sesión');
         }
+
+        // Limpia el hash para evitar doble ejecución
+        window.history.replaceState(null, '', window.location.pathname);
 
       } catch (err) {
         setError('Error procesando enlace');
