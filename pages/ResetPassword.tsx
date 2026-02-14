@@ -17,29 +17,34 @@ const ResetPassword: React.FC = () => {
       try {
         const hash = window.location.hash;
 
-        if (hash && hash.includes('access_token')) {
-          const hashParams = new URLSearchParams(hash.substring(1));
-
-          const access_token = hashParams.get('access_token');
-          const refresh_token = hashParams.get('refresh_token');
-
-          if (access_token && refresh_token) {
-            const { error } = await dbClient.auth.setSession({
-              access_token,
-              refresh_token,
-            });
-
-            if (error) {
-              setError('Enlace inválido o expirado.');
-            }
-          } else {
-            setError('Enlace inválido.');
-          }
-        } else {
+        if (!hash) {
           setError('Modo: sin token');
+          setInitLoading(false);
+          return;
         }
+
+        const hashParams = new URLSearchParams(hash.replace('#', ''));
+
+        const access_token = hashParams.get('access_token');
+        const refresh_token = hashParams.get('refresh_token');
+
+        if (!access_token || !refresh_token) {
+          setError('Token incompleto');
+          setInitLoading(false);
+          return;
+        }
+
+        const { error } = await dbClient.auth.setSession({
+          access_token,
+          refresh_token,
+        });
+
+        if (error) {
+          setError('Error estableciendo sesión');
+        }
+
       } catch (err) {
-        setError('Error procesando enlace.');
+        setError('Error procesando enlace');
       } finally {
         setInitLoading(false);
       }
@@ -74,7 +79,7 @@ const ResetPassword: React.FC = () => {
       });
 
       if (error) {
-        setError('Error actualizando contraseña.');
+        setError('Enlace inválido o expirado.');
       } else {
         setSuccess(true);
         setTimeout(() => {
