@@ -3,7 +3,7 @@ import { Eye, EyeOff } from 'lucide-react';
 import { dbClient } from '../services/database';
 
 const ResetPassword: React.FC = () => {
-  const initialized = useRef(false);
+  const hasProcessed = useRef(false);
 
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -15,46 +15,43 @@ const ResetPassword: React.FC = () => {
   const [initLoading, setInitLoading] = useState(true);
 
   useEffect(() => {
-    if (initialized.current) return;
-    initialized.current = true;
+    if (hasProcessed.current) return;
+    hasProcessed.current = true;
 
-    const handleRecovery = async () => {
+    const processRecovery = async () => {
       try {
         const hash = window.location.hash;
 
-        if (hash && hash.includes('access_token')) {
-          const hashParams = new URLSearchParams(hash.replace('#', ''));
-
-          const access_token = hashParams.get('access_token');
-          const refresh_token = hashParams.get('refresh_token');
-
-          if (access_token && refresh_token) {
-            const { error } = await dbClient.auth.setSession({
-              access_token,
-              refresh_token,
-            });
-
-            if (error) {
-              setError('Error estableciendo sesión.');
-              setInitLoading(false);
-              return;
-            }
-
-            // Limpia el hash SOLO después de éxito
-            window.history.replaceState(
-              null,
-              '',
-              window.location.pathname
-            );
-          }
-        }
-
-        // Verifica que haya sesión activa
-        const { data } = await dbClient.auth.getSession();
-
-        if (!data.session) {
+        if (!hash || !hash.includes('access_token')) {
           setError('Enlace inválido o expirado.');
+          setInitLoading(false);
+          return;
         }
+
+        const params = new URLSearchParams(hash.substring(1));
+        const access_token = params.get('access_token');
+        const refresh_token = params.get('refresh_token');
+
+        if (!access_token || !refresh_token) {
+          setError('Token inválido.');
+          setInitLoading(false);
+          return;
+        }
+
+        const { error } = await dbClient.auth.setSession({
+          access_token,
+          refresh_token,
+        });
+
+        if (error) {
+          setError(error.message);
+          setInitLoading(false);
+          return;
+        }
+
+        // 🔒 Limpiamos hash SOLO después de sesión exitosa
+        window.history.replaceState(null, '', window.location.pathname);
+
       } catch (err) {
         setError('Error procesando el enlace.');
       } finally {
@@ -62,7 +59,7 @@ const ResetPassword: React.FC = () => {
       }
     };
 
-    handleRecovery();
+    processRecovery();
   }, []);
 
   const validatePassword = (password: string): boolean => {
@@ -91,15 +88,15 @@ const ResetPassword: React.FC = () => {
       });
 
       if (error) {
-        setError('Error actualizando contraseña.');
+        setError(error.message);
       } else {
         setSuccess(true);
         setTimeout(() => {
           window.location.href = '/';
-        }, 2500);
+        }, 2000);
       }
     } catch (err) {
-      setError('Ocurrió un error.');
+      setError('Ocurrió un error actualizando la contraseña.');
     } finally {
       setLoading(false);
     }
