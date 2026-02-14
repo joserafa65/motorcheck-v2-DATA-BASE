@@ -252,13 +252,15 @@ const Auth: React.FC = () => {
                 <div className="bg-green-500/10 rounded-full p-4 mb-4">
                   <CheckCircle className="text-green-500" size={48} />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+  ¡Enlace enviado!
+</h3>
+
+<p className="text-gray-600 dark:text-gray-400 text-center max-w-sm">
   Te enviamos un enlace para restablecer tu contraseña.  
-                  
   El enlace es válido por 60 minutos.  
-  
-                  Si no lo ves, revisa tu carpeta de spam.
-                </h3>
+  Si no lo ves, revisa tu carpeta de spam.
+</p>
                 <p className="text-center text-gray-600 dark:text-gray-400 mb-6">
                   Te enviamos un enlace para restablecer tu contraseña. Revisa tu bandeja de entrada.
                 </p>
