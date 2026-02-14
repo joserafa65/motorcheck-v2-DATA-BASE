@@ -13,16 +13,12 @@ const ResetPassword: React.FC = () => {
   const [initLoading, setInitLoading] = useState(true);
 
   useEffect(() => {
-    let hasRun = false;
-
     const handleRecovery = async () => {
-      if (hasRun) return;
-      hasRun = true;
-
       try {
         const hash = window.location.hash;
 
         if (!hash || !hash.includes('access_token')) {
+          setError('Enlace inválido o expirado.');
           setInitLoading(false);
           return;
         }
@@ -33,7 +29,7 @@ const ResetPassword: React.FC = () => {
         const refresh_token = hashParams.get('refresh_token');
 
         if (!access_token || !refresh_token) {
-          setError('Token incompleto');
+          setError('Token incompleto.');
           setInitLoading(false);
           return;
         }
@@ -44,14 +40,14 @@ const ResetPassword: React.FC = () => {
         });
 
         if (error) {
-          setError('Error estableciendo sesión');
+          setError('Error estableciendo sesión.');
         }
 
         // Limpia el hash para evitar doble ejecución
         window.history.replaceState(null, '', window.location.pathname);
 
       } catch (err) {
-        setError('Error procesando enlace');
+        setError('Error procesando el enlace.');
       } finally {
         setInitLoading(false);
       }
@@ -86,7 +82,7 @@ const ResetPassword: React.FC = () => {
       });
 
       if (error) {
-        setError('Enlace inválido o expirado.');
+        setError('Error actualizando contraseña.');
       } else {
         setSuccess(true);
         setTimeout(() => {
@@ -94,7 +90,7 @@ const ResetPassword: React.FC = () => {
         }, 2500);
       }
     } catch (err) {
-      setError('Ocurrió un error actualizando la contraseña.');
+      setError('Ocurrió un error.');
     } finally {
       setLoading(false);
     }
@@ -104,6 +100,24 @@ const ResetPassword: React.FC = () => {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white">
         <p>Validando enlace...</p>
+      </div>
+    );
+  }
+
+  if (error && !success) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-red-600 mb-4">
+            {error}
+          </h1>
+          <button
+            onClick={() => window.location.href = '/'}
+            className="px-6 py-3 bg-blue-600 text-white rounded-lg"
+          >
+            Volver al inicio
+          </button>
+        </div>
       </div>
     );
   }
@@ -167,10 +181,6 @@ const ResetPassword: React.FC = () => {
             </button>
           </div>
 
-          {error && (
-            <p className="text-red-600 text-sm">{error}</p>
-          )}
-
           <button
             type="submit"
             disabled={loading}
@@ -184,4 +194,4 @@ const ResetPassword: React.FC = () => {
   );
 };
 
-export default ResetPassword;s
+export default ResetPassword;
