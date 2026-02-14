@@ -261,9 +261,6 @@ const Auth: React.FC = () => {
   El enlace es válido por 60 minutos.  
   Si no lo ves, revisa tu carpeta de spam.
 </p>
-                <p className="text-center text-gray-600 dark:text-gray-400 mb-6">
-                  Te enviamos un enlace para restablecer tu contraseña. Revisa tu bandeja de entrada.
-                </p>
                 <button
                   onClick={handleCloseResetModal}
                   className="px-6 py-2.5 bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white font-medium rounded-lg transition-all"
