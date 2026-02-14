@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Lock, AlertCircle, CheckCircle, Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff } from 'lucide-react';
 import { dbClient } from '../services/database';
 
 const ResetPassword: React.FC = () => {
@@ -10,27 +10,21 @@ const ResetPassword: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
-  const [sessionError, setSessionError] = useState(false);
   const [initLoading, setInitLoading] = useState(true);
 
   useEffect(() => {
-    const initSession = async () => {
+    const init = async () => {
       try {
-        const { data, error } = await dbClient.auth.getSession();
-
-        if (error || !data.session) {
-          setSessionError(true);
-          setError('Enlace inválido o expirado. Solicita uno nuevo.');
-        }
+        // Dejamos que Supabase procese automáticamente el token del link
+        await dbClient.auth.getSession();
       } catch (err) {
-        setSessionError(true);
-        setError('Ocurrió un error al validar el enlace.');
+        console.error('Error inicializando sesión:', err);
       } finally {
         setInitLoading(false);
       }
     };
 
-    initSession();
+    init();
   }, []);
 
   const validatePassword = (password: string): boolean => {
@@ -59,7 +53,7 @@ const ResetPassword: React.FC = () => {
       });
 
       if (error) {
-        setError('Error al actualizar la contraseña.');
+        setError('Enlace inválido o expirado.');
       } else {
         setSuccess(true);
         setTimeout(() => {
@@ -67,7 +61,7 @@ const ResetPassword: React.FC = () => {
         }, 2500);
       }
     } catch (err) {
-      setError('Ocurrió un error.');
+      setError('Ocurrió un error actualizando la contraseña.');
     } finally {
       setLoading(false);
     }
@@ -77,24 +71,6 @@ const ResetPassword: React.FC = () => {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white">
         <p>Validando enlace...</p>
-      </div>
-    );
-  }
-
-  if (sessionError) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-red-600 mb-4">
-            Enlace inválido o expirado
-          </h1>
-          <button
-            onClick={() => window.location.href = '/'}
-            className="px-6 py-3 bg-blue-600 text-white rounded-lg"
-          >
-            Volver al inicio
-          </button>
-        </div>
       </div>
     );
   }
