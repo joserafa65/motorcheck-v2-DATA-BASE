@@ -4,6 +4,7 @@ export interface UserAccess {
   user_id: string;
   trial_start: string;
   trial_end: string;
+  subscription_status: string;
   created_at: string;
   updated_at: string;
 }
@@ -11,7 +12,13 @@ export interface UserAccess {
 export interface TrialStatus {
   isActive: boolean;
   trialEndDate: Date | null;
-  daysRemaining: number;
+  subscriptionStatus: string;
+}
+
+export interface UserAccessValidation {
+  hasAccess: boolean;
+  isTrialActive: boolean;
+  subscriptionStatus: string;
 }
 
 export const TrialService = {
@@ -75,30 +82,24 @@ export const TrialService = {
     }
   },
 
-  calculateDaysRemaining(trialEndDate: Date): number {
-    const now = new Date();
-    const diffMs = trialEndDate.getTime() - now.getTime();
-    const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
-    return Math.max(0, diffDays);
-  },
-
   async getTrialStatus(userId: string): Promise<TrialStatus> {
     try {
       const isActive = await this.checkTrialStatus(userId);
       const trialEndDate = await this.getTrialEndDate(userId);
-      const daysRemaining = trialEndDate ? this.calculateDaysRemaining(trialEndDate) : 0;
+      const userAccess = await this.getUserAccess(userId);
+      const subscriptionStatus = userAccess?.subscription_status || 'inactive';
 
       return {
         isActive,
         trialEndDate,
-        daysRemaining
+        subscriptionStatus
       };
     } catch (error) {
       console.error('Error getting complete trial status:', error);
       return {
         isActive: false,
         trialEndDate: null,
-        daysRemaining: 0
+        subscriptionStatus: 'inactive'
       };
     }
   },
@@ -120,6 +121,29 @@ export const TrialService = {
     } catch (error) {
       console.error('Error fetching user access:', error);
       return null;
+    }
+  },
+
+  async validateUserAccess(userId: string): Promise<UserAccessValidation> {
+    try {
+      const isTrialActive = await this.checkTrialStatus(userId);
+      const userAccess = await this.getUserAccess(userId);
+      const subscriptionStatus = userAccess?.subscription_status || 'inactive';
+
+      const hasAccess = isTrialActive || subscriptionStatus === 'active';
+
+      return {
+        hasAccess,
+        isTrialActive,
+        subscriptionStatus
+      };
+    } catch (error) {
+      console.error('Error validating user access:', error);
+      return {
+        hasAccess: false,
+        isTrialActive: false,
+        subscriptionStatus: 'inactive'
+      };
     }
   }
 };

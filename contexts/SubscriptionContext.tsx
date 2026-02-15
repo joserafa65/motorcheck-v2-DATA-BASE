@@ -8,7 +8,7 @@ interface SubscriptionContextType {
   entitlementActive: boolean;
   isTrialActive: boolean;
   trialEndDate: Date | null;
-  daysRemaining: number;
+  subscriptionStatus: string;
   showPaywall: boolean;
   loading: boolean;
   customerInfo: CustomerInfo | null;
@@ -24,7 +24,7 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const [entitlementActive, setEntitlementActive] = useState(false);
   const [isTrialActive, setIsTrialActive] = useState(false);
   const [trialEndDate, setTrialEndDate] = useState<Date | null>(null);
-  const [daysRemaining, setDaysRemaining] = useState(0);
+  const [subscriptionStatus, setSubscriptionStatus] = useState<string>('inactive');
   const [showPaywall, setShowPaywall] = useState(false);
   const [loading, setLoading] = useState(true);
   const [customerInfo, setCustomerInfo] = useState<CustomerInfo | null>(null);
@@ -87,25 +87,26 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
       await TrialService.initializeTrial(userId);
       console.log('Trial initialized for user:', userId);
 
-      const trialActive = await TrialService.checkTrialStatus(userId);
-      setIsTrialActive(trialActive);
-      console.log('Trial active (server-side):', trialActive);
+      const accessValidation = await TrialService.validateUserAccess(userId);
+      setIsTrialActive(accessValidation.isTrialActive);
+      setSubscriptionStatus(accessValidation.subscriptionStatus);
+      console.log('Access validation from Supabase:', accessValidation);
 
       const trialStatus = await TrialService.getTrialStatus(userId);
       setTrialEndDate(trialStatus.trialEndDate);
-      setDaysRemaining(trialStatus.daysRemaining);
       console.log('Trial status:', trialStatus);
 
-      const shouldShowPaywall = !hasActiveEntitlement && !trialActive;
+      const shouldShowPaywall = !accessValidation.hasAccess;
       setShowPaywall(shouldShowPaywall);
 
       console.log('=== SUBSCRIPTION STATUS ===');
       console.log('Platform:', Capacitor.getPlatform());
       console.log('User ID:', userId);
-      console.log('Entitlement Active:', hasActiveEntitlement);
-      console.log('Trial Active:', trialActive);
+      console.log('RevenueCat Entitlement Active:', hasActiveEntitlement);
+      console.log('Supabase Has Access:', accessValidation.hasAccess);
+      console.log('Trial Active:', accessValidation.isTrialActive);
+      console.log('Subscription Status:', accessValidation.subscriptionStatus);
       console.log('Trial End Date:', trialStatus.trialEndDate);
-      console.log('Days Remaining:', trialStatus.daysRemaining);
       console.log('Show Paywall:', shouldShowPaywall);
       console.log('===========================');
 
@@ -126,7 +127,7 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
       setEntitlementActive(false);
       setIsTrialActive(false);
       setTrialEndDate(null);
-      setDaysRemaining(0);
+      setSubscriptionStatus('inactive');
       setCustomerInfo(null);
       setOfferings(null);
     }
@@ -202,7 +203,7 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
         entitlementActive,
         isTrialActive,
         trialEndDate,
-        daysRemaining,
+        subscriptionStatus,
         showPaywall,
         loading,
         customerInfo,
