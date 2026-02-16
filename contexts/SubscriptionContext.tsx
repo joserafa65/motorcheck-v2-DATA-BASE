@@ -50,76 +50,109 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
     }
   };
 
-  const checkSubscriptionStatus = async (userId: string) => {
-    try {
-      setLoading(true);
+ const checkSubscriptionStatus = async (userId: string) => {
+  try {
+    setLoading(true);
 
-      const isWeb = Capacitor.getPlatform() === 'web';
-      console.log('Platform detected:', Capacitor.getPlatform());
+    const isWeb = Capacitor.getPlatform() === 'web';
+    console.log('Platform detected:', Capacitor.getPlatform());
 
-      let hasActiveEntitlement = false;
+    let hasActiveEntitlement = false;
 
-      if (!isWeb) {
-        await initializeRevenueCat();
+    if (!isWeb) {
+      await initializeRevenueCat();
 
-        await Purchases.logIn({ appUserID: userId });
-        console.log('RevenueCat user logged in:', userId);
+      await Purchases.logIn({ appUserID: userId });
+      console.log('RevenueCat user logged in:', userId);
 
-        const { customerInfo: info } = await Purchases.getCustomerInfo();
-        setCustomerInfo(info);
+      const { customerInfo: info } = await Purchases.getCustomerInfo();
+      setCustomerInfo(info);
 
-        hasActiveEntitlement = info.entitlements.active['premium'] !== undefined;
-        setEntitlementActive(hasActiveEntitlement);
-        console.log('RevenueCat entitlement active:', hasActiveEntitlement);
+      hasActiveEntitlement =
+        info.entitlements.active['premium'] !== undefined;
 
-        const { offerings: availableOfferings } = await Purchases.getOfferings();
-        if (availableOfferings.current) {
-          setOfferings(availableOfferings.current.availablePackages);
-          console.log('Available offerings loaded:', availableOfferings.current.availablePackages.length);
-        }
-      } else {
-        console.log('Web platform: Skipping RevenueCat initiconsole.log('Web platform: Skipping RevenueCat initialization');
-setEntitlementActive(false);
-setCustomerInfo(null);
+      setEntitlementActive(hasActiveEntitlement);
+      console.log(
+        'RevenueCat entitlement active:',
+        hasActiveEntitlement
+      );
 
-// 👇 IMPORTANTE: no dejar offerings en null
-setOfferings([]);
+      const { offerings: availableOfferings } =
+        await Purchases.getOfferings();
+
+      if (availableOfferings.current) {
+        setOfferings(
+          availableOfferings.current.availablePackages
+        );
+        console.log(
+          'Available offerings loaded:',
+          availableOfferings.current.availablePackages.length
+        );
       }
-
-      await TrialService.initializeTrial(userId);
-      console.log('Trial initialized for user:', userId);
-
-      const accessValidation = await TrialService.validateUserAccess(userId);
-      setIsTrialActive(accessValidation.isTrialActive);
-      setSubscriptionStatus(accessValidation.subscriptionStatus);
-      console.log('Access validation from Supabase:', accessValidation);
-
-      const trialStatus = await TrialService.getTrialStatus(userId);
-      setTrialEndDate(trialStatus.trialEndDate);
-      console.log('Trial status:', trialStatus);
-
-      const shouldShowPaywall = !accessValidation.hasAccess;
-      setShowPaywall(shouldShowPaywall);
-
-      console.log('=== SUBSCRIPTION STATUS ===');
-      console.log('Platform:', Capacitor.getPlatform());
-      console.log('User ID:', userId);
-      console.log('RevenueCat Entitlement Active:', hasActiveEntitlement);
-      console.log('Supabase Has Access:', accessValidation.hasAccess);
-      console.log('Trial Active:', accessValidation.isTrialActive);
-      console.log('Subscription Status:', accessValidation.subscriptionStatus);
-      console.log('Trial End Date:', trialStatus.trialEndDate);
-      console.log('Show Paywall:', shouldShowPaywall);
-      console.log('===========================');
-
-    } catch (error) {
-      console.error('Error checking subscription status:', error);
-      setShowPaywall(false);
-    } finally {
-      setLoading(false);
+    } else {
+      console.log(
+        'Web platform: Skipping RevenueCat initialization'
+      );
+      setEntitlementActive(false);
+      setCustomerInfo(null);
+      setOfferings(null);
     }
-  };
 
+    // -------- SUPABASE VALIDATION --------
+
+    await TrialService.initializeTrial(userId);
+    console.log('Trial initialized for user:', userId);
+
+    const accessValidation =
+      await TrialService.validateUserAccess(userId);
+
+    setIsTrialActive(accessValidation.isTrialActive);
+    setSubscriptionStatus(accessValidation.subscriptionStatus);
+
+    const trialStatus =
+      await TrialService.getTrialStatus(userId);
+
+    setTrialEndDate(trialStatus.trialEndDate);
+
+    const shouldShowPaywall = !accessValidation.hasAccess;
+    setShowPaywall(shouldShowPaywall);
+
+    console.log('=== SUBSCRIPTION STATUS ===');
+    console.log('Platform:', Capacitor.getPlatform());
+    console.log('User ID:', userId);
+    console.log(
+      'RevenueCat Entitlement Active:',
+      hasActiveEntitlement
+    );
+    console.log(
+      'Supabase Has Access:',
+      accessValidation.hasAccess
+    );
+    console.log(
+      'Trial Active:',
+      accessValidation.isTrialActive
+    );
+    console.log(
+      'Subscription Status:',
+      accessValidation.subscriptionStatus
+    );
+    console.log(
+      'Trial End Date:',
+      trialStatus.trialEndDate
+    );
+    console.log('Show Paywall:', shouldShowPaywall);
+    console.log('===========================');
+
+  } catch (error) {
+    console.error(
+      'Error checking subscription status:',
+      error
+    );
+    setShowPaywall(false);
+  } finally {
+    setLoading(false);
+  }
+};
   useEffect(() => {
     if (user?.id) {
       checkSubscriptionStatus(user.id);
