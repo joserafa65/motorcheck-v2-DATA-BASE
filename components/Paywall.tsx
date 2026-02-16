@@ -16,8 +16,42 @@ export const Paywall: React.FC<PaywallProps> = ({ offerings, onPurchase, onResto
 
   const isWeb = Capacitor.getPlatform() === 'web';
 
-  // 🔥 Si estamos en web y no hay offerings, creamos mock visual
-  const displayOfferings = isWeb && (!offerings || offerings.length === 0)
+// 🔥 Modo preview para diseño del paywall
+const FORCE_PREVIEW = true;
+
+const previewOfferings = [
+  {
+    identifier: 'preview_yearly',
+    product: {
+      identifier: 'preview_yearly',
+      title: 'Plan Anual',
+      description: 'Acceso completo a todas las funciones',
+      priceString: '$9.99 / año',
+    }
+  },
+  {
+    identifier: 'preview_monthly',
+    product: {
+      identifier: 'preview_monthly',
+      title: 'Plan Mensual',
+      description: 'Acceso completo a todas las funciones',
+      priceString: '$1.99 / mes',
+    }
+  },
+  {
+    identifier: 'preview_lifetime',
+    product: {
+      identifier: 'preview_lifetime',
+      title: 'De por vida',
+      description: 'Acceso completo para siempre',
+      priceString: '$34.99 / por siempre',
+    }
+  }
+];
+
+const displayOfferings = FORCE_PREVIEW
+  ? previewOfferings
+  : offerings || [];
     ? [
         {
           identifier: 'web_mock_annual',
