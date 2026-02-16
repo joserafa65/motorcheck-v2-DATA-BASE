@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { PurchasesOffering } from '@revenuecat/purchases-capacitor';
 import { Check, Sparkles } from 'lucide-react';
+import { Capacitor } from '@capacitor/core';
 
 interface PaywallProps {
   offerings: PurchasesOffering[] | null;
@@ -13,39 +14,38 @@ export const Paywall: React.FC<PaywallProps> = ({ offerings, onPurchase, onResto
   const [error, setError] = useState<string | null>(null);
   const [restoring, setRestoring] = useState(false);
 
-  const sortedOfferings = offerings ? [...offerings].sort((a, b) => {
-    const priceA = a.product.price;
-    const priceB = b.product.price;
-    return priceB - priceA;
-  }) : [];
+  const isWeb = Capacitor.getPlatform() === 'web';
 
-  const getPackageType = (pkg: any): 'lifetime' | 'annual' | 'monthly' | 'other' => {
-    const identifier = pkg.identifier.toLowerCase();
-    const productId = pkg.product.identifier.toLowerCase();
-
-    if (identifier.includes('lifetime') || productId.includes('lifetime')) {
-      return 'lifetime';
-    }
-    if (identifier.includes('annual') || productId.includes('annual') || identifier.includes('year')) {
-      return 'annual';
-    }
-    if (identifier.includes('monthly') || productId.includes('monthly') || identifier.includes('month')) {
-      return 'monthly';
-    }
-    return 'other';
-  };
-
-  const getBadge = (type: 'lifetime' | 'annual' | 'monthly' | 'other') => {
-    if (type === 'lifetime') {
-      return { text: 'Pago único', color: 'bg-purple-500' };
-    }
-    if (type === 'annual') {
-      return { text: 'Mejor Valor', color: 'bg-green-500' };
-    }
-    return null;
-  };
+  // 🔥 Si estamos en web y no hay offerings, creamos mock visual
+  const displayOfferings = isWeb && (!offerings || offerings.length === 0)
+    ? [
+        {
+          identifier: 'web_mock_annual',
+          product: {
+            identifier: 'web_mock_annual',
+            title: 'Plan Anual',
+            description: 'Acceso completo a todas las funciones',
+            priceString: '$29.99 / año',
+          }
+        },
+        {
+          identifier: 'web_mock_monthly',
+          product: {
+            identifier: 'web_mock_monthly',
+            title: 'Plan Mensual',
+            description: 'Acceso completo a todas las funciones',
+            priceString: '$4.99 / mes',
+          }
+        }
+      ]
+    : offerings || [];
 
   const handlePurchase = async (pkg: any) => {
+    if (isWeb) {
+      setError('Las compras solo están disponibles en la app móvil.');
+      return;
+    }
+
     setLoading(pkg.identifier);
     setError(null);
 
@@ -59,6 +59,11 @@ export const Paywall: React.FC<PaywallProps> = ({ offerings, onPurchase, onResto
   };
 
   const handleRestore = async () => {
+    if (isWeb) {
+      setError('La restauración solo está disponible en la app móvil.');
+      return;
+    }
+
     setRestoring(true);
     setError(null);
 
@@ -80,22 +85,11 @@ export const Paywall: React.FC<PaywallProps> = ({ offerings, onPurchase, onResto
     'Exportación de reportes PDF',
   ];
 
-  if (!offerings || offerings.length === 0) {
-    return (
-      <div className="fixed inset-0 z-50 bg-gradient-to-br from-gray-900 via-black to-gray-900 flex items-center justify-center p-6">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-400">Cargando planes...</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="fixed inset-0 z-50 bg-gradient-to-br from-gray-900 via-black to-gray-900 overflow-y-auto">
       <div className="min-h-full flex flex-col p-6 pb-8">
         <div className="flex-1 max-w-2xl mx-auto w-full">
-          {/* Header */}
+
           <div className="text-center mb-8 mt-8">
             <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-500 rounded-2xl mb-4">
               <Sparkles className="w-8 h-8 text-white" />
@@ -108,7 +102,6 @@ export const Paywall: React.FC<PaywallProps> = ({ offerings, onPurchase, onResto
             </p>
           </div>
 
-          {/* Benefits */}
           <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 mb-8 border border-white/10">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {benefits.map((benefit, index) => (
@@ -122,121 +115,57 @@ export const Paywall: React.FC<PaywallProps> = ({ offerings, onPurchase, onResto
             </div>
           </div>
 
-          {/* Plans */}
           <div className="space-y-3 mb-6">
-            {sortedOfferings.map((pkg) => {
-              const packageType = getPackageType(pkg);
-              const badge = getBadge(packageType);
+            {displayOfferings.map((pkg: any) => {
               const isLoading = loading === pkg.identifier;
-              const isAnnual = packageType === 'annual';
 
               return (
                 <div
                   key={pkg.identifier}
-                  className={`
-                    relative p-5 rounded-2xl border-2 bg-white/5
-                    ${isAnnual ? 'border-green-500/50 ring-2 ring-green-500/30' : 'border-white/10'}
-                  `}
+                  className="relative p-5 rounded-2xl border-2 bg-white/5 border-white/10"
                 >
-                  {badge && (
-                    <div className="absolute -top-2 left-1/2 transform -translate-x-1/2">
-                      <span className={`${badge.color} text-white text-xs font-semibold px-3 py-1 rounded-full`}>
-                        {badge.text}
-                      </span>
-                    </div>
-                  )}
-
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex-1">
                       <p className="text-white font-semibold text-lg">
-                        {pkg.product.title || pkg.product.identifier}
+                        {pkg.product.title}
                       </p>
                       <p className="text-gray-400 text-sm mt-1">
-                        {pkg.product.description || 'Acceso completo a todas las funciones'}
+                        {pkg.product.description}
                       </p>
                     </div>
                     <div className="text-right ml-4">
                       <p className="text-white font-bold text-2xl">
                         {pkg.product.priceString}
                       </p>
-                      {packageType === 'annual' && (
-                        <p className="text-green-400 text-xs mt-1">
-                          Ahorra 40%
-                        </p>
-                      )}
                     </div>
                   </div>
 
                   <button
                     onClick={() => handlePurchase(pkg)}
                     disabled={isLoading || loading !== null}
-                    className={`
-                      w-full py-3 rounded-xl font-semibold transition-all
-                      ${isLoading
-                        ? 'bg-blue-500 text-white'
-                        : loading !== null
-                        ? 'bg-gray-700 text-gray-500 cursor-not-allowed'
-                        : 'bg-gradient-to-r from-blue-500 to-purple-500 text-white hover:shadow-lg hover:shadow-blue-500/30'
-                      }
-                    `}
+                    className="w-full py-3 rounded-xl font-semibold bg-gradient-to-r from-blue-500 to-purple-500 text-white"
                   >
-                    {isLoading ? (
-                      <div className="flex items-center justify-center gap-2">
-                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                        <span>Procesando...</span>
-                      </div>
-                    ) : (
-                      'Seleccionar'
-                    )}
+                    {isWeb ? 'Disponible en la app móvil' : 'Seleccionar'}
                   </button>
                 </div>
               );
             })}
           </div>
 
-          {/* Error Message */}
           {error && (
             <div className="mb-4 p-4 bg-red-500/10 border border-red-500/20 rounded-xl">
               <p className="text-red-400 text-sm text-center">{error}</p>
             </div>
           )}
 
-          {/* Restore Button */}
           <button
             onClick={handleRestore}
-            disabled={restoring || loading !== null}
-            className="w-full mt-4 py-3 text-gray-400 hover:text-white text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={restoring}
+            className="w-full mt-4 py-3 text-gray-400 hover:text-white text-sm transition-colors"
           >
             {restoring ? 'Restaurando...' : 'Restaurar compras'}
           </button>
 
-          {/* Legal */}
-          <div className="mt-8 pt-6 border-t border-white/10">
-            <p className="text-gray-500 text-xs text-center mb-3 leading-relaxed">
-  Las suscripciones se renuevan automáticamente a menos que se cancelen al menos 24 horas antes del final del período actual.
-  El pago se cargará a tu cuenta de Apple ID al confirmar la compra.
-  Puedes gestionar o cancelar tu suscripción en Ajustes &gt; Apple ID &gt; Suscripciones.
-</p>
-            <div className="flex items-center justify-center gap-4 text-xs">
-              <a
-                href="https://labappstudio.com/motorcheck#terminos"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-gray-400 hover:text-white underline transition-colors"
-              >
-                Términos de uso
-              </a>
-              <span className="text-gray-600">•</span>
-              <a
-                href="https://labappstudio.com/motorcheck#privacidad"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-gray-400 hover:text-white underline transition-colors"
-              >
-                Política de privacidad
-              </a>
-            </div>
-          </div>
         </div>
       </div>
     </div>
