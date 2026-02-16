@@ -78,12 +78,13 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
           console.log('Available offerings loaded:', availableOfferings.current.availablePackages.length);
         }
       } else {
-      console.log('Web platform: Skipping RevenueCat initialization');
+        console.log('Web platform: Skipping RevenueCat initiconsole.log('Web platform: Skipping RevenueCat initialization');
 setEntitlementActive(false);
 setCustomerInfo(null);
 
 // 👇 IMPORTANTE: no dejar offerings en null
 setOfferings([]);
+      }
 
       await TrialService.initializeTrial(userId);
       console.log('Trial initialized for user:', userId);
