@@ -1,81 +1,61 @@
 import React, { useState } from 'react';
-import { PurchasesOffering } from '@revenuecat/purchases-capacitor';
 import { Check, Sparkles } from 'lucide-react';
 import { Capacitor } from '@capacitor/core';
 
 interface PaywallProps {
-  offerings: PurchasesOffering[] | null;
+  offerings: any[] | null;
   onPurchase: (packageToPurchase: any) => Promise<{ success: boolean; error?: string }>;
   onRestore: () => Promise<{ success: boolean; error?: string }>;
 }
 
 export const Paywall: React.FC<PaywallProps> = ({ offerings, onPurchase, onRestore }) => {
+
+  // 🔥 CAMBIA ESTO A FALSE CUANDO APPLE APRUEBE
+  const FORCE_PREVIEW = true;
+
   const [loading, setLoading] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [restoring, setRestoring] = useState(false);
 
   const isWeb = Capacitor.getPlatform() === 'web';
 
-// 🔥 Modo preview para diseño del paywall
-const FORCE_PREVIEW = true;
-
-const previewOfferings = [
-  {
-    identifier: 'preview_yearly',
-    product: {
+  const previewOfferings = [
+    {
       identifier: 'preview_yearly',
-      title: 'Plan Anual',
-      description: 'Acceso completo a todas las funciones',
-      priceString: '$9.99 / año',
-    }
-  },
-  {
-    identifier: 'preview_monthly',
-    product: {
+      product: {
+        identifier: 'preview_yearly',
+        title: 'Plan Anual',
+        description: 'Acceso completo a todas las funciones',
+        priceString: '$9.99 / año',
+      }
+    },
+    {
       identifier: 'preview_monthly',
-      title: 'Plan Mensual',
-      description: 'Acceso completo a todas las funciones',
-      priceString: '$1.99 / mes',
-    }
-  },
-  {
-    identifier: 'preview_lifetime',
-    product: {
+      product: {
+        identifier: 'preview_monthly',
+        title: 'Plan Mensual',
+        description: 'Acceso completo a todas las funciones',
+        priceString: '$1.99 / mes',
+      }
+    },
+    {
       identifier: 'preview_lifetime',
-      title: 'De por vida',
-      description: 'Acceso completo para siempre',
-      priceString: '$34.99 / por siempre',
+      product: {
+        identifier: 'preview_lifetime',
+        title: 'De por vida',
+        description: 'Acceso completo para siempre',
+        priceString: '$34.99 / por siempre',
+      }
     }
-  }
-];
+  ];
 
-const displayOfferings = FORCE_PREVIEW
-  ? previewOfferings
-  : offerings || [];
-    ? [
-        {
-          identifier: 'web_mock_annual',
-          product: {
-            identifier: 'web_mock_annual',
-            title: 'Plan Anual',
-            description: 'Acceso completo a todas las funciones',
-            priceString: '$29.99 / año',
-          }
-        },
-        {
-          identifier: 'web_mock_monthly',
-          product: {
-            identifier: 'web_mock_monthly',
-            title: 'Plan Mensual',
-            description: 'Acceso completo a todas las funciones',
-            priceString: '$4.99 / mes',
-          }
-        }
-      ]
+  const displayOfferings = FORCE_PREVIEW
+    ? previewOfferings
     : offerings || [];
 
   const handlePurchase = async (pkg: any) => {
-    if (isWeb) {
+
+    if (FORCE_PREVIEW || isWeb) {
       setError('Las compras solo están disponibles en la app móvil.');
       return;
     }
@@ -93,7 +73,8 @@ const displayOfferings = FORCE_PREVIEW
   };
 
   const handleRestore = async () => {
-    if (isWeb) {
+
+    if (FORCE_PREVIEW || isWeb) {
       setError('La restauración solo está disponible en la app móvil.');
       return;
     }
@@ -124,6 +105,7 @@ const displayOfferings = FORCE_PREVIEW
       <div className="min-h-full flex flex-col p-6 pb-8">
         <div className="flex-1 max-w-2xl mx-auto w-full">
 
+          {/* HEADER */}
           <div className="text-center mb-8 mt-8">
             <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-500 rounded-2xl mb-4">
               <Sparkles className="w-8 h-8 text-white" />
@@ -136,6 +118,7 @@ const displayOfferings = FORCE_PREVIEW
             </p>
           </div>
 
+          {/* BENEFICIOS */}
           <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 mb-8 border border-white/10">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {benefits.map((benefit, index) => (
@@ -149,17 +132,31 @@ const displayOfferings = FORCE_PREVIEW
             </div>
           </div>
 
-          <div className="space-y-3 mb-6">
+          {/* PLANES */}
+          <div className="space-y-4 mb-6">
             {displayOfferings.map((pkg: any) => {
+
+              const isAnnual = pkg.identifier === 'preview_yearly';
               const isLoading = loading === pkg.identifier;
 
               return (
                 <div
                   key={pkg.identifier}
-                  className="relative p-5 rounded-2xl border-2 bg-white/5 border-white/10"
+                  className={`relative p-5 rounded-2xl border-2 transition-all ${
+                    isAnnual
+                      ? 'bg-white/10 border-blue-500 ring-2 ring-blue-500/30'
+                      : 'bg-white/5 border-white/10'
+                  }`}
                 >
+
+                  {isAnnual && (
+                    <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-blue-600 text-white text-xs px-3 py-1 rounded-full">
+                      Mejor Valor
+                    </div>
+                  )}
+
                   <div className="flex items-start justify-between mb-4">
-                    <div className="flex-1">
+                    <div>
                       <p className="text-white font-semibold text-lg">
                         {pkg.product.title}
                       </p>
@@ -176,22 +173,24 @@ const displayOfferings = FORCE_PREVIEW
 
                   <button
                     onClick={() => handlePurchase(pkg)}
-                    disabled={isLoading || loading !== null}
-                    className="w-full py-3 rounded-xl font-semibold bg-gradient-to-r from-blue-500 to-purple-500 text-white"
+                    disabled={isLoading}
+                    className="w-full py-3 rounded-xl font-semibold bg-gradient-to-r from-blue-500 to-purple-500 text-white hover:opacity-90 transition"
                   >
-                    {isWeb ? 'Disponible en la app móvil' : 'Seleccionar'}
+                    {isWeb || FORCE_PREVIEW ? 'Disponible en la app móvil' : 'Seleccionar'}
                   </button>
                 </div>
               );
             })}
           </div>
 
+          {/* ERROR */}
           {error && (
             <div className="mb-4 p-4 bg-red-500/10 border border-red-500/20 rounded-xl">
               <p className="text-red-400 text-sm text-center">{error}</p>
             </div>
           )}
 
+          {/* RESTORE */}
           <button
             onClick={handleRestore}
             disabled={restoring}
