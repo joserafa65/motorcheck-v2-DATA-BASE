@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { PurchasesOffering } from '@revenuecat/purchases-capacitor';
 import { Check } from 'lucide-react';
 import { Capacitor } from '@capacitor/core';
@@ -16,6 +16,7 @@ type DisplayPackage = {
     title: string;
     description: string;
     priceString: string;
+    price?: number;
   };
 };
 
@@ -31,6 +32,7 @@ export const Paywall: React.FC<PaywallProps> = ({
 
   const isWeb = Capacitor.getPlatform() === 'web';
 
+  // 🔥 Mock visual en web si no hay offerings reales
   const displayOfferings: DisplayPackage[] = useMemo(() => {
     if (isWeb && (!offerings || offerings.length === 0)) {
       return [
@@ -41,6 +43,7 @@ export const Paywall: React.FC<PaywallProps> = ({
             title: 'De por vida',
             description: 'Acceso completo para siempre',
             priceString: '$34.99',
+            price: 34.99,
           },
         },
         {
@@ -50,6 +53,7 @@ export const Paywall: React.FC<PaywallProps> = ({
             title: 'Anual',
             description: 'Acceso completo',
             priceString: '$9.99 / año',
+            price: 9.99,
           },
         },
         {
@@ -59,6 +63,7 @@ export const Paywall: React.FC<PaywallProps> = ({
             title: 'Mensual',
             description: 'Acceso completo',
             priceString: '$1.99 / mes',
+            price: 1.99,
           },
         },
       ];
@@ -71,20 +76,30 @@ export const Paywall: React.FC<PaywallProps> = ({
         title: pkg.product?.title || pkg.product?.identifier,
         description: pkg.product?.description || 'Acceso completo',
         priceString: pkg.product?.priceString || '',
+        price: pkg.product?.price,
       },
     }));
   }, [isWeb, offerings]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!selectedId && displayOfferings.length > 0) {
       setSelectedId(displayOfferings[0].identifier);
     }
   }, [displayOfferings, selectedId]);
 
-  const selectedPkg = useMemo(
-    () => displayOfferings.find((p) => p.identifier === selectedId) || null,
-    [displayOfferings, selectedId]
+  const monthly = displayOfferings.find(p =>
+    p.product.title.toLowerCase().includes('mensual')
   );
+  const annual = displayOfferings.find(p =>
+    p.product.title.toLowerCase().includes('anual')
+  );
+
+  const annualSavingsPercent =
+    monthly?.product.price && annual?.product.price
+      ? Math.round(
+          (1 - annual.product.price / (monthly.product.price * 12)) * 100
+        )
+      : null;
 
   const benefits = [
     'Recordatorio de mantenimientos',
@@ -102,13 +117,8 @@ export const Paywall: React.FC<PaywallProps> = ({
       return;
     }
 
-    if (!selectedPkg) {
-      setError('Selecciona un plan para continuar.');
-      return;
-    }
-
     const realPkg: any = (offerings || []).find(
-      (p: any) => p.identifier === selectedPkg.identifier
+      (p: any) => p.identifier === selectedId
     );
 
     if (!realPkg) {
@@ -117,11 +127,9 @@ export const Paywall: React.FC<PaywallProps> = ({
     }
 
     try {
-      setLoadingId(selectedPkg.identifier);
+      setLoadingId(selectedId);
       const result = await onPurchase(realPkg);
-      if (!result.success) {
-        setError(result.error || 'No se pudo completar la compra.');
-      }
+      if (!result.success) setError(result.error || 'No se pudo completar la compra.');
     } finally {
       setLoadingId(null);
     }
@@ -138,9 +146,7 @@ export const Paywall: React.FC<PaywallProps> = ({
     try {
       setRestoring(true);
       const result = await onRestore();
-      if (!result.success) {
-        setError(result.error || 'No se pudo restaurar.');
-      }
+      if (!result.success) setError(result.error || 'No se pudo restaurar.');
     } finally {
       setRestoring(false);
     }
@@ -155,12 +161,11 @@ export const Paywall: React.FC<PaywallProps> = ({
           <img
             src="/MOTOR_CHECK_LOGO_ICON_07_ALPHA.png"
             alt="MotorCheck"
-            className="w-16 h-16"
+            className="w-20 h-20"
           />
         </div>
 
-        {/* Title */}
-        <h1 className="text-center text-3xl font-semibold text-white tracking-tight">
+        <h1 className="text-center text-4xl font-semibold text-white tracking-tight">
           MOTORCHECK Premium
         </h1>
         <p className="text-center text-gray-400 text-sm mt-2 mb-4">
@@ -183,34 +188,40 @@ export const Paywall: React.FC<PaywallProps> = ({
         <div className="space-y-3 mb-4">
           {displayOfferings.map((pkg, index) => {
             const isSelected = pkg.identifier === selectedId;
-            const isBest = index === 0;
+            const isBest = pkg.product.title.toLowerCase().includes('anual');
 
             return (
               <button
                 key={pkg.identifier}
                 onClick={() => setSelectedId(pkg.identifier)}
-                className={`w-full text-left rounded-xl border p-4 transition
+                className={`w-full text-left rounded-xl border p-4 transition-all duration-200
+                  transform hover:scale-[1.02]
                   ${isSelected
-                    ? 'border-blue-500 bg-white/7'
-                    : 'border-white/10 bg-white/5 hover:bg-white/7'
-                  }
+                    ? 'border-blue-500 bg-white/10'
+                    : 'border-white/10 bg-white/5 hover:bg-white/10'}
                 `}
               >
-                <div className="flex justify-between items-center">
+                <div className="flex items-center justify-between">
                   <div>
                     {isBest && (
-                      <div className="text-sm text-blue-400 font-medium">
+                      <div className="text-sm text-blue-400 font-medium mb-1">
                         Mejor valor
                       </div>
                     )}
-                    <div className="text-xl font-semibold text-white">
+                    <div className="text-2xl font-semibold text-white">
                       {pkg.product.title}
                     </div>
                     <div className="text-sm text-gray-400">
                       {pkg.product.description}
                     </div>
+                    {isBest && annualSavingsPercent && (
+                      <div className="text-sm text-green-400 mt-1">
+                        Ahorra hasta {annualSavingsPercent}% al año
+                      </div>
+                    )}
                   </div>
-                  <div className="text-xl font-semibold text-white">
+
+                  <div className="text-right text-2xl font-semibold text-white">
                     {pkg.product.priceString}
                   </div>
                 </div>
@@ -223,9 +234,9 @@ export const Paywall: React.FC<PaywallProps> = ({
         <button
           onClick={handleContinue}
           disabled={loadingId !== null || restoring}
-          className="w-full py-3 rounded-xl text-base font-semibold bg-blue-600 hover:bg-blue-700 text-white transition"
+          className="w-full py-3 rounded-xl text-base font-semibold bg-blue-600 hover:bg-blue-700 text-white transition-all"
         >
-          {loadingId ? 'Procesando…' : isWeb ? 'Disponible en app móvil' : 'Comprar'}
+          {loadingId ? 'Procesando…' : 'COMPRAR'}
         </button>
 
         {error && (
@@ -234,18 +245,16 @@ export const Paywall: React.FC<PaywallProps> = ({
           </div>
         )}
 
-        {/* Restore */}
         <div className="mt-4 text-center">
           <button
             onClick={handleRestore}
-            disabled={restoring || loadingId !== null}
+            disabled={restoring}
             className="text-sm text-gray-300 hover:text-white underline underline-offset-4"
           >
             {restoring ? 'Restaurando…' : 'Restaurar compras'}
           </button>
         </div>
 
-        {/* Legal */}
         <div className="mt-4 text-[11px] text-gray-500 text-center leading-snug">
           Las suscripciones se renuevan automáticamente.
           <br />
