@@ -319,7 +319,7 @@ const Stats: React.FC<StatsProps> = ({ onNavigate }) => {
 
       {/* All KPI Cards (Dynamic based on filter) - Vertical Layout */}
       <div className="space-y-3 mb-6 animate-enter delay-200">
-        <Card className="py-5 px-5">
+        <Card className="py-4 px-5">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="p-2.5 rounded-xl bg-blue-500/10">
@@ -334,7 +334,7 @@ const Stats: React.FC<StatsProps> = ({ onNavigate }) => {
             </div>
         </Card>
 
-        <Card className="py-5 px-5">
+        <Card className="py-4 px-5">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="p-2.5 rounded-xl bg-emerald-500/10">
@@ -349,7 +349,7 @@ const Stats: React.FC<StatsProps> = ({ onNavigate }) => {
             </div>
         </Card>
 
-        <Card className="py-3 px-5">
+        <Card className="py-4 px-5">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="p-2.5 rounded-xl bg-blue-500/10">
@@ -364,7 +364,7 @@ const Stats: React.FC<StatsProps> = ({ onNavigate }) => {
             </div>
         </Card>
 
-        <Card className="py-5 px-5">
+        <Card className="py-4 px-5">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="p-2.5 rounded-xl bg-purple-500/10">
@@ -379,7 +379,7 @@ const Stats: React.FC<StatsProps> = ({ onNavigate }) => {
             </div>
         </Card>
 
-        <Card className="py-5 px-5">
+        <Card className="py-4 px-5">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="p-2.5 rounded-xl bg-emerald-500/10">
@@ -394,7 +394,7 @@ const Stats: React.FC<StatsProps> = ({ onNavigate }) => {
             </div>
         </Card>
 
-        <Card className="py-5 px-5">
+        <Card className="py-4 px-5">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="p-2.5 rounded-xl bg-yellow-500/10">
@@ -411,7 +411,7 @@ const Stats: React.FC<StatsProps> = ({ onNavigate }) => {
             </div>
         </Card>
 
-        <Card className="py-5 px-5">
+        <Card className="py-4 px-5">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="p-2.5 rounded-xl bg-purple-500/10">
