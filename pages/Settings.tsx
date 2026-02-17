@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useVehicle } from '../contexts/VehicleContext';
 import { useAuth } from '../contexts/AuthContext';
+import { useSubscription } from '../contexts/SubscriptionContext';
 import {
   Button,
   Input,
@@ -9,9 +10,10 @@ import {
   BackButton,
   PhotoInput,
 } from '../components/UI';
+import { Paywall } from '../components/Paywall';
 import { UnitSystem } from '../types';
 import { PDFExportService } from '../services/pdfExport';
-import { Moon, Sun, Download, ShieldAlert, User, LogOut, LogIn, FileText, Scale } from 'lucide-react';
+import { Moon, Sun, Download, ShieldAlert, User, LogOut, LogIn, FileText, Scale, Sparkles, Star } from 'lucide-react';
 import { dbClient } from '../services/database';
 import { Capacitor } from '@capacitor/core';
 
@@ -23,9 +25,11 @@ const Settings: React.FC<SettingsProps> = ({ onNavigate }) => {
   const { vehicle, fuelLogs, serviceLogs, updateVehicle, resetAll } =
     useVehicle();
   const { user, signOut } = useAuth();
+  const { entitlementActive, isTrialActive, offerings, purchase, restore } = useSubscription();
 
   const [formData, setFormData] = useState(vehicle);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+  const [showPaywallModal, setShowPaywallModal] = useState(false);
 
   useEffect(() => {
     setFormData(vehicle);
@@ -175,6 +179,16 @@ const Settings: React.FC<SettingsProps> = ({ onNavigate }) => {
       window.open(url, '_blank', 'noopener,noreferrer');
     }
   };
+
+  const handleOpenPaywall = () => {
+    setShowPaywallModal(true);
+  };
+
+  const handleClosePaywall = () => {
+    setShowPaywallModal(false);
+  };
+
+  const isPremium = entitlementActive || isTrialActive;
 
   return (
     <div className="p-4 pt-5 pb-24 max-w-lg mx-auto">
@@ -357,6 +371,52 @@ const Settings: React.FC<SettingsProps> = ({ onNavigate }) => {
           )}
         </Card>
 
+        {/* Suscripción */}
+        <Card className="p-4">
+          <div className="flex items-center gap-2 mb-4">
+            <Sparkles size={20} className="text-blue-500" />
+            <h3 className="text-lg font-bold text-blue-500 uppercase tracking-wider">
+              Suscripción
+            </h3>
+          </div>
+
+          {!isPremium ? (
+            <div className="space-y-3">
+              <button
+                onClick={handleOpenPaywall}
+                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white py-4 px-6 rounded-xl font-bold text-lg transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+              >
+                <Sparkles size={22} />
+                Mejorar a Premium
+              </button>
+              <p className="text-sm text-gray-500 dark:text-gray-400 text-center font-medium">
+                Desbloquea estadísticas ilimitadas
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <div className="mb-3 px-3 py-2 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-lg border border-blue-500/20">
+                <div className="flex items-center gap-2 justify-center">
+                  <Star size={16} className="text-blue-500 fill-blue-500" />
+                  <p className="text-sm font-bold text-blue-600 dark:text-blue-400">
+                    Premium Activo
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={handleOpenPaywall}
+                className="w-full bg-gray-600 hover:bg-gray-500 text-white py-4 px-6 rounded-xl font-bold text-lg transition-all flex items-center justify-center gap-2"
+              >
+                <Star size={22} />
+                Administrar suscripción
+              </button>
+              <p className="text-sm text-gray-500 dark:text-gray-400 text-center font-medium">
+                Gestiona tu plan actual
+              </p>
+            </div>
+          )}
+        </Card>
+
         {/* Legal */}
         <Card className="p-4">
           <button
@@ -417,6 +477,19 @@ const Settings: React.FC<SettingsProps> = ({ onNavigate }) => {
           </Button>
         </div>
       </div>
+
+      {/* Paywall Modal */}
+      {showPaywallModal && (
+        <div className="fixed inset-0 z-50">
+          <Paywall
+            offerings={offerings}
+            onPurchase={purchase}
+            onRestore={restore}
+            allowClose={true}
+            onClose={handleClosePaywall}
+          />
+        </div>
+      )}
     </div>
   );
 };
