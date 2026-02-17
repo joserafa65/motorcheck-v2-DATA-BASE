@@ -1,13 +1,12 @@
 import React, { useMemo, useState } from 'react';
 import { PurchasesOffering } from '@revenuecat/purchases-capacitor';
-import { Check, X } from 'lucide-react';
+import { Check } from 'lucide-react';
 import { Capacitor } from '@capacitor/core';
 
 interface PaywallProps {
   offerings: PurchasesOffering[] | null;
   onPurchase: (packageToPurchase: any) => Promise<{ success: boolean; error?: string }>;
   onRestore: () => Promise<{ success: boolean; error?: string }>;
-  onClose?: () => void;
 }
 
 type DisplayPackage = {
@@ -24,16 +23,14 @@ export const Paywall: React.FC<PaywallProps> = ({
   offerings,
   onPurchase,
   onRestore,
-  onClose,
 }) => {
-  const [selectedId, setSelectedId] = useState<string>(''); // se setea al cargar displayOfferings
+  const [selectedId, setSelectedId] = useState<string>('');
   const [loadingId, setLoadingId] = useState<string | null>(null);
   const [restoring, setRestoring] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const isWeb = Capacitor.getPlatform() === 'web';
 
-  // Mock para web mientras Apple/RC no entregan offerings reales en web
   const displayOfferings: DisplayPackage[] = useMemo(() => {
     if (isWeb && (!offerings || offerings.length === 0)) {
       return [
@@ -78,10 +75,9 @@ export const Paywall: React.FC<PaywallProps> = ({
     }));
   }, [isWeb, offerings]);
 
-  // Inicializa selección cuando llegan paquetes
   React.useEffect(() => {
     if (!selectedId && displayOfferings.length > 0) {
-      setSelectedId(displayOfferings[0].identifier); // por defecto: “mejor valor” arriba
+      setSelectedId(displayOfferings[0].identifier);
     }
   }, [displayOfferings, selectedId]);
 
@@ -105,24 +101,27 @@ export const Paywall: React.FC<PaywallProps> = ({
       setError('Disponible solo en la app móvil.');
       return;
     }
+
     if (!selectedPkg) {
       setError('Selecciona un plan para continuar.');
       return;
     }
 
-    // En mobile necesitamos el paquete real de RevenueCat, no el display map.
-    // Buscamos el objeto original por identifier.
-    const realPkg: any = (offerings || []).find((p: any) => p.identifier === selectedPkg.identifier);
+    const realPkg: any = (offerings || []).find(
+      (p: any) => p.identifier === selectedPkg.identifier
+    );
 
     if (!realPkg) {
-      setError('No pude encontrar el plan real. Intenta de nuevo.');
+      setError('No pude encontrar el plan real.');
       return;
     }
 
     try {
       setLoadingId(selectedPkg.identifier);
       const result = await onPurchase(realPkg);
-      if (!result.success) setError(result.error || 'No se pudo completar la compra.');
+      if (!result.success) {
+        setError(result.error || 'No se pudo completar la compra.');
+      }
     } finally {
       setLoadingId(null);
     }
@@ -139,7 +138,9 @@ export const Paywall: React.FC<PaywallProps> = ({
     try {
       setRestoring(true);
       const result = await onRestore();
-      if (!result.success) setError(result.error || 'No se pudo restaurar.');
+      if (!result.success) {
+        setError(result.error || 'No se pudo restaurar.');
+      }
     } finally {
       setRestoring(false);
     }
@@ -147,16 +148,7 @@ export const Paywall: React.FC<PaywallProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 bg-black flex flex-col justify-center px-5">
-      <div className="max-w-sm mx-auto w-full relative">
-
-        {/* Close */}
-        <button
-          onClick={() => onClose?.()}
-          className="absolute -top-1 right-0 p-2 text-gray-400 hover:text-white"
-          aria-label="Cerrar"
-        >
-          <X size={24} />
-        </button>
+      <div className="max-w-sm mx-auto w-full">
 
         {/* Logo */}
         <div className="flex justify-center mb-3 mt-2">
@@ -187,50 +179,39 @@ export const Paywall: React.FC<PaywallProps> = ({
           </div>
         </div>
 
-        {/* Plans (radio style) */}
+        {/* Plans */}
         <div className="space-y-3 mb-4">
           {displayOfferings.map((pkg, index) => {
             const isSelected = pkg.identifier === selectedId;
-            const isBest = index === 0; // lifetime primero en mock; si no, igual sirve para destacar “top”
+            const isBest = index === 0;
 
             return (
               <button
                 key={pkg.identifier}
                 onClick={() => setSelectedId(pkg.identifier)}
                 className={`w-full text-left rounded-xl border p-4 transition
-                  ${isSelected ? 'border-blue-500 bg-white/7' : 'border-white/10 bg-white/5 hover:bg-white/7'}
+                  ${isSelected
+                    ? 'border-blue-500 bg-white/7'
+                    : 'border-white/10 bg-white/5 hover:bg-white/7'
+                  }
                 `}
               >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    {/* radio */}
-                    <div
-                      className={`w-5 h-5 rounded-full border flex items-center justify-center
-                        ${isSelected ? 'border-blue-500' : 'border-white/20'}
-                      `}
-                    >
-                      {isSelected && <div className="w-2.5 h-2.5 rounded-full bg-blue-500" />}
+                <div className="flex justify-between items-center">
+                  <div>
+                    {isBest && (
+                      <div className="text-sm text-blue-400 font-medium">
+                        Mejor valor
+                      </div>
+                    )}
+                    <div className="text-xl font-semibold text-white">
+                      {pkg.product.title}
                     </div>
-
-                    <div>
-                      {isBest && (
-                        <div className="text-sm text-blue-400 font-medium -mb-0.5">
-                          Mejor valor
-                        </div>
-                      )}
-                      <div className="text-xl font-semibold text-white">
-                        {pkg.product.title}
-                      </div>
-                      <div className="text-sm text-gray-400">
-                        {pkg.product.description}
-                      </div>
+                    <div className="text-sm text-gray-400">
+                      {pkg.product.description}
                     </div>
                   </div>
-
-                  <div className="text-right">
-                    <div className="text-xl font-semibold text-white">
-                      {pkg.product.priceString}
-                    </div>
+                  <div className="text-xl font-semibold text-white">
+                    {pkg.product.priceString}
                   </div>
                 </div>
               </button>
@@ -238,21 +219,15 @@ export const Paywall: React.FC<PaywallProps> = ({
           })}
         </div>
 
-        {/* Primary CTA */}
+        {/* CTA */}
         <button
           onClick={handleContinue}
           disabled={loadingId !== null || restoring}
-          className={`w-full py-3 rounded-xl text-base font-semibold transition
-            ${loadingId
-              ? 'bg-blue-600 text-white opacity-90'
-              : 'bg-blue-600 hover:bg-blue-700 text-white'
-            }
-          `}
+          className="w-full py-3 rounded-xl text-base font-semibold bg-blue-600 hover:bg-blue-700 text-white transition"
         >
-          {loadingId ? 'Procesando…' : isWeb ? 'Disponible en app móvil' : 'Continuar'}
+          {loadingId ? 'Procesando…' : isWeb ? 'Disponible en app móvil' : 'Comprar'}
         </button>
 
-        {/* Error */}
         {error && (
           <div className="mt-3 text-sm text-red-400 text-center">
             {error}
@@ -264,18 +239,18 @@ export const Paywall: React.FC<PaywallProps> = ({
           <button
             onClick={handleRestore}
             disabled={restoring || loadingId !== null}
-            className="text-sm text-gray-300 hover:text-white underline underline-offset-4 disabled:opacity-50"
+            className="text-sm text-gray-300 hover:text-white underline underline-offset-4"
           >
             {restoring ? 'Restaurando…' : 'Restaurar compras'}
           </button>
         </div>
 
- {/* Legal */}
-<div className="mt-4 text-[11px] text-gray-500 text-center leading-snug">
-  Las suscripciones se renuevan automáticamente.
-  <br />
-  Puedes cancelarlas en cualquier momento desde los ajustes de tu Apple ID.
-</div>
+        {/* Legal */}
+        <div className="mt-4 text-[11px] text-gray-500 text-center leading-snug">
+          Las suscripciones se renuevan automáticamente.
+          <br />
+          Puedes cancelarlas en cualquier momento desde los ajustes de tu Apple ID.
+        </div>
 
         <div className="flex justify-center gap-4 text-sm mt-2">
           <a
