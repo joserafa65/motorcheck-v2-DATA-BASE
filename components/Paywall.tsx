@@ -166,8 +166,8 @@ export const Paywall: React.FC<PaywallProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black flex flex-col justify-center px-5">
-      <div className="max-w-sm mx-auto w-full relative">
+    <div className="fixed inset-0 z-50 bg-black overflow-y-auto px-5 py-6">
+      <div className="max-w-sm mx-auto w-full relative min-h-full flex flex-col justify-center">
 
         {allowClose && (
           <button
@@ -327,7 +327,6 @@ export const Paywall: React.FC<PaywallProps> = ({
           </a>
         </div>
 
-        {/* NUEVO BOTÓN CAMBIAR CUENTA */}
         <div className="mt-4 text-center">
           <button
             onClick={handleSwitchAccount}
