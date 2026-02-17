@@ -314,17 +314,98 @@ const Stats: React.FC<StatsProps> = ({ onNavigate }) => {
         )}
       </div>
 
-      {/* KPI Cards (Dynamic based on filter) */}
-      <div className="grid grid-cols-2 gap-4 mb-6 animate-enter delay-200">
-        <Card className="text-center py-5 px-4">
-            <div className="text-gray-500 dark:text-gray-400 text-xs uppercase font-bold tracking-wider mb-2">Consumo Prom.</div>
-            <div className="text-2xl font-bold text-blue-600 dark:text-blue-400 leading-none">{metrics.eff.toFixed(1)}</div>
-            <div className="text-gray-500 text-xs font-medium mt-1">{getUnitLabel()}</div>
+      {/* All KPI Cards (Dynamic based on filter) - Vertical Layout */}
+      <div className="space-y-3 mb-6 animate-enter delay-200">
+        <Card className="py-5 px-5">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-xl bg-blue-500/10">
+                  <Droplet size={22} className="text-blue-500" />
+                </div>
+                <div>
+                  <div className="text-gray-500 dark:text-gray-400 text-xs uppercase font-bold tracking-wider">Consumo Prom.</div>
+                  <div className="text-gray-500 text-xs font-medium">{getUnitLabel()}</div>
+                </div>
+              </div>
+              <div className="text-3xl font-bold text-blue-600 dark:text-blue-400 leading-none">{metrics.eff.toFixed(1)}</div>
+            </div>
         </Card>
-        <Card className="text-center py-5 px-4">
-            <div className="text-gray-500 dark:text-gray-400 text-xs uppercase font-bold tracking-wider mb-2">Distancia</div>
-            <div className="text-2xl font-bold text-emerald-500 dark:text-emerald-400 leading-none">{metrics.distance.toLocaleString()}</div>
-            <div className="text-gray-500 text-xs font-medium mt-1">km recorridos</div>
+
+        <Card className="py-5 px-5">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-xl bg-emerald-500/10">
+                  <MapPin size={22} className="text-emerald-500" />
+                </div>
+                <div>
+                  <div className="text-gray-500 dark:text-gray-400 text-xs uppercase font-bold tracking-wider">Distancia</div>
+                  <div className="text-gray-500 text-xs font-medium">km recorridos</div>
+                </div>
+              </div>
+              <div className="text-3xl font-bold text-emerald-500 dark:text-emerald-400 leading-none">{metrics.distance.toLocaleString()}</div>
+            </div>
+        </Card>
+
+        <Card className="py-5 px-5">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-xl bg-blue-500/10">
+                  <Droplet size={22} className="text-blue-500" />
+                </div>
+                <div>
+                  <div className="text-gray-500 dark:text-gray-400 text-xs uppercase font-bold tracking-wider">Visitas Gasolinera</div>
+                  <div className="text-gray-500 text-xs font-medium">total de recargas</div>
+                </div>
+              </div>
+              <div className="text-3xl font-bold text-gray-900 dark:text-white leading-none">{metrics.fuelVisits}</div>
+            </div>
+        </Card>
+
+        <Card className="py-5 px-5">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-xl bg-purple-500/10">
+                  <Wrench size={22} className="text-purple-500" />
+                </div>
+                <div>
+                  <div className="text-gray-500 dark:text-gray-400 text-xs uppercase font-bold tracking-wider">Visitas Mecánica</div>
+                  <div className="text-gray-500 text-xs font-medium">servicios realizados</div>
+                </div>
+              </div>
+              <div className="text-3xl font-bold text-gray-900 dark:text-white leading-none">{metrics.serviceVisits}</div>
+            </div>
+        </Card>
+
+        <Card className="py-5 px-5">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-xl bg-emerald-500/10">
+                  <Droplet size={22} className="text-emerald-500 fill-current" />
+                </div>
+                <div>
+                  <div className="text-gray-500 dark:text-gray-400 text-xs uppercase font-bold tracking-wider">{getVolUnit()} Consumidos</div>
+                  <div className="text-gray-500 text-xs font-medium">volumen total</div>
+                </div>
+              </div>
+              <div className="text-3xl font-bold text-gray-900 dark:text-white leading-none">{metrics.totalVolume.toFixed(1)}</div>
+            </div>
+        </Card>
+
+        <Card className="py-5 px-5">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-xl bg-yellow-500/10">
+                  <DollarSign size={22} className="text-yellow-500" />
+                </div>
+                <div>
+                  <div className="text-gray-500 dark:text-gray-400 text-xs uppercase font-bold tracking-wider">Costo / Tanqueada</div>
+                  <div className="text-gray-500 text-xs font-medium">promedio por recarga</div>
+                </div>
+              </div>
+              <div className="text-2xl font-bold text-gray-900 dark:text-white leading-none tracking-tight">
+                {CURRENCY_FORMATTER.format(metrics.avgCostPerRefuel)}
+              </div>
+            </div>
         </Card>
       </div>
 
@@ -384,37 +465,6 @@ const Stats: React.FC<StatsProps> = ({ onNavigate }) => {
             </ResponsiveContainer>
           </div>
       </Card>
-
-      {/* New Detailed Stats Grid (Requested) */}
-      <h3 className="font-bold mb-4 text-sm uppercase tracking-wide text-gray-500 dark:text-gray-400 px-1 animate-enter delay-500">Resumen Detallado</h3>
-      <div className="grid grid-cols-2 gap-4 animate-enter delay-700">
-          <Card className="text-center py-4 px-3">
-              <div className="flex justify-center mb-2 text-blue-500"><Droplet size={20} /></div>
-              <div className="text-gray-500 dark:text-gray-400 text-[10px] uppercase font-bold tracking-wider mb-1">Visitas Gasolinera</div>
-              <div className="text-2xl font-bold text-gray-900 dark:text-white leading-none">{metrics.fuelVisits}</div>
-          </Card>
-
-          <Card className="text-center py-4 px-3">
-              <div className="flex justify-center mb-2 text-purple-500"><Wrench size={20} /></div>
-              <div className="text-gray-500 dark:text-gray-400 text-[10px] uppercase font-bold tracking-wider mb-1">Visitas Mecánica</div>
-              <div className="text-2xl font-bold text-gray-900 dark:text-white leading-none">{metrics.serviceVisits}</div>
-          </Card>
-
-          <Card className="text-center py-4 px-3">
-              <div className="flex justify-center mb-2 text-emerald-500"><Droplet size={20} className="fill-current" /></div>
-              <div className="text-gray-500 dark:text-gray-400 text-[10px] uppercase font-bold tracking-wider mb-1">{getVolUnit()} Consumidos</div>
-              <div className="text-2xl font-bold text-gray-900 dark:text-white leading-none">{metrics.totalVolume.toFixed(1)}</div>
-              <div className="text-gray-500 text-[10px] font-medium mt-1">{getVolUnit()}</div>
-          </Card>
-
-          <Card className="text-center py-4 px-3">
-              <div className="flex justify-center mb-2 text-yellow-500"><DollarSign size={20} /></div>
-              <div className="text-gray-500 dark:text-gray-400 text-[10px] uppercase font-bold tracking-wider mb-1">Costo / Tanqueada</div>
-              <div className="text-xl font-bold text-gray-900 dark:text-white leading-none tracking-tight">
-                  {CURRENCY_FORMATTER.format(metrics.avgCostPerRefuel)}
-              </div>
-          </Card>
-      </div>
 
     </div>
   );
