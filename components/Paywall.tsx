@@ -1,12 +1,14 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { PurchasesOffering } from '@revenuecat/purchases-capacitor';
-import { Check } from 'lucide-react';
+import { Check, X } from 'lucide-react';
 import { Capacitor } from '@capacitor/core';
 
 interface PaywallProps {
   offerings: PurchasesOffering[] | null;
   onPurchase: (packageToPurchase: any) => Promise<{ success: boolean; error?: string }>;
   onRestore: () => Promise<{ success: boolean; error?: string }>;
+  allowClose?: boolean;        // 🔥 NUEVO
+  onClose?: () => void;        // 🔥 NUEVO
 }
 
 type DisplayPackage = {
@@ -24,6 +26,8 @@ export const Paywall: React.FC<PaywallProps> = ({
   offerings,
   onPurchase,
   onRestore,
+  allowClose = false,
+  onClose,
 }) => {
   const [selectedId, setSelectedId] = useState<string>('');
   const [loadingId, setLoadingId] = useState<string | null>(null);
@@ -157,7 +161,18 @@ export const Paywall: React.FC<PaywallProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 bg-black flex flex-col justify-center px-5">
-      <div className="max-w-sm mx-auto w-full">
+      <div className="max-w-sm mx-auto w-full relative">
+
+        {/* 🔥 CLOSE BUTTON SOLO SI allowClose */}
+        {allowClose && (
+          <button
+            onClick={onClose}
+            className="absolute -top-2 right-0 p-2 text-gray-400 hover:text-white transition"
+            aria-label="Cerrar"
+          >
+            <X size={22} />
+          </button>
+        )}
 
         {/* Logo */}
         <div className="flex justify-center mb-3 mt-2">
@@ -208,10 +223,8 @@ export const Paywall: React.FC<PaywallProps> = ({
               >
                 <div className="flex items-start justify-between">
 
-                  {/* LEFT SIDE */}
                   <div className="flex items-start gap-3">
 
-                    {/* RADIO CIRCLE */}
                     <div
                       className={`mt-2 w-5 h-5 rounded-full border flex items-center justify-center transition-all
                         ${isSelected
@@ -220,7 +233,7 @@ export const Paywall: React.FC<PaywallProps> = ({
                       `}
                     >
                       {isSelected && (
-                        <div className="w-2.5 h-2.5 rounded-full bg-blue-500 transition-all" />
+                        <div className="w-2.5 h-2.5 rounded-full bg-blue-500" />
                       )}
                     </div>
 
@@ -259,7 +272,6 @@ export const Paywall: React.FC<PaywallProps> = ({
                     </div>
                   </div>
 
-                  {/* PRICE */}
                   <div className="text-2xl font-semibold text-white">
                     {pkg.product.priceString}
                   </div>
