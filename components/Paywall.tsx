@@ -272,7 +272,8 @@ export const Paywall: React.FC<PaywallProps> = ({
 
         {/* Legal */}
         <div className="mt-4 text-[11px] text-gray-500 text-center leading-snug">
-          Suscripciones con renovación automática. Cancela en Ajustes &gt; Apple ID &gt; Suscripciones.
+          Las suscripciones se renuevan automáticamente.
+Puedes cancelarlas en cualquier momento desde Ajustes > Apple ID > Suscripciones.
         </div>
 
         <div className="flex justify-center gap-4 text-sm mt-2">
