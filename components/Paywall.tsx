@@ -270,11 +270,12 @@ export const Paywall: React.FC<PaywallProps> = ({
           </button>
         </div>
 
-        {/* Legal */}
-        <div className="mt-4 text-[11px] text-gray-500 text-center leading-snug">
-          Las suscripciones se renuevan automáticamente.
-Puedes cancelarlas en cualquier momento desde Ajustes > Apple ID > Suscripciones.
-        </div>
+ {/* Legal */}
+<div className="mt-4 text-[11px] text-gray-500 text-center leading-snug">
+  Las suscripciones se renuevan automáticamente.
+  <br />
+  Puedes cancelarlas en cualquier momento desde los ajustes de tu Apple ID.
+</div>
 
         <div className="flex justify-center gap-4 text-sm mt-2">
           <a
