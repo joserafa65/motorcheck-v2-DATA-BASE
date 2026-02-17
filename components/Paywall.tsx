@@ -32,20 +32,9 @@ export const Paywall: React.FC<PaywallProps> = ({
 
   const isWeb = Capacitor.getPlatform() === 'web';
 
-  // 🔥 Mock visual en web si no hay offerings reales
   const displayOfferings: DisplayPackage[] = useMemo(() => {
     if (isWeb && (!offerings || offerings.length === 0)) {
       return [
-        {
-          identifier: 'lifetime_mock',
-          product: {
-            identifier: 'lifetime_mock',
-            title: 'De por vida',
-            description: 'Acceso completo para siempre',
-            priceString: '$34.99',
-            price: 34.99,
-          },
-        },
         {
           identifier: 'annual_mock',
           product: {
@@ -57,11 +46,21 @@ export const Paywall: React.FC<PaywallProps> = ({
           },
         },
         {
+          identifier: 'lifetime_mock',
+          product: {
+            identifier: 'lifetime_mock',
+            title: 'De por vida',
+            description: 'Pago único. Olvídate para siempre.',
+            priceString: '$34.99',
+            price: 34.99,
+          },
+        },
+        {
           identifier: 'monthly_mock',
           product: {
             identifier: 'monthly_mock',
             title: 'Mensual',
-            description: 'Acceso completo',
+            description: 'Ideal si prefieres flexibilidad.',
             priceString: '$1.99 / mes',
             price: 1.99,
           },
@@ -83,7 +82,10 @@ export const Paywall: React.FC<PaywallProps> = ({
 
   useEffect(() => {
     if (!selectedId && displayOfferings.length > 0) {
-      setSelectedId(displayOfferings[0].identifier);
+      const annual = displayOfferings.find(p =>
+        p.product.title.toLowerCase().includes('anual')
+      );
+      setSelectedId(annual?.identifier || displayOfferings[0].identifier);
     }
   }, [displayOfferings, selectedId]);
 
@@ -186,44 +188,69 @@ export const Paywall: React.FC<PaywallProps> = ({
 
         {/* Plans */}
         <div className="space-y-3 mb-4">
-          {displayOfferings.map((pkg, index) => {
+          {displayOfferings.map((pkg) => {
             const isSelected = pkg.identifier === selectedId;
-            const isBest = pkg.product.title.toLowerCase().includes('anual');
+            const isAnnual = pkg.product.title.toLowerCase().includes('anual');
 
             return (
               <button
                 key={pkg.identifier}
                 onClick={() => setSelectedId(pkg.identifier)}
                 className={`w-full text-left rounded-xl border p-4 transition-all duration-200
-                  transform hover:scale-[1.02]
+                  transform hover:scale-[1.01]
                   ${isSelected
-                    ? 'border-blue-500 bg-white/10'
-                    : 'border-white/10 bg-white/5 hover:bg-white/10'}
+                    ? 'border-blue-500 bg-white/10 shadow-[0_0_0_1px_rgba(59,130,246,0.3)]'
+                    : 'border-white/10 bg-white/5 hover:bg-white/8'}
                 `}
               >
                 <div className="flex items-center justify-between">
-                  <div>
-                    {isBest && (
-                      <div className="text-sm text-blue-400 font-medium mb-1">
-                        Mejor valor
-                      </div>
-                    )}
-                    <div className="text-2xl font-semibold text-white">
-                      {pkg.product.title}
+
+                  <div className="flex items-start gap-3">
+
+                    {/* Radio */}
+                    <div
+                      className={`mt-2 w-5 h-5 rounded-full border transition-all duration-200
+                        ${isSelected
+                          ? 'border-blue-500 bg-blue-500/20'
+                          : 'border-white/30'}
+                      `}
+                    >
+                      {isSelected && (
+                        <div className="w-2.5 h-2.5 bg-blue-500 rounded-full m-auto mt-[5px]" />
+                      )}
                     </div>
-                    <div className="text-sm text-gray-400">
-                      {pkg.product.description}
-                    </div>
-                    {isBest && annualSavingsPercent && (
-                      <div className="text-sm text-green-400 mt-1">
-                        Ahorra hasta {annualSavingsPercent}% al año
+
+                    <div>
+                      {isAnnual && (
+                        <div className="text-sm text-blue-400 font-medium mb-1">
+                          Mejor valor
+                        </div>
+                      )}
+
+                      <div className={`text-2xl font-semibold transition-colors
+                        ${isSelected ? 'text-white' : 'text-gray-200'}
+                      `}>
+                        {pkg.product.title}
                       </div>
-                    )}
+
+                      <div className="text-sm text-gray-400">
+                        {pkg.product.description}
+                      </div>
+
+                      {isAnnual && annualSavingsPercent && (
+                        <div className="text-sm text-green-400 mt-1">
+                          Ahorra hasta {annualSavingsPercent}% al año
+                        </div>
+                      )}
+                    </div>
                   </div>
 
-                  <div className="text-right text-2xl font-semibold text-white">
+                  <div className={`text-2xl font-semibold transition-colors
+                    ${isSelected ? 'text-white' : 'text-gray-300'}
+                  `}>
                     {pkg.product.priceString}
                   </div>
+
                 </div>
               </button>
             );
@@ -234,7 +261,7 @@ export const Paywall: React.FC<PaywallProps> = ({
         <button
           onClick={handleContinue}
           disabled={loadingId !== null || restoring}
-          className="w-full py-3 rounded-xl text-base font-semibold bg-blue-600 hover:bg-blue-700 text-white transition-all"
+          className="w-full py-3 rounded-xl text-base font-semibold bg-blue-600 hover:bg-blue-700 transition-all duration-200 text-white"
         >
           {loadingId ? 'Procesando…' : 'COMPRAR'}
         </button>
@@ -279,6 +306,7 @@ export const Paywall: React.FC<PaywallProps> = ({
             Privacidad
           </a>
         </div>
+
       </div>
     </div>
   );
