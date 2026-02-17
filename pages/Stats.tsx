@@ -187,14 +187,16 @@ const Stats: React.FC<StatsProps> = ({ onNavigate }) => {
 
   const metrics = useMemo(() => {
       const { fLogs, sLogs } = filteredData;
-      
+
       // Basic Counts
       const fuelVisits = fLogs.length;
       const serviceVisits = sLogs.length;
       const totalVolume = roundToTwo(fLogs.reduce((acc, l) => acc + l.volume, 0));
       const totalFuelCost = roundToTwo(fLogs.reduce((acc, l) => acc + l.totalCost, 0));
+      const totalServiceCost = roundToTwo(sLogs.reduce((acc, l) => acc + l.cost, 0));
 
       const avgCostPerRefuel = fuelVisits > 0 ? roundToTwo(totalFuelCost / fuelVisits) : 0;
+      const avgCostPerService = serviceVisits > 0 ? roundToTwo(totalServiceCost / serviceVisits) : 0;
 
       // Distance in Range
       // Calculate delta based on min/max odometer in the filtered set
@@ -217,6 +219,7 @@ const Stats: React.FC<StatsProps> = ({ onNavigate }) => {
           serviceVisits,
           totalVolume,
           avgCostPerRefuel,
+          avgCostPerService,
           distance,
           eff
       };
@@ -404,6 +407,23 @@ const Stats: React.FC<StatsProps> = ({ onNavigate }) => {
               </div>
               <div className="text-2xl font-bold text-gray-900 dark:text-white leading-none tracking-tight">
                 {CURRENCY_FORMATTER.format(metrics.avgCostPerRefuel)}
+              </div>
+            </div>
+        </Card>
+
+        <Card className="py-5 px-5">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-xl bg-purple-500/10">
+                  <Wrench size={22} className="text-purple-500" />
+                </div>
+                <div>
+                  <div className="text-gray-500 dark:text-gray-400 text-xs uppercase font-bold tracking-wider">Costo en Servicios</div>
+                  <div className="text-gray-500 text-xs font-medium">promedio por servicio</div>
+                </div>
+              </div>
+              <div className="text-2xl font-bold text-gray-900 dark:text-white leading-none tracking-tight">
+                {CURRENCY_FORMATTER.format(metrics.avgCostPerService)}
               </div>
             </div>
         </Card>
