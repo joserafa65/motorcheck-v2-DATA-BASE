@@ -32,7 +32,6 @@ export const Paywall: React.FC<PaywallProps> = ({
 
   const isWeb = Capacitor.getPlatform() === 'web';
 
-  // Mock visual en web si no hay offerings reales
   const displayOfferings: DisplayPackage[] = useMemo(() => {
     if (isWeb && (!offerings || offerings.length === 0)) {
       return [
@@ -81,7 +80,7 @@ export const Paywall: React.FC<PaywallProps> = ({
     }));
   }, [isWeb, offerings]);
 
-  // 👉 Selección por defecto: ANUAL
+  // Selección por defecto: ANUAL
   useEffect(() => {
     if (!selectedId && displayOfferings.length > 0) {
       const annualPlan = displayOfferings.find(p =>
@@ -194,6 +193,7 @@ export const Paywall: React.FC<PaywallProps> = ({
             const isSelected = pkg.identifier === selectedId;
             const isAnnual = pkg.product.title.toLowerCase().includes('anual');
             const isLifetime = pkg.product.title.toLowerCase().includes('vida');
+            const isMonthly = pkg.product.title.toLowerCase().includes('mensual');
 
             return (
               <button
@@ -206,44 +206,61 @@ export const Paywall: React.FC<PaywallProps> = ({
                     : 'border-white/10 bg-white/5 hover:bg-white/10'}
                 `}
               >
-                <div className="flex items-center justify-between">
-                  <div>
+                <div className="flex items-start justify-between">
 
-                    {isAnnual && (
-                      <div className="text-sm text-blue-400 font-medium mb-1">
-                        Mejor opción
-                      </div>
-                    )}
+                  {/* LEFT SIDE */}
+                  <div className="flex items-start gap-3">
 
-                    <div className="text-2xl font-semibold text-white">
-                      {pkg.product.title}
+                    {/* RADIO CIRCLE */}
+                    <div
+                      className={`mt-2 w-5 h-5 rounded-full border flex items-center justify-center transition-all
+                        ${isSelected
+                          ? 'border-blue-500'
+                          : 'border-white/30'}
+                      `}
+                    >
+                      {isSelected && (
+                        <div className="w-2.5 h-2.5 rounded-full bg-blue-500 transition-all" />
+                      )}
                     </div>
 
-                    <div className="text-sm text-gray-400">
-                      {pkg.product.description}
+                    <div>
+                      {isAnnual && (
+                        <div className="text-sm text-blue-400 font-medium mb-1">
+                          Mejor opción
+                        </div>
+                      )}
+
+                      <div className="text-2xl font-semibold text-white">
+                        {pkg.product.title}
+                      </div>
+
+                      <div className="text-sm text-gray-400">
+                        {pkg.product.description}
+                      </div>
+
+                      {isAnnual && annualSavingsPercent && (
+                        <div className="text-sm text-green-400 mt-1">
+                          Ahorra hasta {annualSavingsPercent}% al año
+                        </div>
+                      )}
+
+                      {isLifetime && (
+                        <div className="text-sm text-gray-400 mt-1">
+                          Ideal si trabajas con tu vehículo todos los días.
+                        </div>
+                      )}
+
+                      {isMonthly && (
+                        <div className="text-sm text-gray-400 mt-1">
+                          Ideal si prefieres flexibilidad.
+                        </div>
+                      )}
                     </div>
-
-                    {isAnnual && annualSavingsPercent && (
-                      <div className="text-sm text-green-400 mt-1">
-                        Ahorra hasta {annualSavingsPercent}% al año
-                      </div>
-                    )}
-
-                    {isLifetime && (
-                      <div className="text-sm text-gray-400 mt-1">
-                        Ideal si trabajas con tu vehículo todos los días.
-                      </div>
-                    )}
-
-                    {pkg.product.title.toLowerCase().includes('mensual') && (
-                      <div className="text-sm text-gray-400 mt-1">
-                        Ideal si prefieres flexibilidad.
-                      </div>
-                    )}
-
                   </div>
 
-                  <div className="text-right text-2xl font-semibold text-white">
+                  {/* PRICE */}
+                  <div className="text-2xl font-semibold text-white">
                     {pkg.product.priceString}
                   </div>
                 </div>
