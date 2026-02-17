@@ -2,7 +2,7 @@ import React, { useMemo, useState, useEffect } from 'react';
 import { PurchasesOffering } from '@revenuecat/purchases-capacitor';
 import { Check, X } from 'lucide-react';
 import { Capacitor } from '@capacitor/core';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../contexts/AuthContext';
 
 interface PaywallProps {
   offerings: PurchasesOffering[] | null;
