@@ -33,28 +33,20 @@ const AppContent: React.FC = () => {
   const [isReady, setIsReady] = useState(false);
   const [showSplash, setShowSplash] = useState(!splashAlreadyShown);
 
-  // ✅ SOLO depende del pathname
   const isResetPasswordRoute = window.location.pathname === '/reset-password';
 
-  // INIT APP
   useEffect(() => {
     const initApp = async () => {
       const hasCompletedOnboarding = StorageService.hasCompletedOnboarding();
       setShowOnboarding(!hasCompletedOnboarding);
       setIsReady(true);
     };
-
     initApp();
   }, []);
 
-  // 🔔 NOTIFICACIONES
   useEffect(() => {
     if (session && !showOnboarding && isReady) {
-      NotificationService.requestPermission().then(result => {
-        if (result === 'granted') {
-          // listeners si los quieres luego
-        }
-      });
+      NotificationService.requestPermission();
     }
   }, [session, showOnboarding, isReady]);
 
@@ -109,7 +101,6 @@ const AppContent: React.FC = () => {
     }
   };
 
-  // ✅ ResetPassword tiene prioridad absoluta
   if (isResetPasswordRoute) {
     return <ResetPassword />;
   }
@@ -121,15 +112,10 @@ const AppContent: React.FC = () => {
   return (
     <>
       {showSplash && <AnimatedSplash onFinish={handleSplashFinish} />}
-
-      {!showSplash && (authLoading || !isReady) && null}
-
       {!showSplash && shouldShowOnboarding && (
         <Onboarding onComplete={handleOnboardingComplete} />
       )}
-
       {!showSplash && shouldShowAuth && <Auth />}
-
       {!showSplash && shouldShowApp && (
         <SubscriptionProvider>
           <SubscriptionGate
@@ -148,7 +134,33 @@ const SubscriptionGate: React.FC<{
   currentView: string;
   handleNavigation: (view: string, params?: any) => void;
 }> = ({ renderView, currentView, handleNavigation }) => {
-  const { loading, showPaywall, offerings, purchase, restore } = useSubscription();
+  const {
+    loading,
+    showPaywall,
+    offerings,
+    purchase,
+    restore,
+    isTrialActive,
+    subscriptionStatus,
+  } = useSubscription();
+
+  const [openCount, setOpenCount] = useState(0);
+  const [showTrialNudge, setShowTrialNudge] = useState(false);
+
+  // 🔥 Contador de aperturas
+  useEffect(() => {
+    const count = Number(localStorage.getItem('app_open_count') || 0) + 1;
+    localStorage.setItem('app_open_count', String(count));
+    setOpenCount(count);
+  }, []);
+
+  // 🔥 Mostrar paywall cada 5 aperturas si está en trial
+  useEffect(() => {
+    const isPremium = subscriptionStatus === 'active';
+    if (isTrialActive && !isPremium && openCount > 0 && openCount % 5 === 0) {
+      setShowTrialNudge(true);
+    }
+  }, [openCount, isTrialActive, subscriptionStatus]);
 
   if (loading) {
     return (
@@ -158,8 +170,28 @@ const SubscriptionGate: React.FC<{
     );
   }
 
+  // 🔒 Paywall obligatorio (trial vencido)
   if (showPaywall) {
-    return <Paywall offerings={offerings} onPurchase={purchase} onRestore={restore} />;
+    return (
+      <Paywall
+        offerings={offerings}
+        onPurchase={purchase}
+        onRestore={restore}
+      />
+    );
+  }
+
+  // 🔥 Paywall recordatorio durante trial
+  if (showTrialNudge) {
+    return (
+      <Paywall
+        offerings={offerings}
+        onPurchase={purchase}
+        onRestore={restore}
+        allowClose={true}
+        onClose={() => setShowTrialNudge(false)}
+      />
+    );
   }
 
   const NavItem = ({ view, params, icon: Icon, label }: any) => (
