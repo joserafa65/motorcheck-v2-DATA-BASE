@@ -2,13 +2,14 @@ import React, { useMemo, useState, useEffect } from 'react';
 import { PurchasesOffering } from '@revenuecat/purchases-capacitor';
 import { Check, X } from 'lucide-react';
 import { Capacitor } from '@capacitor/core';
+import { useAuth } from '../context/AuthContext';
 
 interface PaywallProps {
   offerings: PurchasesOffering[] | null;
   onPurchase: (packageToPurchase: any) => Promise<{ success: boolean; error?: string }>;
   onRestore: () => Promise<{ success: boolean; error?: string }>;
-  allowClose?: boolean;        // 🔥 NUEVO
-  onClose?: () => void;        // 🔥 NUEVO
+  allowClose?: boolean;
+  onClose?: () => void;
 }
 
 type DisplayPackage = {
@@ -29,6 +30,8 @@ export const Paywall: React.FC<PaywallProps> = ({
   allowClose = false,
   onClose,
 }) => {
+  const { signOut } = useAuth();
+
   const [selectedId, setSelectedId] = useState<string>('');
   const [loadingId, setLoadingId] = useState<string | null>(null);
   const [restoring, setRestoring] = useState(false);
@@ -84,7 +87,6 @@ export const Paywall: React.FC<PaywallProps> = ({
     }));
   }, [isWeb, offerings]);
 
-  // Selección por defecto: ANUAL
   useEffect(() => {
     if (!selectedId && displayOfferings.length > 0) {
       const annualPlan = displayOfferings.find(p =>
@@ -159,22 +161,23 @@ export const Paywall: React.FC<PaywallProps> = ({
     }
   };
 
+  const handleSwitchAccount = async () => {
+    await signOut();
+  };
+
   return (
     <div className="fixed inset-0 z-50 bg-black flex flex-col justify-center px-5">
       <div className="max-w-sm mx-auto w-full relative">
 
-        {/* 🔥 CLOSE BUTTON SOLO SI allowClose */}
         {allowClose && (
           <button
             onClick={onClose}
             className="absolute -top-2 right-0 p-2 text-gray-400 hover:text-white transition"
-            aria-label="Cerrar"
           >
             <X size={22} />
           </button>
         )}
 
-        {/* Logo */}
         <div className="flex justify-center mb-3 mt-2">
           <img
             src="/MOTOR_CHECK_LOGO_ICON_07_ALPHA.png"
@@ -183,14 +186,14 @@ export const Paywall: React.FC<PaywallProps> = ({
           />
         </div>
 
-        <h1 className="text-center text-4xl font-semibold text-white tracking-tight">
+        <h1 className="text-center text-4xl font-semibold text-white">
           MOTORCHECK Premium
         </h1>
+
         <p className="text-center text-gray-400 text-sm mt-2 mb-4">
           Menos fallas. Más productividad. Más ingresos.
         </p>
 
-        {/* Benefits */}
         <div className="bg-white/5 border border-white/10 rounded-xl p-4 mb-4">
           <div className="space-y-2">
             {benefits.map((benefit, index) => (
@@ -202,7 +205,6 @@ export const Paywall: React.FC<PaywallProps> = ({
           </div>
         </div>
 
-        {/* Plans */}
         <div className="space-y-3 mb-4">
           {displayOfferings.map((pkg) => {
             const isSelected = pkg.identifier === selectedId;
@@ -214,22 +216,17 @@ export const Paywall: React.FC<PaywallProps> = ({
               <button
                 key={pkg.identifier}
                 onClick={() => setSelectedId(pkg.identifier)}
-                className={`w-full text-left rounded-xl border p-4 transition-all duration-200
-                  transform hover:scale-[1.02]
+                className={`w-full text-left rounded-xl border p-4 transition-all duration-200 transform hover:scale-[1.02]
                   ${isSelected
                     ? 'border-blue-500 bg-white/10'
                     : 'border-white/10 bg-white/5 hover:bg-white/10'}
                 `}
               >
                 <div className="flex items-start justify-between">
-
                   <div className="flex items-start gap-3">
-
                     <div
-                      className={`mt-2 w-5 h-5 rounded-full border flex items-center justify-center transition-all
-                        ${isSelected
-                          ? 'border-blue-500'
-                          : 'border-white/30'}
+                      className={`mt-2 w-5 h-5 rounded-full border flex items-center justify-center
+                        ${isSelected ? 'border-blue-500' : 'border-white/30'}
                       `}
                     >
                       {isSelected && (
@@ -281,7 +278,6 @@ export const Paywall: React.FC<PaywallProps> = ({
           })}
         </div>
 
-        {/* CTA */}
         <button
           onClick={handleContinue}
           disabled={loadingId !== null || restoring}
@@ -330,6 +326,17 @@ export const Paywall: React.FC<PaywallProps> = ({
             Privacidad
           </a>
         </div>
+
+        {/* NUEVO BOTÓN CAMBIAR CUENTA */}
+        <div className="mt-4 text-center">
+          <button
+            onClick={handleSwitchAccount}
+            className="text-xs text-gray-500 hover:text-gray-300 transition"
+          >
+            Usar otra cuenta
+          </button>
+        </div>
+
       </div>
     </div>
   );
