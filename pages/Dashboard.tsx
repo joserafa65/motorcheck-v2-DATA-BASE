@@ -90,6 +90,9 @@ const Dashboard: React.FC<{ onNavigate: (view: string, params?: any) => void }> 
 
   const handleShareApp = async () => {
     try {
+      // ESTA ES LA LÍNEA AGREGADA PARA SUPABASE
+      await dbClient.from('share_events').insert([{}]);
+
       await Share.share({
         title: 'MotorCheck',
         text: shareMessage,
@@ -222,6 +225,7 @@ const Dashboard: React.FC<{ onNavigate: (view: string, params?: any) => void }> 
                         <div className="text-xs text-gray-500 inline-block font-medium">{getUnitLabel()}</div>
                       </div>
                   </Card>
+                  
                   <Card className="py-2.5 px-4 bg-white/60 dark:bg-zinc-900/50 flex flex-row items-center justify-between border-gray-200 dark:border-white/5">
                       <div className="flex items-center gap-2.5">
                           <div className="p-1.5 rounded-xl bg-purple-100 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400">
