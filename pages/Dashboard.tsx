@@ -1,11 +1,16 @@
-
 import React, { useMemo, useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useVehicle } from '../contexts/VehicleContext';
 import { Card, Button } from '../components/UI';
-import { AlertTriangle, CheckCircle, TrendingUp, ChevronRight, Calendar, Gauge, CreditCard, History, Fuel, Wrench, X, Flag, Clock, AlertOctagon, Settings } from 'lucide-react';
+import { 
+  AlertTriangle, CheckCircle, TrendingUp, ChevronRight, Calendar, 
+  Gauge, CreditCard, History, Fuel, Wrench, X, Flag, Clock, 
+  AlertOctagon, Settings, Share2 
+} from 'lucide-react';
 import { CURRENCY_FORMATTER, DATE_FORMATTER, roundToTwo } from '../constants';
 import { ServiceStatus, UnitSystem } from '../types';
+import { Share } from '@capacitor/share';
+import { dbClient } from '../services/database';
 
 const Dashboard: React.FC<{ onNavigate: (view: string, params?: any) => void }> = ({ onNavigate }) => {
   const { vehicle, serviceStatuses, fuelLogs, urgentCount, upcomingCount, updateVehicle } = useVehicle();
@@ -13,7 +18,11 @@ const Dashboard: React.FC<{ onNavigate: (view: string, params?: any) => void }> 
   const [showOdoModal, setShowOdoModal] = useState(false);
   const [odoInput, setOdoInput] = useState('');
   const [alertService, setAlertService] = useState<ServiceStatus | null>(null);
+  
+  // State para el mensaje de compartir
+  const [shareMessage, setShareMessage] = useState('Estoy usando MotorCheck para controlar mi vehículo. 🚗');
 
+  // Lógica de cálculos (Combustible, Eficiencia, etc.)
   const lastFuel = fuelLogs.length > 0 ? fuelLogs[0] : null;
   const currentMonth = new Date().getMonth();
   const currentYear = new Date().getFullYear();
@@ -50,6 +59,7 @@ const Dashboard: React.FC<{ onNavigate: (view: string, params?: any) => void }> 
       return totalVol > 0 ? (totalDist / totalVol).toFixed(1) : null;
   }, [fuelLogs, vehicle.unitSystem]);
 
+  // Handlers y Funciones
   const getUnitLabel = () => {
     switch (vehicle.unitSystem) {
       case UnitSystem.KM_GAL: return 'km/gal';
@@ -67,8 +77,6 @@ const Dashboard: React.FC<{ onNavigate: (view: string, params?: any) => void }> 
       return `$${amount}`;
   };
 
-  const totalAlerts = urgentCount + upcomingCount;
-
   const handleSaveOdo = () => {
     const newVal = parseInt(odoInput);
     if (!isNaN(newVal)) {
@@ -80,6 +88,47 @@ const Dashboard: React.FC<{ onNavigate: (view: string, params?: any) => void }> 
     }
   };
 
+  const handleShareApp = async () => {
+    try {
+      await Share.share({
+        title: 'MotorCheck',
+        text: shareMessage,
+        dialogTitle: 'Compartir MotorCheck',
+      });
+    } catch (e) {
+      console.log('Error al compartir', e);
+    }
+  };
+
+  const dismissAlert = (redirect: boolean) => {
+    if (!alertService) return;
+    const key = `motorcheck_alert_shown_${alertService.serviceId}_${alertService.status}`;
+    sessionStorage.setItem(key, vehicle.currentOdometer.toString());
+    setAlertService(null);
+    if (redirect) onNavigate('services', { serviceId: alertService.serviceId });
+  };
+
+  // EFECTOS (Separados para evitar errores)
+  
+  // 1. Efecto para cargar mensaje de compartir desde Supabase
+  useEffect(() => {
+    const fetchShareMessage = async () => {
+      try {
+        const { data } = await dbClient
+          .from('app_config')
+          .select('value')
+          .eq('key', 'share_message')
+          .single();
+
+        if (data?.value) setShareMessage(data.value);
+      } catch (e) {
+        console.log('No se pudo cargar share_message de Supabase, usando default.');
+      }
+    };
+    fetchShareMessage();
+  }, []);
+
+  // 2. Efecto para manejar alertas de servicios
   useEffect(() => {
     if (serviceStatuses.length === 0) return;
     const critical = serviceStatuses
@@ -99,69 +148,64 @@ const Dashboard: React.FC<{ onNavigate: (view: string, params?: any) => void }> 
           }
           return false;
       });
-      
+
     if (critical) {
         const timer = setTimeout(() => setAlertService(critical), 800);
         return () => clearTimeout(timer);
     }
   }, [serviceStatuses, vehicle.currentOdometer]);
 
-  const dismissAlert = (redirect: boolean) => {
-    if (!alertService) return;
-    const key = `motorcheck_alert_shown_${alertService.serviceId}_${alertService.status}`;
-    sessionStorage.setItem(key, vehicle.currentOdometer.toString());
-    setAlertService(null);
-    if (redirect) onNavigate('services', { serviceId: alertService.serviceId });
-  };
 
   return (
     <div className="pb-24 space-y-4">
+      {/* HEADER / PORTADA */}
       <div className="relative w-full h-52 bg-gray-900 rounded-b-[2.5rem] shadow-2xl overflow-hidden mb-3 group animate-enter">
-           {vehicle.photoUrl ? (
-              <div className="w-full h-full relative overflow-hidden rounded-b-[2.5rem]">
-                  <img src={vehicle.photoUrl} alt="Vehicle Cover" className="w-full h-full object-cover transform transition-transform duration-1000 group-hover:scale-105" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent opacity-90"></div>
-              </div>
-           ) : (
-              <div className="w-full h-full bg-gradient-to-br from-blue-900 via-zinc-900 to-black relative">
-                 <div className="absolute inset-0 opacity-20" style={{backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '32px 32px'}}></div>
-                 <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent"></div>
-              </div>
-           )}
-           <div className="absolute top-0 left-0 right-0 p-4 flex justify-between items-start z-20">
-               <div className="bg-black/30 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10 shadow-lg">
-                   <span className="text-xs font-bold text-white/90 uppercase tracking-wide">MotorCheck</span>
+            {vehicle.photoUrl ? (
+               <div className="w-full h-full relative overflow-hidden rounded-b-[2.5rem]">
+                   <img src={vehicle.photoUrl} alt="Vehicle Cover" className="w-full h-full object-cover transform transition-transform duration-1000 group-hover:scale-105" />
+                   <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent opacity-90"></div>
                </div>
-               {!vehicle.photoUrl && (
-                   <Settings
-                       size={65}
-                       className="opacity-30 hover:opacity-100 transition-opacity cursor-pointer text-white drop-shadow-lg"
-                       onClick={() => onNavigate('settings')}
-                   />
-               )}
-           </div>
-           <div className="absolute bottom-0 left-0 right-0 p-4 z-20">
-               <div className="flex justify-between items-end">
-                   <div>
-                       <h1 className="text-2xl font-black text-white leading-none mb-1.5 shadow-black drop-shadow-md tracking-tight truncate max-w-[180px]">
-                           {vehicle.brand || 'Tu'} {vehicle.model || 'Vehículo'}
-                       </h1>
-                       <div className="text-white/80 font-medium text-xs flex items-center gap-2">
-                           <span className="bg-white/20 backdrop-blur-sm px-2 py-0.5 rounded text-xs font-bold">{vehicle.year || '----'}</span>
-                           <span className="opacity-50">|</span>
-                           <span className="uppercase tracking-wide text-xs font-bold">{vehicle.plate || '--- ---'}</span>
-                       </div>
-                   </div>
-                   <div className="text-right">
-                       <div className="text-xs text-white/60 uppercase tracking-wide mb-0.5 font-bold">Kilometraje</div>
-                       <div className="text-2xl font-mono text-blue-400 font-bold drop-shadow-md leading-none">
-                           {vehicle.currentOdometer.toLocaleString()} <span className="text-xs text-white/50 font-sans">km</span>
-                       </div>
-                   </div>
+            ) : (
+               <div className="w-full h-full bg-gradient-to-br from-blue-900 via-zinc-900 to-black relative">
+                  <div className="absolute inset-0 opacity-20" style={{backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '32px 32px'}}></div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent"></div>
                </div>
-           </div>
+            )}
+            <div className="absolute top-0 left-0 right-0 p-4 flex justify-between items-start z-20">
+                <div className="bg-black/30 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10 shadow-lg">
+                    <span className="text-xs font-bold text-white/90 uppercase tracking-wide">MotorCheck</span>
+                </div>
+                {!vehicle.photoUrl && (
+                    <Settings
+                        size={65}
+                        className="opacity-30 hover:opacity-100 transition-opacity cursor-pointer text-white drop-shadow-lg"
+                        onClick={() => onNavigate('settings')}
+                    />
+                )}
+            </div>
+            <div className="absolute bottom-0 left-0 right-0 p-4 z-20">
+                <div className="flex justify-between items-end">
+                    <div>
+                        <h1 className="text-2xl font-black text-white leading-none mb-1.5 shadow-black drop-shadow-md tracking-tight truncate max-w-[180px]">
+                            {vehicle.brand || 'Tu'} {vehicle.model || 'Vehículo'}
+                        </h1>
+                        <div className="text-white/80 font-medium text-xs flex items-center gap-2">
+                            <span className="bg-white/20 backdrop-blur-sm px-2 py-0.5 rounded text-xs font-bold">{vehicle.year || '----'}</span>
+                            <span className="opacity-50">|</span>
+                            <span className="uppercase tracking-wide text-xs font-bold">{vehicle.plate || '--- ---'}</span>
+                        </div>
+                    </div>
+                    <div className="text-right">
+                        <div className="text-xs text-white/60 uppercase tracking-wide mb-0.5 font-bold">Kilometraje</div>
+                        <div className="text-2xl font-mono text-blue-400 font-bold drop-shadow-md leading-none">
+                            {vehicle.currentOdometer.toLocaleString()} <span className="text-xs text-white/50 font-sans">km</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
       </div>
 
+      {/* ESTADÍSTICAS RÁPIDAS */}
       <div className="px-4 space-y-4">
           <div className="animate-enter delay-100 flex flex-col space-y-2">
                   <Card className="py-2.5 px-4 bg-white/60 dark:bg-zinc-900/50 flex flex-row items-center justify-between border-gray-200 dark:border-white/5">
@@ -210,6 +254,7 @@ const Dashboard: React.FC<{ onNavigate: (view: string, params?: any) => void }> 
                   </Card>
           </div>
 
+          {/* BOTONES DE ACCIÓN */}
           <div className="grid grid-cols-3 gap-2.5 animate-enter delay-300">
             <Button onClick={() => onNavigate('fuel')} className="bg-blue-600 hover:bg-blue-500 h-28 flex-col !gap-1.5 px-2 shadow-blue-900/20">
                 <Fuel size={26} strokeWidth={2} className="mb-0.5 relative z-10" />
@@ -228,6 +273,7 @@ const Dashboard: React.FC<{ onNavigate: (view: string, params?: any) => void }> 
             </Button>
           </div>
 
+          {/* ESTADO DE SERVICIOS */}
           <div onClick={() => worstStatus && onNavigate('services', { serviceId: worstStatus.serviceId })} className={`animate-enter delay-200 relative overflow-hidden rounded-2xl p-4 shadow-xl transition-all duration-500 cursor-pointer active:scale-[0.98] ${isAllGood ? 'bg-gradient-to-br from-green-600/10 to-gray-900/5 dark:from-green-900/40 dark:to-black border border-green-500/20' : 'bg-gradient-to-br from-red-600/10 to-gray-900/5 dark:from-red-900/40 dark:to-black border border-red-500/20'}`}>
             <div className={`absolute -top-20 -right-20 w-64 h-64 rounded-full blur-[80px] opacity-20 dark:opacity-40 ${isAllGood ? 'bg-green-500' : 'bg-red-600'}`}></div>
             <div className="relative z-10">
@@ -280,7 +326,30 @@ const Dashboard: React.FC<{ onNavigate: (view: string, params?: any) => void }> 
                 )}
             </div>
           </div>
+
+          {/* NUEVO BOTÓN PARA RECOMENDAR / COMPARTIR */}
+          <div className="animate-enter delay-400">
+            <Card className="py-3 px-4 bg-white/60 dark:bg-zinc-900/50 flex items-center justify-between border-gray-200 dark:border-white/5">
+              <div className="flex items-center gap-2">
+                <div className="p-1.5 rounded-xl bg-blue-100 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400">
+                  <Share2 size={16} />
+                </div>
+                <span className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                  Recomendar MotorCheck
+                </span>
+              </div>
+
+              <button
+                onClick={handleShareApp}
+                className="text-sm font-bold text-blue-600 dark:text-blue-400 hover:opacity-80 transition px-2 py-1"
+              >
+                Compartir
+              </button>
+            </Card>
+          </div>
       </div>
+
+      {/* MODALES (USANDO PORTALES) */}
 
       {alertService && createPortal(
           <div className="fixed inset-0 z-[160] flex items-center justify-center bg-black/80 backdrop-blur-md p-5 animate-in fade-in duration-500">
