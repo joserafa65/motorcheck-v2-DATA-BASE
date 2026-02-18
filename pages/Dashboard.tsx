@@ -360,4 +360,3 @@ const Dashboard: React.FC<{ onNavigate: (view: string, params?: any) => void }> 
 };
 
 export default Dashboard;
-
