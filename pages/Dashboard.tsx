@@ -20,7 +20,6 @@ const Dashboard: React.FC<{ onNavigate: (view: string, params?: any) => void }> 
   const [alertService, setAlertService] = useState<ServiceStatus | null>(null);
   const [shareMessage, setShareMessage] = useState('Estoy usando MotorCheck para controlar mi vehículo. 🚗');
 
-  // Lógica de Gasolina y Eficiencia (Original)
   const lastFuel = fuelLogs.length > 0 ? fuelLogs[0] : null;
   const currentMonth = new Date().getMonth();
   const currentYear = new Date().getFullYear();
@@ -68,15 +67,12 @@ const Dashboard: React.FC<{ onNavigate: (view: string, params?: any) => void }> 
   const handleSaveOdo = () => {
     const newVal = parseInt(odoInput);
     if (!isNaN(newVal)) {
-        if (newVal < vehicle.currentOdometer) {
-            if(!confirm("El nuevo kilometraje es MENOR al actual. ¿Estás seguro?")) return;
-        }
         updateVehicle({ ...vehicle, currentOdometer: newVal });
         setShowOdoModal(false);
     }
   };
 
-  // Función Share con Registro en Supabase
+  // --- LÓGICA DE COMPARTIR (SUPABASE) ---
   const handleShareApp = async () => {
     try {
       await dbClient.from('share_events').insert([{}]); 
@@ -86,68 +82,52 @@ const Dashboard: React.FC<{ onNavigate: (view: string, params?: any) => void }> 
         dialogTitle: 'Compartir MotorCheck',
       });
     } catch (e) {
-      console.log('Error en share:', e);
+      console.log('Error al trackear o compartir:', e);
     }
   };
 
-  const dismissAlert = (redirect: boolean) => {
-    if (!alertService) return;
-    const key = `motorcheck_alert_shown_${alertService.serviceId}_${alertService.status}`;
-    sessionStorage.setItem(key, vehicle.currentOdometer.toString());
-    setAlertService(null);
-    if (redirect) onNavigate('services', { serviceId: alertService.serviceId });
-  };
-
-  // Efectos de Datos (Config y Alertas Críticas)
   useEffect(() => {
-    const fetchConfig = async () => {
+    const fetchShareMessage = async () => {
       try {
         const { data } = await dbClient.from('app_config').select('value').eq('key', 'share_message').single();
         if (data?.value) setShareMessage(data.value);
-      } catch (e) { console.log('Default message used'); }
+      } catch (e) { console.log('Usando mensaje por defecto'); }
     };
-    fetchConfig();
+    fetchShareMessage();
   }, []);
-
-  useEffect(() => {
-    if (serviceStatuses.length === 0) return;
-    const critical = serviceStatuses.find(s => {
-        if (s.status === 'ok') return false;
-        const key = `motorcheck_alert_shown_${s.serviceId}_${s.status}`;
-        return !sessionStorage.getItem(key);
-    });
-    if (critical) {
-        const timer = setTimeout(() => setAlertService(critical), 800);
-        return () => clearTimeout(timer);
-    }
-  }, [serviceStatuses]);
+  // ---------------------------------------
 
   return (
     <div className="pb-24 space-y-4">
-      {/* HEADER: FOTO + SETTINGS + PLACA */}
+      {/* VEHICLE HEADER (FIEL AL ORIGINAL) */}
       <div className="relative w-full h-52 bg-gray-900 rounded-b-[2.5rem] shadow-2xl overflow-hidden mb-3 group animate-enter">
             {vehicle.photoUrl ? (
-               <div className="w-full h-full relative">
-                   <img src={vehicle.photoUrl} alt="Vehicle" className="w-full h-full object-cover" />
-                   <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent"></div>
+               <div className="w-full h-full relative overflow-hidden rounded-b-[2.5rem]">
+                   <img src={vehicle.photoUrl} alt="Vehicle" className="w-full h-full object-cover transform transition-transform duration-1000 group-hover:scale-105" />
+                   <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent opacity-90"></div>
                </div>
             ) : (
                <div className="w-full h-full bg-gradient-to-br from-blue-900 via-zinc-900 to-black relative">
                   <div className="absolute inset-0 opacity-20" style={{backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '32px 32px'}}></div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent"></div>
                </div>
             )}
             <div className="absolute top-0 left-0 right-0 p-4 flex justify-between items-start z-20">
                 <div className="bg-black/30 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10">
                     <span className="text-xs font-bold text-white/90 uppercase tracking-wide">MotorCheck</span>
                 </div>
-                <button onClick={() => onNavigate('settings')} className="p-2.5 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 text-white active:scale-90 transition-transform">
+                {/* BOTÓN SETTINGS ORIGINAL */}
+                <button 
+                  onClick={() => onNavigate('settings')}
+                  className="p-2.5 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 text-white hover:bg-white/20 transition-all active:scale-90"
+                >
                   <Settings size={20} />
                 </button>
             </div>
             <div className="absolute bottom-0 left-0 right-0 p-4 z-20">
                 <div className="flex justify-between items-end">
                     <div>
-                        <h1 className="text-2xl font-black text-white leading-none mb-1.5 drop-shadow-md">
+                        <h1 className="text-2xl font-black text-white leading-none mb-1.5 shadow-black drop-shadow-md truncate max-w-[180px]">
                             {vehicle.brand || 'Tu'} {vehicle.model || 'Vehículo'}
                         </h1>
                         <div className="text-white/80 font-medium text-xs flex items-center gap-2">
@@ -158,7 +138,7 @@ const Dashboard: React.FC<{ onNavigate: (view: string, params?: any) => void }> 
                     </div>
                     <div className="text-right">
                         <div className="text-xs text-white/60 uppercase tracking-wide mb-0.5 font-bold">Kilometraje</div>
-                        <div className="text-2xl font-mono text-blue-400 font-bold leading-none">
+                        <div className="text-2xl font-mono text-blue-400 font-bold drop-shadow-md leading-none">
                             {vehicle.currentOdometer.toLocaleString()} <span className="text-xs text-white/50 font-sans">km</span>
                         </div>
                     </div>
@@ -167,45 +147,57 @@ const Dashboard: React.FC<{ onNavigate: (view: string, params?: any) => void }> 
       </div>
 
       <div className="px-4 space-y-4">
-          {/* CARDS DE ESTADO: EFICIENCIA Y GASTO */}
+          {/* STATS CARDS */}
           <div className="animate-enter delay-100 flex flex-col space-y-2">
-              <Card className="py-2.5 px-4 flex items-center justify-between border-gray-200 dark:border-white/5 dark:bg-zinc-900/50">
-                  <div className="flex items-center gap-2.5">
-                      <div className="p-1.5 rounded-xl bg-blue-100 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400"><TrendingUp size={16} /></div>
-                      <span className="text-xs font-bold text-gray-500 uppercase tracking-wide">Eficiencia</span>
-                  </div>
-                  <div className="text-right">
-                    <span className="text-base font-bold dark:text-white mr-1">{efficiency || '--'}</span>
-                    <span className="text-xs text-gray-500">{getUnitLabel()}</span>
-                  </div>
-              </Card>
-              <Card className="py-2.5 px-4 flex items-center justify-between border-gray-200 dark:border-white/5 dark:bg-zinc-900/50">
-                  <div className="flex items-center gap-2.5">
-                      <div className="p-1.5 rounded-xl bg-purple-100 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400"><CreditCard size={16} /></div>
-                      <span className="text-xs font-bold text-gray-500 uppercase tracking-wide">Gasolina x mes</span>
-                  </div>
-                  <div className="text-right">
-                    <span className="text-base font-bold dark:text-white mr-1">{spendThisMonth > 0 ? formatCompactCurrency(spendThisMonth) : '$0'}</span>
-                    <span className="text-xs text-gray-500">{logsThisMonth.length} recargas</span>
-                  </div>
-              </Card>
+                  <Card className="py-2.5 px-4 bg-white/60 dark:bg-zinc-900/50 flex flex-row items-center justify-between border-gray-200 dark:border-white/5">
+                      <div className="flex items-center gap-2.5">
+                          <div className="p-1.5 rounded-xl bg-blue-100 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400">
+                             <TrendingUp size={16} />
+                          </div>
+                          <span className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Eficiencia</span>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-base font-bold text-gray-900 dark:text-white leading-none inline-block mr-1">
+                            {efficiency ? efficiency : '--'}
+                        </div>
+                        <div className="text-xs text-gray-500 inline-block font-medium">{getUnitLabel()}</div>
+                      </div>
+                  </Card>
+                  
+                  <Card className="py-2.5 px-4 bg-white/60 dark:bg-zinc-900/50 flex flex-row items-center justify-between border-gray-200 dark:border-white/5">
+                      <div className="flex items-center gap-2.5">
+                          <div className="p-1.5 rounded-xl bg-purple-100 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400">
+                             <CreditCard size={16} />
+                          </div>
+                          <span className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Gasolina x mes</span>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-base font-bold text-gray-900 dark:text-white leading-none inline-block mr-1">
+                            {spendThisMonth > 0 ? formatCompactCurrency(spendThisMonth) : '$0'}
+                        </div>
+                        <div className="text-xs text-gray-500 inline-block font-medium">{logsThisMonth.length} recargas</div>
+                      </div>
+                  </Card>
           </div>
 
-          {/* BOTONES DE ACCIÓN PRINCIPALES */}
+          {/* ACTION BUTTONS */}
           <div className="grid grid-cols-3 gap-2.5 animate-enter delay-300">
-            <Button onClick={() => onNavigate('fuel')} className="bg-blue-600 h-28 flex-col !gap-1.5 shadow-lg shadow-blue-900/20">
-                <Fuel size={26} /><span className="text-sm font-bold">Tanqueada</span>
+            <Button onClick={() => onNavigate('fuel')} className="bg-blue-600 hover:bg-blue-500 h-28 flex-col !gap-1.5 shadow-blue-900/20">
+                <Fuel size={26} strokeWidth={2} />
+                <span className="text-sm font-bold">Tanqueada</span>
             </Button>
-            <Button onClick={() => onNavigate('services', { startInProgramMode: true })} className="h-28 flex-col !gap-1.5 !bg-orange-600 shadow-lg shadow-orange-900/20 !border-0 text-white">
-                <Wrench size={26} /><span className="text-sm font-bold">Servicio</span>
+            <Button onClick={() => onNavigate('services', { startInProgramMode: true })} className="h-28 flex-col !gap-1.5 !bg-orange-600 !hover:bg-orange-500 shadow-orange-900/20 !border-0 text-white">
+                <Wrench size={26} strokeWidth={2} />
+                <span className="text-sm font-bold">Servicio</span>
             </Button>
-            <Button onClick={() => { setOdoInput(''); setShowOdoModal(true); }} className="h-28 flex-col !gap-1.5 !bg-purple-600 shadow-lg shadow-purple-900/20 !border-0 text-white">
-                <Gauge size={26} /><span className="text-sm font-bold">Odómetro</span>
+            <Button onClick={() => { setOdoInput(''); setShowOdoModal(true); }} className="h-28 flex-col !gap-1.5 !bg-purple-600 !hover:bg-purple-500 shadow-purple-900/20 !border-0 text-white">
+                <Gauge size={26} strokeWidth={2} />
+                <span className="text-sm font-bold">Odómetro</span>
             </Button>
           </div>
 
-          {/* TARJETA DE ESTADO DE SERVICIO (RESTAURADO DETALLE KM) */}
-          <div onClick={() => worstStatus && onNavigate('services', { serviceId: worstStatus.serviceId })} className={`animate-enter delay-200 relative overflow-hidden rounded-2xl p-4 shadow-xl cursor-pointer active:scale-[0.98] transition-all ${isAllGood ? 'bg-green-600/10 border border-green-500/20' : 'bg-red-600/10 border border-red-500/20'}`}>
+          {/* SERVICE STATUS CARD (CON EL RESUMEN DEL KM ORIGINAL) */}
+          <div onClick={() => worstStatus && onNavigate('services', { serviceId: worstStatus.serviceId })} className={`animate-enter delay-200 relative overflow-hidden rounded-2xl p-4 shadow-xl transition-all duration-500 cursor-pointer active:scale-[0.98] ${isAllGood ? 'bg-gradient-to-br from-green-600/10 to-gray-900/5 dark:from-green-900/40 dark:to-black border border-green-500/20' : 'bg-gradient-to-br from-red-600/10 to-gray-900/5 dark:from-red-900/40 dark:to-black border border-red-500/20'}`}>
             <div className="relative z-10 flex items-center justify-between">
                 <div className="flex items-start gap-3">
                     <div className={`p-2.5 rounded-2xl ${isAllGood ? 'bg-green-500' : 'bg-red-600'} text-white shadow-lg`}>
@@ -215,7 +207,7 @@ const Dashboard: React.FC<{ onNavigate: (view: string, params?: any) => void }> 
                         <h2 className={`text-lg font-black leading-tight ${isAllGood ? 'dark:text-white text-gray-900' : 'text-red-600'}`}>
                             {isAllGood ? 'Todo en orden' : 'Acción requerida'}
                         </h2>
-                        <p className="text-xs font-bold uppercase tracking-wide opacity-60 dark:text-white text-gray-700">
+                        <p className="text-xs font-bold uppercase tracking-wide opacity-60 dark:text-white/70 text-gray-500">
                             {worstStatus?.name || '---'}
                         </p>
                     </div>
@@ -229,48 +221,41 @@ const Dashboard: React.FC<{ onNavigate: (view: string, params?: any) => void }> 
             </div>
           </div>
 
-          {/* BOTÓN RECOMENDAR (NUEVO) */}
+          {/* SHARE CARD (RESTAURADA CLASE POR CLASE) */}
           <div className="animate-enter delay-400">
-            <Card className="py-3 px-4 flex items-center justify-between border-gray-200 dark:border-white/5 dark:bg-zinc-900/50">
+            <Card className="py-3 px-4 bg-white/60 dark:bg-zinc-900/50 flex items-center justify-between border-gray-200 dark:border-white/5">
               <div className="flex items-center gap-2">
-                <div className="p-1.5 rounded-xl bg-blue-100 dark:bg-blue-900/20 text-blue-600"><Share2 size={16} /></div>
-                <span className="text-xs font-bold text-gray-500 uppercase tracking-wide">Recomendar App</span>
+                <div className="p-1.5 rounded-xl bg-blue-100 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400">
+                  <Share2 size={16} />
+                </div>
+                <span className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                  Recomendar MotorCheck
+                </span>
               </div>
-              <button onClick={handleShareApp} className="text-sm font-bold text-blue-600 dark:text-blue-400 px-2 py-1">Compartir</button>
+              <button
+                onClick={handleShareApp}
+                className="text-sm font-bold text-blue-600 dark:text-blue-400 hover:opacity-80 transition px-2 py-1"
+              >
+                Compartir
+              </button>
             </Card>
           </div>
       </div>
 
-      {/* PORTAL: MODAL ODÓMETRO */}
+      {/* PORTALS (NO ALTERAN LA UI PRINCIPAL) */}
       {showOdoModal && createPortal(
           <div className="fixed inset-0 z-[150] flex items-center justify-center bg-black/80 backdrop-blur-md p-5">
-            <div className="bg-white dark:bg-zinc-900 w-full max-w-xs rounded-2xl p-6 border border-white/10 relative">
-                <button onClick={() => setShowOdoModal(false)} className="absolute top-4 right-4 p-2 text-gray-500"><X size={18} /></button>
+            <div className="bg-white dark:bg-zinc-900 w-full max-w-xs rounded-2xl p-6 shadow-2xl border border-white/10 relative">
+                <button onClick={() => setShowOdoModal(false)} className="absolute top-4 right-4 p-2 rounded-full bg-gray-100 dark:bg-white/10 text-gray-500">
+                   <X size={18} />
+                </button>
                 <div className="text-center mb-6">
-                    <Gauge size={28} className="mx-auto mb-2 text-blue-600" />
-                    <h3 className="text-xl font-black dark:text-white">Odómetro</h3>
+                    <Gauge size={28} className="mx-auto mb-4 text-blue-600" />
+                    <h3 className="text-xl font-black text-gray-900 dark:text-white">Odómetro</h3>
                 </div>
-                <input type="number" value={odoInput} onChange={(e) => setOdoInput(e.target.value)} className="w-full bg-gray-50 dark:bg-black/40 border-2 rounded-2xl py-4 text-center text-3xl font-mono font-black dark:text-white mb-6" placeholder={vehicle.currentOdometer.toString()} />
-                <Button onClick={handleSaveOdo}>Guardar</Button>
+                <input type="number" value={odoInput} onChange={(e) => setOdoInput(e.target.value)} className="w-full bg-gray-50 dark:bg-black/40 border-2 rounded-2xl py-4 text-center text-3xl font-mono font-black text-gray-900 dark:text-white outline-none mb-6" placeholder={vehicle.currentOdometer.toString()} />
+                <Button onClick={handleSaveOdo} className="text-lg font-bold">Guardar</Button>
             </div>
-          </div>,
-          document.body
-      )}
-
-      {/* PORTAL: ALERTA CRÍTICA (RESTAURADO) */}
-      {alertService && createPortal(
-          <div className="fixed inset-0 z-[160] flex items-center justify-center bg-black/90 backdrop-blur-xl p-6">
-              <div className="bg-white dark:bg-zinc-900 w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl relative text-center border-4 border-red-600/20">
-                  <div className="w-20 h-20 bg-red-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-red-600/40 animate-pulse">
-                      <AlertOctagon size={40} className="text-white" />
-                  </div>
-                  <h2 className="text-3xl font-black mb-2 text-gray-900 dark:text-white">¡ATENCIÓN!</h2>
-                  <p className="text-gray-500 dark:text-gray-400 mb-8 font-medium">El servicio de <span className="text-red-600 font-bold">{alertService.name}</span> requiere revisión inmediata.</p>
-                  <div className="space-y-3">
-                      <Button onClick={() => dismissAlert(true)} className="!bg-red-600 !py-4 text-lg">Gestionar ahora</Button>
-                      <button onClick={() => dismissAlert(false)} className="text-gray-400 text-sm font-bold uppercase tracking-widest py-2">Omitir por ahora</button>
-                  </div>
-              </div>
           </div>,
           document.body
       )}
