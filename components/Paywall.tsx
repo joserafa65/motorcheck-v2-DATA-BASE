@@ -186,26 +186,26 @@ export const Paywall: React.FC<PaywallProps> = ({
           />
         </div>
 
-        <h1 className="text-center text-4xl font-semibold text-white">
+        <h1 className="text-center text-2xl font-semibold text-white">
           MOTORCHECK Premium
         </h1>
 
-        <p className="text-center text-gray-400 text-sm mt-2 mb-4">
+        <p className="text-center text-gray-400 text-sm mt-1 mb-3">
           Menos fallas. Más productividad. Más ingresos.
         </p>
 
-        <div className="bg-white/5 border border-white/10 rounded-xl p-4 mb-4">
-          <div className="space-y-2">
+        <div className="bg-white/5 border border-white/10 rounded-xl p-3 mb-3">
+          <div className="space-y-1.5">
             {benefits.map((benefit, index) => (
-              <div key={index} className="flex items-center gap-2 text-base text-gray-200">
-                <Check size={16} className="text-green-400" />
+              <div key={index} className="flex items-center gap-2 text-sm text-gray-200">
+                <Check size={14} className="text-green-400 shrink-0" />
                 {benefit}
               </div>
             ))}
           </div>
         </div>
 
-        <div className="space-y-3 mb-4">
+        <div className="space-y-2 mb-3">
           {displayOfferings.map((pkg) => {
             const isSelected = pkg.identifier === selectedId;
             const isAnnual = pkg.product.title.toLowerCase().includes('anual');
@@ -216,60 +216,56 @@ export const Paywall: React.FC<PaywallProps> = ({
               <button
                 key={pkg.identifier}
                 onClick={() => setSelectedId(pkg.identifier)}
-                className={`w-full text-left rounded-xl border p-4 transition-all duration-200 transform hover:scale-[1.02]
+                className={`w-full text-left rounded-xl border p-3 transition-all duration-200
                   ${isSelected
                     ? 'border-blue-500 bg-white/10'
                     : 'border-white/10 bg-white/5 hover:bg-white/10'}
                 `}
               >
-                <div className="flex items-start justify-between">
-                  <div className="flex items-start gap-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
                     <div
-                      className={`mt-2 w-5 h-5 rounded-full border flex items-center justify-center
+                      className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0
                         ${isSelected ? 'border-blue-500' : 'border-white/30'}
                       `}
                     >
                       {isSelected && (
-                        <div className="w-2.5 h-2.5 rounded-full bg-blue-500" />
+                        <div className="w-2 h-2 rounded-full bg-blue-500" />
                       )}
                     </div>
 
                     <div>
                       {isAnnual && (
-                        <div className="text-sm text-blue-400 font-medium mb-1">
+                        <div className="text-xs text-blue-400 font-medium mb-0.5">
                           Mejor opción
                         </div>
                       )}
 
-                      <div className="text-2xl font-semibold text-white">
+                      <div className="text-base font-bold text-white">
                         {pkg.product.title}
                       </div>
 
-                      <div className="text-sm text-gray-400">
-                        {pkg.product.description}
-                      </div>
-
                       {isAnnual && annualSavingsPercent && (
-                        <div className="text-sm text-green-400 mt-1">
+                        <div className="text-xs text-green-400">
                           Ahorra hasta {annualSavingsPercent}% al año
                         </div>
                       )}
 
                       {isLifetime && (
-                        <div className="text-sm text-gray-400 mt-1">
+                        <div className="text-xs text-gray-400">
                           Ideal si trabajas con tu vehículo todos los días.
                         </div>
                       )}
 
                       {isMonthly && (
-                        <div className="text-sm text-gray-400 mt-1">
+                        <div className="text-xs text-gray-400">
                           Ideal si prefieres flexibilidad.
                         </div>
                       )}
                     </div>
                   </div>
 
-                  <div className="text-2xl font-semibold text-white">
+                  <div className="text-base font-bold text-white shrink-0">
                     {pkg.product.priceString}
                   </div>
                 </div>
@@ -287,12 +283,12 @@ export const Paywall: React.FC<PaywallProps> = ({
         </button>
 
         {error && (
-          <div className="mt-3 text-sm text-red-400 text-center">
+          <div className="mt-2 text-sm text-red-400 text-center">
             {error}
           </div>
         )}
 
-        <div className="mt-4 text-center">
+        <div className="mt-2 text-center">
           <button
             onClick={handleRestore}
             disabled={restoring}
@@ -302,13 +298,13 @@ export const Paywall: React.FC<PaywallProps> = ({
           </button>
         </div>
 
-        <div className="mt-4 text-[11px] text-gray-500 text-center leading-snug">
+        <div className="mt-2 text-[11px] text-gray-500 text-center leading-snug">
           Las suscripciones se renuevan automáticamente.
           <br />
           Puedes cancelarlas en cualquier momento desde los ajustes de tu Apple ID.
         </div>
 
-        <div className="flex justify-center gap-4 text-sm mt-2">
+        <div className="flex justify-center gap-4 text-xs mt-1.5">
           <a
             href="https://labappstudio.com/motorcheck#terminos"
             target="_blank"
@@ -327,7 +323,7 @@ export const Paywall: React.FC<PaywallProps> = ({
           </a>
         </div>
 
-        <div className="mt-4 text-center">
+        <div className="mt-2 text-center">
           <button
             onClick={handleSwitchAccount}
             className="text-xs text-gray-500 hover:text-gray-300 underline underline-offset-4 transition"
