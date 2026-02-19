@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 
 interface AnimatedSplashProps {
   onFinish: () => void;
@@ -10,14 +10,19 @@ export const AnimatedSplash: React.FC<AnimatedSplashProps> = ({ onFinish }) => {
   const [imageLoaded, setImageLoaded] = useState(false);
   const hasFinished = useRef(false);
 
-  const handleAnimationEnd = () => {
-    if (hasFinished.current || animationFinished) {
-      return;
-    }
+  const finish = () => {
+    if (hasFinished.current || animationFinished) return;
     hasFinished.current = true;
     animationFinished = true;
     onFinish();
   };
+
+  useEffect(() => {
+    const timer = setTimeout(finish, 2500);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const handleAnimationEnd = () => finish();
 
   return (
     <div
