@@ -1,11 +1,12 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useVehicle } from '../contexts/VehicleContext';
+import { useSubscription } from '../contexts/SubscriptionContext';
 import { Card, Button } from '../components/UI';
-import { 
-  AlertTriangle, CheckCircle, TrendingUp, ChevronRight, Calendar, 
-  Gauge, CreditCard, History, Fuel, Wrench, X, Flag, Clock, 
-  AlertOctagon, Settings, Share2 
+import {
+  AlertTriangle, CheckCircle, TrendingUp, ChevronRight, Calendar,
+  Gauge, CreditCard, History, Fuel, Wrench, X, Flag, Clock,
+  AlertOctagon, Settings, Share2
 } from 'lucide-react';
 import { CURRENCY_FORMATTER, DATE_FORMATTER, roundToTwo } from '../constants';
 import { ServiceStatus, UnitSystem } from '../types';
@@ -14,10 +15,12 @@ import { dbClient } from '../services/database';
 
 const Dashboard: React.FC<{ onNavigate: (view: string, params?: any) => void }> = ({ onNavigate }) => {
   const { vehicle, serviceStatuses, fuelLogs, urgentCount, upcomingCount, updateVehicle } = useVehicle();
+  const { isTrialActive, showPaywall } = useSubscription();
 
   const [showOdoModal, setShowOdoModal] = useState(false);
   const [odoInput, setOdoInput] = useState('');
   const [alertService, setAlertService] = useState<ServiceStatus | null>(null);
+  const [showTrialReminder, setShowTrialReminder] = useState(false);
   
   // State para el mensaje de compartir
   const [shareMessage, setShareMessage] = useState('Estoy usando MotorCheck para controlar mi vehículo. 🚗');
@@ -111,6 +114,12 @@ const Dashboard: React.FC<{ onNavigate: (view: string, params?: any) => void }> 
     if (redirect) onNavigate('services', { serviceId: alertService.serviceId });
   };
 
+  const handleCloseTrialReminder = () => {
+    const today = new Date().toISOString().slice(0, 10);
+    localStorage.setItem('motorcheck_trial_reminder_last_shown', today);
+    setShowTrialReminder(false);
+  };
+
   // EFECTOS (Separados para evitar errores)
   
   // 1. Efecto para cargar mensaje de compartir desde Supabase
@@ -131,7 +140,17 @@ const Dashboard: React.FC<{ onNavigate: (view: string, params?: any) => void }> 
     fetchShareMessage();
   }, []);
 
-  // 2. Efecto para manejar alertas de servicios
+  // 2. Efecto para mostrar recordatorio de prueba gratuita
+  useEffect(() => {
+    if (!isTrialActive || showPaywall) return;
+    const today = new Date().toISOString().slice(0, 10);
+    const lastShown = localStorage.getItem('motorcheck_trial_reminder_last_shown');
+    if (lastShown === today) return;
+    const timer = setTimeout(() => setShowTrialReminder(true), 1200);
+    return () => clearTimeout(timer);
+  }, [isTrialActive, showPaywall]);
+
+  // 3. Efecto para manejar alertas de servicios
   useEffect(() => {
     if (serviceStatuses.length === 0) return;
     const critical = serviceStatuses
@@ -382,6 +401,38 @@ const Dashboard: React.FC<{ onNavigate: (view: string, params?: any) => void }> 
                           Recordar más tarde
                        </button>
                    </div>
+              </div>
+          </div>,
+          document.body
+      )}
+
+      {showTrialReminder && createPortal(
+          <div className="fixed inset-0 z-[155] flex items-center justify-center bg-black/80 backdrop-blur-md p-5 animate-in fade-in duration-500">
+              <div className="bg-white dark:bg-zinc-900 w-full max-w-sm rounded-3xl p-6 shadow-2xl relative animate-in zoom-in-95 slide-in-from-bottom-4 duration-500 border border-white/10 text-center overflow-hidden">
+                  <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-500 via-blue-600 to-blue-500" />
+                  <div className="mx-auto w-20 h-20 rounded-full flex items-center justify-center mb-5 shadow-xl bg-blue-500/10 text-blue-500">
+                      <CreditCard size={44} strokeWidth={2.5} />
+                  </div>
+                  <h2 className="text-2xl font-black mb-2 text-gray-900 dark:text-white leading-tight">
+                      Tu prueba gratuita está activa
+                  </h2>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 font-medium mb-8 leading-relaxed">
+                      Estás probando MotorCheck. Activa tu plan cuando quieras para no perder el seguimiento de tu vehículo.
+                  </p>
+                  <div className="space-y-3">
+                      <Button
+                          onClick={() => { handleCloseTrialReminder(); onNavigate('settings'); }}
+                          className="text-base font-bold !bg-blue-600 hover:!bg-blue-500"
+                      >
+                          ACTIVAR MI PLAN
+                      </Button>
+                      <button
+                          onClick={handleCloseTrialReminder}
+                          className="text-sm font-bold text-gray-500 dark:text-gray-400 hover:text-white transition-colors py-2 uppercase tracking-wide"
+                      >
+                          SEGUIR CON MI PRUEBA
+                      </button>
+                  </div>
               </div>
           </div>,
           document.body
