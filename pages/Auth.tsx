@@ -248,22 +248,19 @@ const Auth: React.FC = () => {
             </p>
 
             {resetSuccess ? (
-              <div className="flex flex-col items-center py-6">
-                <div className="bg-green-500/10 rounded-full p-4 mb-4">
+              <div className="flex flex-col items-center gap-4 py-4">
+                <div className="bg-green-500/10 rounded-full p-4">
                   <CheckCircle className="text-green-500" size={48} />
                 </div>
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-  ¡Enlace enviado!
-</h3>
-
-<p className="text-gray-600 dark:text-gray-400 text-center max-w-sm">
-  Te enviamos un enlace para restablecer tu contraseña.  
-  El enlace es válido por 60 minutos.  
-  Si no lo ves, revisa tu carpeta de spam.
-</p>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  ¡Enlace enviado!
+                </h3>
+                <p className="text-gray-600 dark:text-gray-400 text-center text-sm leading-relaxed">
+                  Te enviamos un enlace para restablecer tu contraseña. El enlace es válido por 60 minutos. Si no lo ves, revisa tu carpeta de spam.
+                </p>
                 <button
                   onClick={handleCloseResetModal}
-                  className="px-6 py-2.5 bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white font-medium rounded-lg transition-all"
+                  className="w-full py-3 bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white font-medium rounded-xl transition-all"
                 >
                   Entendido
                 </button>
