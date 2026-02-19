@@ -6,7 +6,7 @@ import { Card, Button } from '../components/UI';
 import {
   AlertTriangle, CheckCircle, TrendingUp, ChevronRight, Calendar,
   Gauge, CreditCard, History, Fuel, Wrench, X, Flag, Clock,
-  AlertOctagon, Settings, Share2
+  AlertOctagon, Settings, Send
 } from 'lucide-react';
 import { CURRENCY_FORMATTER, DATE_FORMATTER, roundToTwo } from '../constants';
 import { ServiceStatus, UnitSystem } from '../types';
@@ -352,23 +352,15 @@ const Dashboard: React.FC<{ onNavigate: (view: string, params?: any) => void }> 
 
           {/* NUEVO BOTÓN PARA RECOMENDAR / COMPARTIR */}
           <div className="animate-enter delay-400">
-            <Card className="py-3 px-4 bg-white/60 dark:bg-zinc-900/50 flex items-center justify-between border-gray-200 dark:border-white/5">
-              <div className="flex items-center gap-2">
-                <div className="p-1.5 rounded-xl bg-blue-100 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400">
-                  <Share2 size={16} />
-                </div>
-                <span className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
-                  Recomendar MotorCheck
-                </span>
-              </div>
-
-              <button
-                onClick={handleShareApp}
-                className="text-sm font-bold text-blue-600 dark:text-blue-400 hover:opacity-80 transition px-2 py-1"
-              >
-                Compartir
-              </button>
-            </Card>
+            <button
+              onClick={handleShareApp}
+              className="w-full py-3 px-4 bg-blue-500 hover:bg-blue-600 active:scale-95 dark:bg-blue-600 dark:hover:bg-blue-700 rounded-2xl flex items-center justify-center gap-2.5 transition-all shadow-sm shadow-blue-500/20"
+            >
+              <Send size={17} className="text-white" />
+              <span className="text-sm font-semibold text-white tracking-wide">
+                Recomendar MotorCheck
+              </span>
+            </button>
           </div>
       </div>
 
