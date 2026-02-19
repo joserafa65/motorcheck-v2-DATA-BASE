@@ -288,11 +288,11 @@ export const Paywall: React.FC<PaywallProps> = ({
           </div>
         )}
 
-        <div className="mt-2 text-center">
+        <div className="mt-5 text-center">
           <button
             onClick={handleRestore}
             disabled={restoring}
-            className="text-sm text-gray-300 hover:text-white underline underline-offset-4"
+            className="text-sm text-gray-300 hover:text-white underline underline-offset-4 py-2 px-3"
           >
             {restoring ? 'Restaurando…' : 'Restaurar compras'}
           </button>
