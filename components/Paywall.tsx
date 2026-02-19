@@ -231,19 +231,25 @@ export const Paywall: React.FC<PaywallProps> = ({
                   onClick={() => setSelectedId(pkg.identifier)}
                   className={`w-full text-left rounded-xl border p-3 transition-all duration-200
                     ${isSelected
-                      ? 'border-blue-500 bg-white/10'
-                      : 'border-white/10 bg-white/5 hover:bg-white/10'}
+                      ? isLifetime
+                        ? 'border-amber-400 bg-white/10'
+                        : 'border-blue-500 bg-white/10'
+                      : isLifetime
+                        ? 'border-amber-400/40 bg-white/5 hover:bg-white/10'
+                        : 'border-white/10 bg-white/5 hover:bg-white/10'}
                   `}
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2.5">
                       <div
                         className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0
-                          ${isSelected ? 'border-blue-500' : 'border-white/30'}
+                          ${isSelected
+                            ? isLifetime ? 'border-amber-400' : 'border-blue-500'
+                            : 'border-white/30'}
                         `}
                       >
                         {isSelected && (
-                          <div className="w-2 h-2 rounded-full bg-blue-500" />
+                          <div className={`w-2 h-2 rounded-full ${isLifetime ? 'bg-amber-400' : 'bg-blue-500'}`} />
                         )}
                       </div>
 
