@@ -219,6 +219,52 @@ const Settings: React.FC<SettingsProps> = ({ onNavigate }) => {
           </div>
         </Card>
 
+        {/* Suscripción */}
+        <Card className="p-4">
+          <div className="flex items-center gap-2 mb-4">
+            <Sparkles size={20} className="text-blue-500" />
+            <h3 className="text-lg font-bold text-blue-500 uppercase tracking-wider">
+              Suscripción
+            </h3>
+          </div>
+
+          {!isPremium ? (
+            <div className="space-y-3">
+              <button
+                onClick={handleOpenPaywall}
+                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white py-4 px-6 rounded-xl font-bold text-lg transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+              >
+                <Sparkles size={22} />
+                Mejorar a Premium
+              </button>
+              <p className="text-sm text-gray-500 dark:text-gray-400 text-center font-medium">
+                Desbloquea estadísticas ilimitadas
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <div className="mb-3 px-3 py-2 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-lg border border-blue-500/20">
+                <div className="flex items-center gap-2 justify-center">
+                  <Star size={16} className="text-blue-500 fill-blue-500" />
+                  <p className="text-sm font-bold text-blue-600 dark:text-blue-400">
+                    Premium Activo
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={handleOpenPaywall}
+                className="w-full bg-gray-600 hover:bg-gray-500 text-white py-4 px-6 rounded-xl font-bold text-lg transition-all flex items-center justify-center gap-2"
+              >
+                <Star size={22} />
+                Administrar suscripción
+              </button>
+              <p className="text-sm text-gray-500 dark:text-gray-400 text-center font-medium">
+                Gestiona tu plan actual
+              </p>
+            </div>
+          )}
+        </Card>
+
         {/* Datos del vehículo */}
         <Card className="p-4">
           <h3 className="text-lg font-bold mb-5 text-blue-500 uppercase tracking-wider">
@@ -368,52 +414,6 @@ const Settings: React.FC<SettingsProps> = ({ onNavigate }) => {
               <LogIn size={22} />
               Iniciar Sesión / Cambiar de Cuenta
             </Button>
-          )}
-        </Card>
-
-        {/* Suscripción */}
-        <Card className="p-4">
-          <div className="flex items-center gap-2 mb-4">
-            <Sparkles size={20} className="text-blue-500" />
-            <h3 className="text-lg font-bold text-blue-500 uppercase tracking-wider">
-              Suscripción
-            </h3>
-          </div>
-
-          {!isPremium ? (
-            <div className="space-y-3">
-              <button
-                onClick={handleOpenPaywall}
-                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white py-4 px-6 rounded-xl font-bold text-lg transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
-              >
-                <Sparkles size={22} />
-                Mejorar a Premium
-              </button>
-              <p className="text-sm text-gray-500 dark:text-gray-400 text-center font-medium">
-                Desbloquea estadísticas ilimitadas
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              <div className="mb-3 px-3 py-2 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-lg border border-blue-500/20">
-                <div className="flex items-center gap-2 justify-center">
-                  <Star size={16} className="text-blue-500 fill-blue-500" />
-                  <p className="text-sm font-bold text-blue-600 dark:text-blue-400">
-                    Premium Activo
-                  </p>
-                </div>
-              </div>
-              <button
-                onClick={handleOpenPaywall}
-                className="w-full bg-gray-600 hover:bg-gray-500 text-white py-4 px-6 rounded-xl font-bold text-lg transition-all flex items-center justify-center gap-2"
-              >
-                <Star size={22} />
-                Administrar suscripción
-              </button>
-              <p className="text-sm text-gray-500 dark:text-gray-400 text-center font-medium">
-                Gestiona tu plan actual
-              </p>
-            </div>
           )}
         </Card>
 
