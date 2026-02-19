@@ -248,12 +248,6 @@ export const Paywall: React.FC<PaywallProps> = ({
                       </div>
 
                       <div>
-                        {isAnnual && (
-                          <div className="text-xs text-blue-400 font-medium mb-0.5">
-                            Mejor opción
-                          </div>
-                        )}
-
                         <div className="text-base font-bold text-white">
                           {pkg.product.title}
                         </div>
