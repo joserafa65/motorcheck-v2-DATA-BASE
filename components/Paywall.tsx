@@ -88,12 +88,7 @@ export const Paywall: React.FC<PaywallProps> = ({
   }, [isWeb, offerings]);
 
   useEffect(() => {
-    if (!selectedId && displayOfferings.length > 0) {
-      const annualPlan = displayOfferings.find(p =>
-        p.product.title.toLowerCase().includes('anual')
-      );
-      setSelectedId(annualPlan ? annualPlan.identifier : displayOfferings[0].identifier);
-    }
+    // No default selection
   }, [displayOfferings, selectedId]);
 
   const monthly = displayOfferings.find(p =>
@@ -111,11 +106,12 @@ export const Paywall: React.FC<PaywallProps> = ({
       : null;
 
   const benefits = [
+    'Maximiza tu rentabilidad',
     'Recordatorio de mantenimientos',
     'Backup automático en la nube',
     'Historial ilimitado',
-    'Estadísticas de consumo',
     'Exportación de reportes PDF',
+    'Estadísticas de egresos y consumos',
   ];
 
   const handleContinue = async () => {
@@ -187,11 +183,12 @@ export const Paywall: React.FC<PaywallProps> = ({
         </div>
 
         <h1 className="text-center text-2xl font-semibold text-white">
-          MOTORCHECK Premium
+          MOTORCHECK
         </h1>
 
         <p className="text-center text-gray-400 text-sm mt-1 mb-3">
-          Evita fallas. Mantén tu vehículo siempre al día.
+          Cuida tu vehículo como se merece.<br />
+          Empieza tu prueba de 15 días gratis.
         </p>
 
         <div className="bg-white/5 border border-white/10 rounded-xl p-3 mb-3">
@@ -206,70 +203,93 @@ export const Paywall: React.FC<PaywallProps> = ({
         </div>
 
         <div className="space-y-2 mb-3">
-          {displayOfferings.map((pkg) => {
+          {[
+            ...displayOfferings.filter(p => p.product.title.toLowerCase().includes('vida')),
+            ...displayOfferings.filter(p => p.product.title.toLowerCase().includes('anual')),
+            ...displayOfferings.filter(p => p.product.title.toLowerCase().includes('mensual')),
+            ...displayOfferings.filter(p =>
+              !p.product.title.toLowerCase().includes('vida') &&
+              !p.product.title.toLowerCase().includes('anual') &&
+              !p.product.title.toLowerCase().includes('mensual')
+            ),
+          ].map((pkg) => {
             const isSelected = pkg.identifier === selectedId;
             const isAnnual = pkg.product.title.toLowerCase().includes('anual');
             const isLifetime = pkg.product.title.toLowerCase().includes('vida');
             const isMonthly = pkg.product.title.toLowerCase().includes('mensual');
 
             return (
-              <button
-                key={pkg.identifier}
-                onClick={() => setSelectedId(pkg.identifier)}
-                className={`w-full text-left rounded-xl border p-3 transition-all duration-200
-                  ${isSelected
-                    ? 'border-blue-500 bg-white/10'
-                    : 'border-white/10 bg-white/5 hover:bg-white/10'}
-                `}
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2.5">
-                    <div
-                      className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0
-                        ${isSelected ? 'border-blue-500' : 'border-white/30'}
-                      `}
-                    >
-                      {isSelected && (
-                        <div className="w-2 h-2 rounded-full bg-blue-500" />
-                      )}
-                    </div>
-
-                    <div>
-                      {isAnnual && (
-                        <div className="text-xs text-blue-400 font-medium mb-0.5">
-                          Mejor opción
-                        </div>
-                      )}
-
-                      <div className="text-base font-bold text-white">
-                        {pkg.product.title}
+              <div key={pkg.identifier}>
+                {isLifetime && (
+                  <div className="mb-1">
+                    <span className="text-xs font-semibold text-amber-400 bg-amber-400/10 border border-amber-400/30 rounded-md px-2 py-0.5">
+                      Oferta Fundador
+                    </span>
+                  </div>
+                )}
+                <button
+                  onClick={() => setSelectedId(pkg.identifier)}
+                  className={`w-full text-left rounded-xl border p-3 transition-all duration-200
+                    ${isSelected
+                      ? 'border-blue-500 bg-white/10'
+                      : 'border-white/10 bg-white/5 hover:bg-white/10'}
+                  `}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2.5">
+                      <div
+                        className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0
+                          ${isSelected ? 'border-blue-500' : 'border-white/30'}
+                        `}
+                      >
+                        {isSelected && (
+                          <div className="w-2 h-2 rounded-full bg-blue-500" />
+                        )}
                       </div>
 
-                      {isAnnual && annualSavingsPercent && (
-                        <div className="text-xs text-green-400">
-                          Ahorra hasta {annualSavingsPercent}% al año
-                        </div>
-                      )}
+                      <div>
+                        {isAnnual && (
+                          <div className="text-xs text-blue-400 font-medium mb-0.5">
+                            Mejor opción
+                          </div>
+                        )}
 
-                      {isLifetime && (
-                        <div className="text-xs text-gray-400">
-                          Ideal si trabajas con tu vehículo todos los días.
+                        <div className="text-base font-bold text-white">
+                          {pkg.product.title}
                         </div>
-                      )}
 
-                      {isMonthly && (
-                        <div className="text-xs text-gray-400">
-                          Ideal si prefieres flexibilidad.
-                        </div>
-                      )}
+                        {isLifetime && (
+                          <div className="text-xs text-gray-400">
+                            Paga una vez. Úsalo para siempre.
+                          </div>
+                        )}
+
+                        {isAnnual && annualSavingsPercent && (
+                          <div className="text-xs text-green-400">
+                            Ahorra hasta {annualSavingsPercent}% al año
+                          </div>
+                        )}
+
+                        {isAnnual && (
+                          <div className="text-xs text-gray-400">
+                            Menos de $0.83 al mes.
+                          </div>
+                        )}
+
+                        {isMonthly && (
+                          <div className="text-xs text-gray-400">
+                            Ideal si prefieres flexibilidad.
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="text-base font-bold text-white shrink-0">
+                      {pkg.product.priceString}
                     </div>
                   </div>
-
-                  <div className="text-base font-bold text-white shrink-0">
-                    {pkg.product.priceString}
-                  </div>
-                </div>
-              </button>
+                </button>
+              </div>
             );
           })}
         </div>
@@ -279,7 +299,7 @@ export const Paywall: React.FC<PaywallProps> = ({
           disabled={loadingId !== null || restoring}
           className="w-full py-3 rounded-xl text-base font-semibold bg-blue-600 hover:bg-blue-700 text-white transition-all"
         >
-          {loadingId ? 'Procesando…' : 'COMPRAR'}
+          {loadingId ? 'Procesando…' : 'Desbloquear MOTORCHECK'}
         </button>
 
         {error && (
