@@ -249,7 +249,7 @@ const Settings: React.FC<SettingsProps> = ({ onNavigate }) => {
               <div className="px-3 py-2 bg-blue-500/10 rounded-xl border border-blue-500/20 flex items-center justify-center gap-2">
                 <Star size={17} className="text-blue-500 fill-blue-500" />
                 <p className="text-sm font-bold text-blue-600 dark:text-blue-400">
-                  Premium Activo
+                  {entitlementActive ? '⭐ Premium Activo' : isTrialActive ? '🧪 Prueba Activa' : 'Sin suscripción'}
                 </p>
               </div>
               <button
