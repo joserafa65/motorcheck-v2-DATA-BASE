@@ -191,7 +191,7 @@ export const Paywall: React.FC<PaywallProps> = ({
         </h1>
 
         <p className="text-center text-gray-400 text-sm mt-1 mb-3">
-          Menos fallas. Más productividad. Más ingresos.
+          Evita fallas. Mantén tu vehículo siempre al día.
         </p>
 
         <div className="bg-white/5 border border-white/10 rounded-xl p-3 mb-3">
