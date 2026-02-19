@@ -304,12 +304,12 @@ export const Paywall: React.FC<PaywallProps> = ({
           Puedes cancelarlas en cualquier momento desde los ajustes de tu Apple ID.
         </div>
 
-        <div className="flex justify-center gap-4 text-xs mt-1.5">
+        <div className="flex justify-center gap-6 mt-3">
           <a
             href="https://labappstudio.com/motorcheck#terminos"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-gray-300 hover:text-white underline underline-offset-4"
+            className="text-sm text-gray-300 hover:text-white underline underline-offset-4 py-2 px-1"
           >
             Términos
           </a>
@@ -317,16 +317,16 @@ export const Paywall: React.FC<PaywallProps> = ({
             href="https://labappstudio.com/motorcheck#privacidad"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-gray-300 hover:text-white underline underline-offset-4"
+            className="text-sm text-gray-300 hover:text-white underline underline-offset-4 py-2 px-1"
           >
             Privacidad
           </a>
         </div>
 
-        <div className="mt-2 text-center">
+        <div className="mt-1 text-center">
           <button
             onClick={handleSwitchAccount}
-            className="text-xs text-gray-500 hover:text-gray-300 underline underline-offset-4 transition"
+            className="text-sm text-gray-500 hover:text-gray-300 underline underline-offset-4 transition py-2 px-3"
           >
             Usar otra cuenta
           </button>
