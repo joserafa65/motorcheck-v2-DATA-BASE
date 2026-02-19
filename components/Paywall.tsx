@@ -182,7 +182,7 @@ export const Paywall: React.FC<PaywallProps> = ({
           <img
             src="/MOTOR_CHECK_LOGO_ICON_07_ALPHA.png"
             alt="MotorCheck"
-            className="w-20 h-20"
+            style={{ width: '6.5rem', height: '6.5rem' }}
           />
         </div>
 
