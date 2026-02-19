@@ -194,82 +194,85 @@ const Settings: React.FC<SettingsProps> = ({ onNavigate }) => {
     <div className="p-4 pt-5 pb-24 max-w-lg mx-auto">
       <BackButton onClick={() => onNavigate('dashboard')} title="Ajustes" />
 
-      <div className="space-y-6">
+      <div className="space-y-4">
         {/* Apariencia */}
         <Card
-          className="p-4 flex justify-between items-center cursor-pointer hover:bg-white/5 transition-all"
+          className="py-3.5 px-4 flex justify-between items-center"
           onClick={handleThemeToggle}
         >
-          <div>
-            <h3 className="text-lg font-bold text-gray-900 dark:text-white">
-              Apariencia
-            </h3>
-            <p className="text-sm text-gray-500 font-medium">
-              {formData.theme === 'dark'
-                ? 'Modo Oscuro'
-                : 'Modo Claro'}
-            </p>
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 rounded-xl bg-gray-500/10 shrink-0">
+              {formData.theme === 'dark' ? (
+                <Moon size={20} className="text-gray-600 dark:text-gray-300" />
+              ) : (
+                <Sun size={20} className="text-gray-600 dark:text-gray-300" />
+              )}
+            </div>
+            <div>
+              <p className="text-sm font-bold text-gray-900 dark:text-white">Apariencia</p>
+              <p className="text-xs text-gray-500 font-medium">
+                {formData.theme === 'dark' ? 'Modo Oscuro' : 'Modo Claro'}
+              </p>
+            </div>
           </div>
-          <div className="p-3 rounded-2xl">
-            {formData.theme === 'dark' ? (
-              <Moon size={26} />
-            ) : (
-              <Sun size={26} />
-            )}
-          </div>
+          <svg className="w-4 h-4 text-gray-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
         </Card>
 
         {/* Suscripción */}
-        <Card className="p-4">
-          <div className="flex items-center gap-2 mb-4">
-            <Sparkles size={20} className="text-blue-500" />
-            <h3 className="text-lg font-bold text-blue-500 uppercase tracking-wider">
+        <Card className="py-4 px-4">
+          <div className="flex items-center gap-2.5 mb-4">
+            <div className="p-2 rounded-xl bg-blue-500/10 shrink-0">
+              <Sparkles size={18} className="text-blue-500" />
+            </div>
+            <h3 className="text-xs font-bold text-blue-500 uppercase tracking-wider">
               Suscripción
             </h3>
           </div>
 
           {!isPremium ? (
-            <div className="space-y-3">
+            <div className="space-y-2.5">
               <button
                 onClick={handleOpenPaywall}
-                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white py-4 px-6 rounded-xl font-bold text-lg transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+                className="w-full bg-blue-600 hover:bg-blue-500 active:scale-95 text-white py-3.5 px-5 rounded-xl font-bold text-sm transition-all shadow-lg flex items-center justify-center gap-2"
               >
-                <Sparkles size={22} />
+                <Sparkles size={18} />
                 Mejorar a Premium
               </button>
-              <p className="text-sm text-gray-500 dark:text-gray-400 text-center font-medium">
+              <p className="text-xs text-gray-500 dark:text-gray-400 text-center font-medium">
                 Desbloquea estadísticas ilimitadas
               </p>
             </div>
           ) : (
-            <div className="space-y-3">
-              <div className="mb-3 px-3 py-2 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-lg border border-blue-500/20">
-                <div className="flex items-center gap-2 justify-center">
-                  <Star size={16} className="text-blue-500 fill-blue-500" />
-                  <p className="text-sm font-bold text-blue-600 dark:text-blue-400">
-                    Premium Activo
-                  </p>
-                </div>
+            <div className="space-y-2.5">
+              <div className="px-3 py-2 bg-blue-500/10 rounded-xl border border-blue-500/20 flex items-center justify-center gap-2">
+                <Star size={14} className="text-blue-500 fill-blue-500" />
+                <p className="text-xs font-bold text-blue-600 dark:text-blue-400">
+                  Premium Activo
+                </p>
               </div>
               <button
                 onClick={handleOpenPaywall}
-                className="w-full bg-gray-600 hover:bg-gray-500 text-white py-4 px-6 rounded-xl font-bold text-lg transition-all flex items-center justify-center gap-2"
+                className="w-full bg-gray-200 dark:bg-white/10 hover:bg-gray-300 dark:hover:bg-white/20 active:scale-95 text-gray-800 dark:text-white py-3.5 px-5 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2"
               >
-                <Star size={22} />
+                <Star size={18} />
                 Administrar suscripción
               </button>
-              <p className="text-sm text-gray-500 dark:text-gray-400 text-center font-medium">
-                Gestiona tu plan actual
-              </p>
             </div>
           )}
         </Card>
 
         {/* Datos del vehículo */}
-        <Card className="p-4">
-          <h3 className="text-lg font-bold mb-5 text-blue-500 uppercase tracking-wider">
-            Datos del Vehículo
-          </h3>
+        <Card className="py-4 px-4">
+          <div className="flex items-center gap-2.5 mb-4">
+            <div className="p-2 rounded-xl bg-blue-500/10 shrink-0">
+              <User size={18} className="text-blue-500" />
+            </div>
+            <h3 className="text-xs font-bold text-blue-500 uppercase tracking-wider">
+              Datos del Vehículo
+            </h3>
+          </div>
 
           <PhotoInput
             value={formData.photoUrl}
@@ -329,10 +332,15 @@ const Settings: React.FC<SettingsProps> = ({ onNavigate }) => {
         </Card>
 
         {/* Preferencias */}
-        <Card className="p-4">
-          <h3 className="text-lg font-bold mb-5 text-blue-500 uppercase tracking-wider">
-            Preferencias
-          </h3>
+        <Card className="py-4 px-4">
+          <div className="flex items-center gap-2.5 mb-4">
+            <div className="p-2 rounded-xl bg-blue-500/10 shrink-0">
+              <Scale size={18} className="text-blue-500" />
+            </div>
+            <h3 className="text-xs font-bold text-blue-500 uppercase tracking-wider">
+              Preferencias
+            </h3>
+          </div>
 
           <Select
             label="Sistema de Unidades"
@@ -340,25 +348,16 @@ const Settings: React.FC<SettingsProps> = ({ onNavigate }) => {
             value={formData.unitSystem}
             onChange={handleChange}
             options={[
-              {
-                value: UnitSystem.KM_GAL,
-                label: 'Kilómetros / Galón',
-              },
-              {
-                value: UnitSystem.KM_LITER,
-                label: 'Kilómetros / Litro',
-              },
-              {
-                value: UnitSystem.LITER_100KM,
-                label: 'Litros / 100 km',
-              },
+              { value: UnitSystem.KM_GAL, label: 'Kilómetros / Galón' },
+              { value: UnitSystem.KM_LITER, label: 'Kilómetros / Litro' },
+              { value: UnitSystem.LITER_100KM, label: 'Litros / 100 km' },
             ]}
           />
         </Card>
 
         <Button
           onClick={handleSave}
-          className="bg-emerald-600 hover:bg-emerald-500 text-lg py-4 font-bold"
+          className="bg-emerald-600 hover:bg-emerald-500 font-bold"
         >
           Guardar Cambios
         </Button>
@@ -367,31 +366,33 @@ const Settings: React.FC<SettingsProps> = ({ onNavigate }) => {
         <Button
           onClick={handleExportPDF}
           disabled={isGeneratingPdf}
-          className="bg-blue-600 hover:bg-blue-500 py-5 text-lg font-bold"
+          className="bg-blue-600 hover:bg-blue-500 font-bold"
         >
           {isGeneratingPdf ? (
             'Generando…'
           ) : (
             <>
-              <Download size={22} />
+              <Download size={18} />
               Exportar Historial en PDF
             </>
           )}
         </Button>
 
         {/* Cuenta */}
-        <Card className="p-4">
-          <div className="flex items-center gap-2 mb-4">
-            <User size={20} className="text-blue-500" />
-            <h3 className="text-lg font-bold text-blue-500 uppercase tracking-wider">
+        <Card className="py-4 px-4">
+          <div className="flex items-center gap-2.5 mb-4">
+            <div className="p-2 rounded-xl bg-blue-500/10 shrink-0">
+              <User size={18} className="text-blue-500" />
+            </div>
+            <h3 className="text-xs font-bold text-blue-500 uppercase tracking-wider">
               Cuenta
             </h3>
           </div>
 
           {user ? (
-            <div className="space-y-4">
-              <div className="p-3 bg-gray-100 dark:bg-white/5 rounded-xl">
-                <p className="text-xs text-gray-500 dark:text-gray-400 mb-1 font-medium">
+            <div className="space-y-3">
+              <div className="px-3 py-2.5 bg-gray-100 dark:bg-white/5 rounded-xl">
+                <p className="text-xs text-gray-500 dark:text-gray-400 mb-0.5 font-medium">
                   Sesión activa
                 </p>
                 <p className="text-sm font-bold text-gray-900 dark:text-white break-all">
@@ -400,78 +401,70 @@ const Settings: React.FC<SettingsProps> = ({ onNavigate }) => {
               </div>
               <Button
                 onClick={handleSignOut}
-                className="bg-gray-600 hover:bg-gray-500 py-4 text-lg font-bold w-full"
+                className="bg-gray-200 dark:bg-white/10 hover:bg-gray-300 dark:hover:bg-white/20 text-gray-800 dark:text-white font-bold"
               >
-                <LogOut size={22} />
+                <LogOut size={18} />
                 Cerrar Sesión
               </Button>
             </div>
           ) : (
             <Button
               onClick={handleSignIn}
-              className="bg-blue-600 hover:bg-blue-500 py-4 text-lg font-bold w-full"
+              className="bg-blue-600 hover:bg-blue-500 font-bold"
             >
-              <LogIn size={22} />
+              <LogIn size={18} />
               Iniciar Sesión / Cambiar de Cuenta
             </Button>
           )}
         </Card>
 
         {/* Legal */}
-        <Card className="p-4">
+        <Card className="py-1 px-2">
           <button
             onClick={() => openExternalUrl('https://labappstudio.com/motorcheck#privacidad')}
-            className="w-full flex items-center justify-between p-4 rounded-xl hover:bg-gray-100 dark:hover:bg-white/5 transition-all group"
+            className="w-full flex items-center justify-between px-3 py-3.5 rounded-xl hover:bg-gray-100 dark:hover:bg-white/5 transition-all group"
           >
             <div className="flex items-center gap-3">
-              <FileText size={20} className="text-gray-600 dark:text-gray-400" />
-              <span className="text-gray-900 dark:text-white font-medium">
+              <FileText size={18} className="text-gray-500 dark:text-gray-400 shrink-0" />
+              <span className="text-sm text-gray-700 dark:text-gray-300 font-medium">
                 Política de Privacidad
               </span>
             </div>
-            <svg
-              className="w-5 h-5 text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300 transition-colors"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
+            <svg className="w-4 h-4 text-gray-400 group-hover:text-gray-500 dark:group-hover:text-gray-300 transition-colors shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>
           </button>
 
+          <div className="mx-3 h-px bg-gray-200 dark:bg-white/5" />
+
           <button
             onClick={() => openExternalUrl('https://labappstudio.com/motorcheck#terminos')}
-            className="w-full flex items-center justify-between p-4 rounded-xl hover:bg-gray-100 dark:hover:bg-white/5 transition-all group"
+            className="w-full flex items-center justify-between px-3 py-3.5 rounded-xl hover:bg-gray-100 dark:hover:bg-white/5 transition-all group"
           >
             <div className="flex items-center gap-3">
-              <Scale size={20} className="text-gray-600 dark:text-gray-400" />
-              <span className="text-gray-900 dark:text-white font-medium">
+              <Scale size={18} className="text-gray-500 dark:text-gray-400 shrink-0" />
+              <span className="text-sm text-gray-700 dark:text-gray-300 font-medium">
                 Términos de Uso
               </span>
             </div>
-            <svg
-              className="w-5 h-5 text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300 transition-colors"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
+            <svg className="w-4 h-4 text-gray-400 group-hover:text-gray-500 dark:group-hover:text-gray-300 transition-colors shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>
           </button>
         </Card>
 
         {/* Zona de peligro */}
-        <div className="pt-8 border-t border-gray-300 dark:border-white/10">
+        <div className="pt-6 border-t border-gray-200 dark:border-white/10">
           <div className="flex items-center gap-2 mb-3">
-            <ShieldAlert size={20} className="text-red-500" />
-            <h3 className="text-red-500 font-black uppercase tracking-widest text-sm">
+            <ShieldAlert size={16} className="text-red-500" />
+            <h3 className="text-xs text-red-500 font-black uppercase tracking-widest">
               Zona de Peligro
             </h3>
           </div>
           <Button
             onClick={handleReset}
             variant="danger"
-            className="py-4 font-bold"
+            className="font-bold"
           >
             Borrar Todos los Datos
           </Button>
