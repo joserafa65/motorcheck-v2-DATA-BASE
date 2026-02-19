@@ -284,12 +284,12 @@ const Dashboard: React.FC<{ onNavigate: (view: string, params?: any) => void }> 
                 <span className="text-[10px] font-medium opacity-90 uppercase tracking-tight leading-tight relative z-10">Ingresa una</span>
                 <span className="text-sm font-bold leading-none relative z-10">Tanqueada</span>
             </Button>
-            <Button onClick={() => onNavigate('services', { startInProgramMode: true })} className="h-28 flex-col !gap-1.5 px-2 !bg-orange-600 !hover:bg-orange-500 shadow-orange-900/20 !border-0 text-white">
+            <Button onClick={() => onNavigate('services', { startInProgramMode: true })} className="h-28 flex-col !gap-1.5 px-2 !bg-orange-600 hover:!bg-orange-500 shadow-orange-900/20 !border-0 text-white">
                 <Wrench size={26} strokeWidth={2} className="mb-0.5 relative z-10" />
                 <span className="text-[10px] font-medium opacity-90 uppercase tracking-tight leading-tight relative z-10">Programa un</span>
                 <span className="text-sm font-bold leading-none relative z-10">Servicio</span>
             </Button>
-            <Button onClick={() => { setOdoInput(''); setShowOdoModal(true); }} className="h-28 flex-col !gap-1.5 px-2 !bg-purple-600 !hover:bg-purple-500 shadow-purple-900/20 !border-0 text-white">
+            <Button onClick={() => { setOdoInput(''); setShowOdoModal(true); }} className="h-28 flex-col !gap-1.5 px-2 !bg-purple-600 hover:!bg-purple-500 shadow-purple-900/20 !border-0 text-white">
                 <Gauge size={26} strokeWidth={2} className="mb-0.5 relative z-10" />
                 <span className="text-[10px] font-medium opacity-90 uppercase tracking-tight leading-tight relative z-10">Actualiza tu</span>
                 <span className="text-sm font-bold leading-none relative z-10">Odómetro</span>
