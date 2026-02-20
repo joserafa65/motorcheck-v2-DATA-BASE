@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { PurchasesOffering } from '@revenuecat/purchases-capacitor';
-import { Check, X } from 'lucide-react';
+import { Check } from 'lucide-react';
 import { Capacitor } from '@capacitor/core';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -155,15 +155,6 @@ export const Paywall: React.FC<PaywallProps> = ({
   return (
     <div className="fixed inset-0 z-50 bg-black overflow-y-auto px-5 pt-6 pb-28">
       <div className="max-w-sm mx-auto w-full relative min-h-full flex flex-col justify-center">
-
-        {allowClose && (
-          <button
-            onClick={onClose}
-            className="absolute top-8 right-0 p-2 text-gray-400 hover:text-white transition"
-          >
-            <X size={22} />
-          </button>
-        )}
 
         <div className="flex justify-center mb-3 mt-2">
           <img
@@ -342,6 +333,15 @@ export const Paywall: React.FC<PaywallProps> = ({
             Usar otra cuenta
           </button>
         </div>
+
+        {allowClose && (
+          <button
+            onClick={onClose}
+            className="w-full mt-3 py-3 rounded-xl text-base font-semibold bg-white/10 hover:bg-white/20 text-gray-300 hover:text-white transition-all border border-white/10"
+          >
+            Ir a la prueba
+          </button>
+        )}
 
       </div>
     </div>
