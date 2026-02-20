@@ -204,11 +204,14 @@ export const Paywall: React.FC<PaywallProps> = ({
               !p.product.title.toLowerCase().includes('anual') &&
               !p.product.title.toLowerCase().includes('mensual')
             ),
-          ].map((pkg) => {
-            const isSelected = pkg.identifier === selectedId;
-            const isAnnual = pkg.product.title.toLowerCase().includes('anual');
-            const isLifetime = pkg.product.title.toLowerCase().includes('vida');
-            const isMonthly = pkg.product.title.toLowerCase().includes('mensual');
+].map((pkg) => {
+  const isSelected = pkg.identifier === selectedId;
+
+  const productId = pkg.product.identifier;
+
+  const isAnnual   = productId === 'motorcheck_premium_yearly';
+  const isMonthly  = productId === 'motorcheck_premium_monthly';
+  const isLifetime = productId === 'motorcheck_premium_lifetime';
 
             return (
               <div key={pkg.identifier}>
