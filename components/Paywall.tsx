@@ -264,29 +264,28 @@ export const Paywall: React.FC<PaywallProps> = ({
     : ''}
 </div>
 
-                        {isLifetime && (
-                          <div className="text-xs text-gray-400">
-                            Paga una vez. Úsalo para siempre.
-                          </div>
-                        )}
+               {isLifetime && (
+  <div className="text-xs text-gray-400">
+    Paga una vez. Úsalo para siempre.
+  </div>
+)}
 
-                        {isAnnual && annualSavingsPercent && (
-                          <div className="text-xs text-green-400">
-                            Ahorra hasta {annualSavingsPercent}% al año
-                          </div>
-                        )}
+{isAnnual && (
+  <>
+    <div className="text-xs text-green-400">
+      Ahorra hasta 58% al año
+    </div>
+    <div className="text-xs text-gray-400">
+      Menos de $0.83 al mes.
+    </div>
+  </>
+)}
 
-                        {isAnnual && (
-                          <div className="text-xs text-gray-400">
-                            Menos de $0.83 al mes.
-                          </div>
-                        )}
-
-                        {isMonthly && (
-                          <div className="text-xs text-gray-400">
-                            Ideal si prefieres flexibilidad.
-                          </div>
-                        )}
+{isMonthly && (
+  <div className="text-xs text-gray-400">
+    Ideal si prefieres flexibilidad.
+  </div>
+)}
                       </div>
                     </div>
 
