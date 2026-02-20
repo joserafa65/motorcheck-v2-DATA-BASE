@@ -254,9 +254,15 @@ export const Paywall: React.FC<PaywallProps> = ({
                       </div>
 
                       <div>
-                        <div className="text-base font-bold text-white">
-                          {pkg.product.title}
-                        </div>
+                      <div className="text-base font-bold text-white">
+  {isLifetime
+    ? 'De por vida'
+    : isAnnual
+    ? 'Anual'
+    : isMonthly
+    ? 'Mensual'
+    : ''}
+</div>
 
                         {isLifetime && (
                           <div className="text-xs text-gray-400">
