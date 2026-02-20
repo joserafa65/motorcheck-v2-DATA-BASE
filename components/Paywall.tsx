@@ -168,7 +168,7 @@ export const Paywall: React.FC<PaywallProps> = ({
         {allowClose && (
           <button
             onClick={onClose}
-            className="absolute -top-2 right-0 p-2 text-gray-400 hover:text-white transition"
+            className="absolute top-8 right-0 p-2 text-gray-400 hover:text-white transition"
           >
             <X size={22} />
           </button>
