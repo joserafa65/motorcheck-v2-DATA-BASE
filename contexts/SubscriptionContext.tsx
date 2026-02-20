@@ -77,8 +77,8 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
         hasActiveEntitlement
       );
 
-      const { offerings: availableOfferings } =
-        await Purchases.getOfferings();
+  const availableOfferings =
+  await Purchases.getOfferings();
 
       if (availableOfferings.current) {
         setOfferings(
