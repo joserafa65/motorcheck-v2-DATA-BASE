@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { PurchasesOffering } from '@revenuecat/purchases-capacitor';
-import { Check } from 'lucide-react';
+import { Check, X } from 'lucide-react';
 import { Capacitor } from '@capacitor/core';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -165,6 +165,14 @@ export const Paywall: React.FC<PaywallProps> = ({
     <div className="fixed inset-0 z-50 bg-black overflow-y-auto px-5 pt-6 pb-28">
       <div className="max-w-sm mx-auto w-full relative min-h-full flex flex-col justify-center">
 
+        {allowClose && (
+          <button
+            onClick={onClose}
+            className="absolute top-8 right-0 p-2 text-gray-400 hover:text-white transition"
+          >
+            <X size={22} />
+          </button>
+        )}
 
         <div className="flex justify-center mb-3 mt-2">
           <img
@@ -204,14 +212,11 @@ export const Paywall: React.FC<PaywallProps> = ({
               !p.product.title.toLowerCase().includes('anual') &&
               !p.product.title.toLowerCase().includes('mensual')
             ),
-].map((pkg) => {
-  const isSelected = pkg.identifier === selectedId;
-
-  const productId = pkg.product.identifier;
-
-  const isAnnual   = productId === 'motorcheck_premium_yearly';
-  const isMonthly  = productId === 'motorcheck_premium_monthly';
-  const isLifetime = productId === 'motorcheck_premium_lifetime';
+          ].map((pkg) => {
+            const isSelected = pkg.identifier === selectedId;
+            const isAnnual = pkg.product.title.toLowerCase().includes('anual');
+            const isLifetime = pkg.product.title.toLowerCase().includes('vida');
+            const isMonthly = pkg.product.title.toLowerCase().includes('mensual');
 
             return (
               <div key={pkg.identifier}>
@@ -249,38 +254,33 @@ export const Paywall: React.FC<PaywallProps> = ({
                       </div>
 
                       <div>
-                      <div className="text-base font-bold text-white">
-  {isLifetime
-    ? 'De por vida'
-    : isAnnual
-    ? 'Anual'
-    : isMonthly
-    ? 'Mensual'
-    : ''}
-</div>
+                        <div className="text-base font-bold text-white">
+                          {pkg.product.title}
+                        </div>
 
-               {isLifetime && (
-  <div className="text-xs text-gray-400">
-    Paga una vez. Úsalo para siempre.
-  </div>
-)}
+                        {isLifetime && (
+                          <div className="text-xs text-gray-400">
+                            Paga una vez. Úsalo para siempre.
+                          </div>
+                        )}
 
-{isAnnual && (
-  <>
-    <div className="text-xs text-green-400">
-      Ahorra hasta 58% al año
-    </div>
-    <div className="text-xs text-gray-400">
-      Menos de $0.83 al mes.
-    </div>
-  </>
-)}
+                        {isAnnual && annualSavingsPercent && (
+                          <div className="text-xs text-green-400">
+                            Ahorra hasta {annualSavingsPercent}% al año
+                          </div>
+                        )}
 
-{isMonthly && (
-  <div className="text-xs text-gray-400">
-    Ideal si prefieres flexibilidad.
-  </div>
-)}
+                        {isAnnual && (
+                          <div className="text-xs text-gray-400">
+                            Menos de $0.83 al mes.
+                          </div>
+                        )}
+
+                        {isMonthly && (
+                          <div className="text-xs text-gray-400">
+                            Ideal si prefieres flexibilidad.
+                          </div>
+                        )}
                       </div>
                     </div>
 
@@ -351,17 +351,6 @@ export const Paywall: React.FC<PaywallProps> = ({
             Usar otra cuenta
           </button>
         </div>
-
-        {allowClose && (
-          <div className="mt-4 text-center">
-            <button
-              onClick={onClose}
-              className="text-sm text-gray-400 hover:text-white underline underline-offset-4 transition py-2 px-3"
-            >
-              Ir a la prueba
-            </button>
-          </div>
-        )}
 
       </div>
     </div>
