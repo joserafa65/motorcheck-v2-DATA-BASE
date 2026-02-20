@@ -43,9 +43,9 @@ export const Paywall: React.FC<PaywallProps> = ({
     if (isWeb && (!offerings || offerings.length === 0)) {
       return [
         {
-          identifier: 'lifetime_mock',
+          identifier: 'motorcheck_premium_lifetime',
           product: {
-            identifier: 'lifetime_mock',
+            identifier: 'motorcheck_premium_lifetime',
             title: 'De por vida',
             description: 'Acceso completo para siempre',
             priceString: '$34.99',
@@ -53,9 +53,9 @@ export const Paywall: React.FC<PaywallProps> = ({
           },
         },
         {
-          identifier: 'annual_mock',
+          identifier: 'motorcheck_premium_yearly',
           product: {
-            identifier: 'annual_mock',
+            identifier: 'motorcheck_premium_yearly',
             title: 'Anual',
             description: 'Acceso completo',
             priceString: '$9.99 / año',
@@ -63,9 +63,9 @@ export const Paywall: React.FC<PaywallProps> = ({
           },
         },
         {
-          identifier: 'monthly_mock',
+          identifier: 'motorcheck_premium_monthly',
           product: {
-            identifier: 'monthly_mock',
+            identifier: 'motorcheck_premium_monthly',
             title: 'Mensual',
             description: 'Acceso completo',
             priceString: '$1.99 / mes',
@@ -86,24 +86,6 @@ export const Paywall: React.FC<PaywallProps> = ({
       },
     }));
   }, [isWeb, offerings]);
-
-  useEffect(() => {
-    // No default selection
-  }, [displayOfferings, selectedId]);
-
-  const monthly = displayOfferings.find(p =>
-    p.product.title.toLowerCase().includes('mensual')
-  );
-  const annual = displayOfferings.find(p =>
-    p.product.title.toLowerCase().includes('anual')
-  );
-
-  const annualSavingsPercent =
-    monthly?.product.price && annual?.product.price
-      ? Math.round(
-          (1 - annual.product.price / (monthly.product.price * 12)) * 100
-        )
-      : null;
 
   const benefits = [
     'Maximiza tu rentabilidad',
@@ -161,6 +143,15 @@ export const Paywall: React.FC<PaywallProps> = ({
     await signOut();
   };
 
+  const sortedPackages = displayOfferings.sort((a, b) => {
+    const order = [
+      'motorcheck_premium_lifetime',
+      'motorcheck_premium_yearly',
+      'motorcheck_premium_monthly',
+    ];
+    return order.indexOf(a.product.identifier) - order.indexOf(b.product.identifier);
+  });
+
   return (
     <div className="fixed inset-0 z-50 bg-black overflow-y-auto px-5 pt-6 pb-28">
       <div className="max-w-sm mx-auto w-full relative min-h-full flex flex-col justify-center">
@@ -203,20 +194,14 @@ export const Paywall: React.FC<PaywallProps> = ({
         </div>
 
         <div className="space-y-2 mb-3">
-          {[
-            ...displayOfferings.filter(p => p.product.title.toLowerCase().includes('vida')),
-            ...displayOfferings.filter(p => p.product.title.toLowerCase().includes('anual')),
-            ...displayOfferings.filter(p => p.product.title.toLowerCase().includes('mensual')),
-            ...displayOfferings.filter(p =>
-              !p.product.title.toLowerCase().includes('vida') &&
-              !p.product.title.toLowerCase().includes('anual') &&
-              !p.product.title.toLowerCase().includes('mensual')
-            ),
-          ].map((pkg) => {
+          {sortedPackages.map((pkg) => {
             const isSelected = pkg.identifier === selectedId;
-            const isAnnual = pkg.product.title.toLowerCase().includes('anual');
-            const isLifetime = pkg.product.title.toLowerCase().includes('vida');
-            const isMonthly = pkg.product.title.toLowerCase().includes('mensual');
+
+            const productId = pkg.product.identifier;
+
+            const isLifetime = productId === 'motorcheck_premium_lifetime';
+            const isAnnual = productId === 'motorcheck_premium_yearly';
+            const isMonthly = productId === 'motorcheck_premium_monthly';
 
             return (
               <div key={pkg.identifier}>
@@ -227,6 +212,7 @@ export const Paywall: React.FC<PaywallProps> = ({
                     </span>
                   </div>
                 )}
+
                 <button
                   onClick={() => setSelectedId(pkg.identifier)}
                   className={`w-full text-left rounded-xl border p-3 transition-all duration-200
@@ -255,7 +241,13 @@ export const Paywall: React.FC<PaywallProps> = ({
 
                       <div>
                         <div className="text-base font-bold text-white">
-                          {pkg.product.title}
+                          {isLifetime
+                            ? 'De por vida'
+                            : isAnnual
+                            ? 'Anual'
+                            : isMonthly
+                            ? 'Mensual'
+                            : pkg.product.title}
                         </div>
 
                         {isLifetime && (
@@ -264,16 +256,15 @@ export const Paywall: React.FC<PaywallProps> = ({
                           </div>
                         )}
 
-                        {isAnnual && annualSavingsPercent && (
-                          <div className="text-xs text-green-400">
-                            Ahorra hasta {annualSavingsPercent}% al año
-                          </div>
-                        )}
-
                         {isAnnual && (
-                          <div className="text-xs text-gray-400">
-                            Menos de $0.83 al mes.
-                          </div>
+                          <>
+                            <div className="text-xs text-green-400">
+                              Ahorra hasta 58% al año
+                            </div>
+                            <div className="text-xs text-gray-400">
+                              Menos de $0.83 al mes.
+                            </div>
+                          </>
                         )}
 
                         {isMonthly && (
