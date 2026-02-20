@@ -62,7 +62,7 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
     if (!isWeb) {
       await initializeRevenueCat();
 
-      await Purchases.logIn({ appUserID: userId });
+      // await Purchases.logIn({ appUserID: userId });
       console.log('RevenueCat user logged in:', userId);
 
       const { customerInfo: info } = await Purchases.getCustomerInfo();
