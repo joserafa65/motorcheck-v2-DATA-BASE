@@ -144,12 +144,15 @@ export const Paywall: React.FC<PaywallProps> = ({
   };
 
   const sortedPackages = displayOfferings.sort((a, b) => {
-    const order = [
-      'motorcheck_premium_lifetime',
-      'motorcheck_premium_yearly',
-      'motorcheck_premium_monthly',
-    ];
-    return order.indexOf(a.product.identifier) - order.indexOf(b.product.identifier);
+    const getId = (id: string) => id?.toLowerCase() || '';
+    const rank = (id: string) => {
+      const n = getId(id);
+      if (n.includes('lifetime')) return 0;
+      if (n.includes('yearly')) return 1;
+      if (n.includes('monthly')) return 2;
+      return 3;
+    };
+    return rank(a.product.identifier) - rank(b.product.identifier);
   });
 
   return (
@@ -188,11 +191,11 @@ export const Paywall: React.FC<PaywallProps> = ({
           {sortedPackages.map((pkg) => {
             const isSelected = pkg.identifier === selectedId;
 
-            const productId = pkg.product.identifier;
+            const productId = pkg.product.identifier?.toLowerCase() || '';
 
-            const isLifetime = productId === 'motorcheck_premium_lifetime';
-            const isAnnual = productId === 'motorcheck_premium_yearly';
-            const isMonthly = productId === 'motorcheck_premium_monthly';
+            const isLifetime = productId.includes('lifetime');
+            const isAnnual   = productId.includes('yearly');
+            const isMonthly  = productId.includes('monthly');
 
             return (
               <div key={pkg.identifier}>
