@@ -32,10 +32,14 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
   const initializeRevenueCat = async () => {
     try {
-      const apiKey = import.meta.env.VITE_REVENUECAT_API_KEY;
+      const platform = Capacitor.getPlatform();
+      const apiKey =
+        platform === 'ios' ? import.meta.env.VITE_REVENUECAT_IOS_KEY :
+        platform === 'android' ? import.meta.env.VITE_REVENUECAT_ANDROID_KEY :
+        null;
 
       if (!apiKey) {
-        console.warn('RevenueCat API key not configured');
+        console.warn('RevenueCat API key not configured for platform:', platform);
         return;
       }
 
@@ -44,7 +48,7 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
         appUserID: undefined,
       });
 
-      console.log('RevenueCat initialized successfully');
+      console.log('RevenueCat initialized successfully for platform:', platform);
     } catch (error) {
       console.error('Error initializing RevenueCat:', error);
     }
