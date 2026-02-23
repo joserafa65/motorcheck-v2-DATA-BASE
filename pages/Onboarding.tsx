@@ -113,7 +113,7 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
         )}
       </div>
 
-      <div className="absolute bottom-8 left-0 right-0 flex justify-center items-center gap-2 pb-safe">
+      <div className="absolute bottom-20 left-0 right-0 flex justify-center items-center gap-2 pb-safe">
         {SCREENS.map((_, index) => (
           <button
             key={index}
