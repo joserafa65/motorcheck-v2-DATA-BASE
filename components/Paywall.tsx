@@ -306,7 +306,11 @@ export const Paywall: React.FC<PaywallProps> = ({
         <div className="mt-2 text-[11px] text-gray-500 text-center leading-snug">
           Las suscripciones se renuevan automáticamente.
           <br />
-          Puedes cancelarlas en cualquier momento desde los ajustes de tu Apple ID.
+          El pago se cargará a tu cuenta de Apple ID al confirmar la compra.
+
+Las suscripciones se renuevan automáticamente a menos que se cancelen al menos 24 horas antes del final del periodo actual.
+
+Puedes administrar o cancelar tu suscripción en los ajustes de tu Apple ID en cualquier momento.
         </div>
 
         <div className="flex justify-center gap-6 mt-3">
