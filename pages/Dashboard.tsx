@@ -24,7 +24,7 @@ const Dashboard: React.FC<{ onNavigate: (view: string, params?: any) => void }> 
   
   // State para el mensaje de compartir
  const [shareMessage, setShareMessage] = useState(
-  'Estoy usando MotorCheck para controlar mi vehículo 🚗\n\nDescárgala aquí:\nhttps://labappstudio.com/motorcheck#descarga'
+  'Estoy usando MotorCheck para llevar el control de mi vehículo 🚗\n\nGasolina, mantenimientos y gastos en un solo lugar.\n\nDescárgala aquí:\nhttps://labappstudio.com/motorcheck#descarga'
 );
 
   // Lógica de cálculos (Combustible, Eficiencia, etc.)
