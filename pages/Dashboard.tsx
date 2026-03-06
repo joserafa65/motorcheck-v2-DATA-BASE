@@ -23,7 +23,9 @@ const Dashboard: React.FC<{ onNavigate: (view: string, params?: any) => void }> 
   const [showTrialReminder, setShowTrialReminder] = useState(false);
   
   // State para el mensaje de compartir
-  const [shareMessage, setShareMessage] = useState('Estoy usando MotorCheck para controlar mi vehículo. 🚗 Descárgala en: https://labappstudio.com/motorcheck#descarga');
+ const [shareMessage, setShareMessage] = useState(
+  'Estoy usando MotorCheck para controlar mi vehículo 🚗\n\nDescárgala aquí:\nhttps://labappstudio.com/motorcheck#descarga'
+);
 
   // Lógica de cálculos (Combustible, Eficiencia, etc.)
   const lastFuel = fuelLogs.length > 0 ? fuelLogs[0] : null;
