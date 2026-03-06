@@ -146,6 +146,7 @@ const SubscriptionGate: React.FC<{
 
   const [openCount, setOpenCount] = useState(0);
   const [showTrialNudge, setShowTrialNudge] = useState(false);
+  const [showFirstLoginPaywall, setShowFirstLoginPaywall] = useState(false);
 
   // 🔥 Contador de aperturas
   useEffect(() => {
@@ -162,6 +163,16 @@ const SubscriptionGate: React.FC<{
     }
   }, [openCount, isTrialActive, subscriptionStatus]);
 
+  // Show paywall once after first sign-in for trial users
+  useEffect(() => {
+    if (!loading) {
+      const isPremium = subscriptionStatus === 'active';
+      if (isTrialActive && !isPremium && !showPaywall && !StorageService.hasSeenFirstLoginPaywall()) {
+        setShowFirstLoginPaywall(true);
+      }
+    }
+  }, [loading]);
+
   if (loading) {
     return (
       <div className="fixed inset-0 bg-black flex items-center justify-center">
@@ -177,6 +188,22 @@ const SubscriptionGate: React.FC<{
         offerings={offerings}
         onPurchase={purchase}
         onRestore={restore}
+      />
+    );
+  }
+
+  // First-login paywall (shown once after first sign-in)
+  if (showFirstLoginPaywall) {
+    return (
+      <Paywall
+        offerings={offerings}
+        onPurchase={purchase}
+        onRestore={restore}
+        allowClose={true}
+        onClose={() => {
+          StorageService.setFirstLoginPaywallSeen();
+          setShowFirstLoginPaywall(false);
+        }}
       />
     );
   }

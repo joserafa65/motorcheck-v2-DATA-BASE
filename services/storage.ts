@@ -8,6 +8,7 @@ const KEYS = {
   SERVICE_DEFS: 'motorcheck_service_defs',
   ONBOARDING_COMPLETED: 'motorcheck_onboarding_completed',
   AUTH_COMPLETED: 'motorcheck_auth_completed',
+  FIRST_LOGIN_PAYWALL_SHOWN: 'motorcheck_first_login_paywall_shown',
 };
 
 export const StorageService = {
@@ -109,5 +110,19 @@ export const StorageService = {
     } catch (e) {
       console.error("Error saving auth status", e);
     }
-  }
+  },
+  hasSeenFirstLoginPaywall: (): boolean => {
+    try {
+      return localStorage.getItem(KEYS.FIRST_LOGIN_PAYWALL_SHOWN) === 'true';
+    } catch (e) {
+      return false;
+    }
+  },
+  setFirstLoginPaywallSeen: () => {
+    try {
+      localStorage.setItem(KEYS.FIRST_LOGIN_PAYWALL_SHOWN, 'true');
+    } catch (e) {
+      console.error("Error saving first login paywall status", e);
+    }
+  },
 };
