@@ -330,6 +330,14 @@ Puedes administrar o cancelar tu suscripción en los ajustes de tu Apple ID en c
           >
             Privacidad
           </a>
+          <a
+            href="https://www.apple.com/legal/internet-services/itunes/dev/stdeula/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sm text-gray-300 hover:text-white underline underline-offset-4 py-2 px-1"
+          >
+            EULA
+          </a>
         </div>
 
         <div className="mt-1 text-center">
