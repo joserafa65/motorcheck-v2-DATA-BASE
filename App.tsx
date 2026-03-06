@@ -13,13 +13,7 @@ import Auth from './pages/Auth';
 import ResetPassword from './pages/ResetPassword';
 import { AnimatedSplash } from './components/AnimatedSplash';
 import { Paywall } from './components/Paywall';
-import {
-  Home,
-  Wrench,
-  BarChart2,
-  Settings as SettingsIcon,
-  ClipboardList,
-} from 'lucide-react';
+import { Hop as Home, Wrench, ChartBar as BarChart2, Settings as SettingsIcon, ClipboardList } from 'lucide-react';
 import { StorageService } from './services/storage';
 import { NotificationService } from './services/notifications';
 
