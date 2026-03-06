@@ -1,5 +1,8 @@
 
 import { jsPDF } from 'jspdf';
+import { Capacitor } from '@capacitor/core';
+import { Filesystem, Directory } from '@capacitor/filesystem';
+import { Share } from '@capacitor/share';
 import { VehicleSettings, FuelLog, ServiceLog, UnitSystem } from '../types';
 import { CURRENCY_FORMATTER, DATE_FORMATTER } from '../constants';
 
@@ -306,6 +309,21 @@ export const PDFExportService = {
     addFooter();
 
     const filename = `MotorCheck_Historial_${vehicle.brand}_${vehicle.model}_${vehicle.plate}.pdf`.replace(/\s+/g, '_');
-    doc.save(filename);
+
+    if (Capacitor.isNativePlatform()) {
+      const base64 = doc.output('datauristring').split(',')[1];
+      const result = await Filesystem.writeFile({
+        path: filename,
+        data: base64,
+        directory: Directory.Cache,
+      });
+      await Share.share({
+        title: filename,
+        url: result.uri,
+        dialogTitle: 'Compartir PDF',
+      });
+    } else {
+      doc.save(filename);
+    }
   }
 };
