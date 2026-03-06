@@ -23,8 +23,8 @@ const Dashboard: React.FC<{ onNavigate: (view: string, params?: any) => void }> 
   const [showTrialReminder, setShowTrialReminder] = useState(false);
   
   // State para el mensaje de compartir
- const [shareMessage, setShareMessage] = useState(
-  'Estoy usando MotorCheck para llevar el control de mi vehículo 🚗\n\nGasolina, mantenimientos y gastos en un solo lugar.\n\nDescárgala aquí:\nhttps://labappstudio.com/motorcheck#descarga'
+ const [shareMessage] = useState(
+  'Estoy usando MotorCheck para llevar el control de mi vehículo 🚗\n\nGasolina, mantenimientos y gastos en un solo lugar.'
 );
 
   // Lógica de cálculos (Combustible, Eficiencia, etc.)
@@ -99,10 +99,11 @@ const Dashboard: React.FC<{ onNavigate: (view: string, params?: any) => void }> 
       await dbClient.from('share_events').insert([{}]);
 
       await Share.share({
-        title: 'MotorCheck',
-        text: shareMessage,
-        dialogTitle: 'Compartir MotorCheck',
-      });
+  title: 'MotorCheck',
+  text: shareMessage,
+  url: 'https://labappstudio.com/motorcheck#descarga',
+  dialogTitle: 'Compartir MotorCheck'
+});
     } catch (e) {
       console.log('Error al compartir', e);
     }
