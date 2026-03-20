@@ -172,7 +172,7 @@ export const Paywall: React.FC<PaywallProps> = ({
           MOTORCHECK
         </h1>
 
-        <p className="text-center text-gray-400 text-sm mt-1 mb-3">
+   <p className="text-center text-gray-400 text-base mt-1 mb-3">
           Cuida tu vehículo como se merece.<br />
           Empieza tu prueba de 15 días gratis.
         </p>
