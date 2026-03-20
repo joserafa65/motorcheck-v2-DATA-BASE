@@ -58,7 +58,6 @@ const mapVehicleToDb = (vehicle: VehicleSettings, userId: string) => ({
 
 // Map local FuelLog to database format
 const mapFuelLogToDb = (log: FuelLog, userId: string, vehicleId: string) => ({
-  id: log.id,
   vehicle_id: vehicleId,
   user_id: userId,
   date: log.date ?? new Date().toISOString(),
