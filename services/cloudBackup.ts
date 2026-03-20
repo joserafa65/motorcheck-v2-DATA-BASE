@@ -73,10 +73,9 @@ const mapFuelLogToDb = (log: FuelLog, userId: string, vehicleId: string) => ({
 
 // Map local ServiceLog to database format
 const mapServiceLogToDb = (log: ServiceLog, userId: string, vehicleId: string) => ({
-  id: log.id,
   vehicle_id: vehicleId,
   user_id: userId,
-  service_id: null,
+  service_id: log.serviceName || 'service',
   service_name: log.serviceName,
   date: log.date,
   odometer: log.odometer,
