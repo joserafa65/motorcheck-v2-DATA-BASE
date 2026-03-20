@@ -4,7 +4,7 @@ import { FuelLog, ServiceDefinition, ServiceLog, ServiceStatus, VehicleSettings,
 import { StorageService } from '../services/storage';
 import { NotificationService } from '../services/notifications';
 import { useAuth } from './AuthContext';
-import { backupVehicle, backupFuelLogs, backupServiceLogs, backupServiceDefinitions, migrateLocalToCloud, shouldMigrate } from '../services/cloudBackup';
+import { backupVehicle, backupFuelLogs, backupServiceLogs, backupServiceDefinitions, migrateLocalToCloud, shouldMigrate, restoreFromCloud } from '../services/cloudBackup';
 
 interface VehicleContextType {
   vehicle: VehicleSettings;
@@ -85,6 +85,43 @@ export const VehicleProvider: React.FC<{ children: React.ReactNode }> = ({ child
     if (user?.id && shouldMigrate()) {
       migrateLocalToCloud(user.id, vehicle, fuelLogs, serviceLogs, serviceDefinitions);
     }
+  }, [user?.id]);
+
+  // Restore cloud data on login when local data is empty
+  useEffect(() => {
+    if (!user?.id) return;
+
+    const localIsEmpty = !vehicle.brand && fuelLogs.length === 0 && serviceLogs.length === 0;
+    if (!localIsEmpty) {
+      console.log('[VehicleContext] Local data present, skipping cloud restore');
+      return;
+    }
+
+    console.log('[VehicleContext] Local data empty, attempting cloud restore...');
+    restoreFromCloud(user.id).then(result => {
+      if (result.vehicle) {
+        setVehicle(result.vehicle);
+        StorageService.saveVehicle(result.vehicle);
+        console.log('[VehicleContext] Vehicle restored from cloud:', result.vehicle.brand, result.vehicle.model);
+      }
+      if (result.fuelLogs.length > 0) {
+        const sorted = [...result.fuelLogs].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+        setFuelLogs(sorted);
+        StorageService.saveFuelLogs(sorted);
+        console.log('[VehicleContext] Fuel logs restored from cloud:', sorted.length);
+      }
+      if (result.serviceLogs.length > 0) {
+        const sorted = [...result.serviceLogs].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+        setServiceLogs(sorted);
+        StorageService.saveServiceLogs(sorted);
+        console.log('[VehicleContext] Service logs restored from cloud:', sorted.length);
+      }
+      if (result.serviceDefinitions.length > 0) {
+        setServiceDefinitions(result.serviceDefinitions);
+        StorageService.saveServiceDefinitions(result.serviceDefinitions);
+        console.log('[VehicleContext] Service definitions restored from cloud:', result.serviceDefinitions.length);
+      }
+    });
   }, [user?.id]);
 
   // Calculate Statuses

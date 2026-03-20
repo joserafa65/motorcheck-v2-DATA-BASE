@@ -1,6 +1,6 @@
 
 import { dbClient } from './database';
-import { FuelLog, ServiceLog, VehicleSettings, ServiceDefinition } from '../types';
+import { FuelLog, ServiceLog, VehicleSettings, ServiceDefinition, UnitSystem, Theme } from '../types';
 
 const CLOUD_KEYS = {
   VEHICLE_ID: 'motorcheck_cloud_vehicle_id',
@@ -204,6 +204,121 @@ export const backupServiceDefinitions = async (defs: ServiceDefinition[], userId
     }
   } catch (e) {
     console.error('[CloudBackup] Exception in backupServiceDefinitions:', e);
+  }
+};
+
+export interface RestoreResult {
+  vehicle: VehicleSettings | null;
+  fuelLogs: FuelLog[];
+  serviceLogs: ServiceLog[];
+  serviceDefinitions: ServiceDefinition[];
+}
+
+// Map DB vehicle row back to local VehicleSettings
+const mapDbToVehicle = (row: Record<string, any>): VehicleSettings => ({
+  brand: row.brand ?? '',
+  model: row.model ?? '',
+  year: row.year ?? '',
+  plate: row.plate ?? '',
+  currentOdometer: row.current_odometer ?? 0,
+  fuelType: row.fuel_type ?? 'Gasolina',
+  oilTypeEngine: row.oil_type_engine ?? '',
+  oilTypeTransmission: row.oil_type_transmission ?? '',
+  unitSystem: (row.unit_system as UnitSystem) ?? UnitSystem.KM_GAL,
+  photoUrl: row.photo_url ?? undefined,
+  theme: (row.theme as Theme) ?? 'dark',
+});
+
+// Map DB fuel_log row back to local FuelLog
+const mapDbToFuelLog = (row: Record<string, any>): FuelLog => ({
+  id: row.id,
+  date: row.date,
+  odometer: row.odometer ?? 0,
+  volume: parseFloat(row.volume) ?? 0,
+  pricePerUnit: parseFloat(row.price_per_unit) ?? 0,
+  totalCost: parseFloat(row.total_cost) ?? 0,
+  fuelType: row.fuel_type ?? undefined,
+  isFullTank: row.is_full_tank ?? false,
+  receiptPhotoUrl: row.receipt_photo_url ?? undefined,
+});
+
+// Map DB service_log row back to local ServiceLog
+const mapDbToServiceLog = (row: Record<string, any>): ServiceLog => ({
+  id: row.id,
+  serviceId: row.service_id ?? null,
+  serviceName: row.service_name ?? '',
+  date: row.date,
+  odometer: row.odometer ?? 0,
+  cost: parseFloat(row.cost) ?? 0,
+  notes: row.notes ?? '',
+  receiptPhotoUrl: row.receipt_photo_url ?? undefined,
+});
+
+// Map DB service_definition row back to local ServiceDefinition
+const mapDbToServiceDef = (row: Record<string, any>): ServiceDefinition => ({
+  id: row.id,
+  name: row.name ?? '',
+  intervalKm: row.interval_km ?? 0,
+  intervalMonths: row.interval_months ?? 0,
+  notes: row.notes ?? undefined,
+  nextDueOdometer: row.next_due_odometer ?? undefined,
+});
+
+// Restore all cloud data for a user. Returns null values if nothing found.
+export const restoreFromCloud = async (userId: string): Promise<RestoreResult> => {
+  const empty: RestoreResult = { vehicle: null, fuelLogs: [], serviceLogs: [], serviceDefinitions: [] };
+
+  try {
+    console.log('[CloudBackup] Starting restore from cloud for user:', userId);
+
+    const { data: vehicleRows, error: vehicleError } = await dbClient
+      .from('vehicles')
+      .select('*')
+      .eq('user_id', userId)
+      .limit(1);
+
+    if (vehicleError) {
+      console.error('[CloudBackup] Error fetching vehicle:', vehicleError);
+      return empty;
+    }
+
+    if (!vehicleRows || vehicleRows.length === 0) {
+      console.log('[CloudBackup] No cloud data found for user');
+      return empty;
+    }
+
+    const vehicleRow = vehicleRows[0];
+    const vehicleId = vehicleRow.id;
+    localStorage.setItem(CLOUD_KEYS.VEHICLE_ID, vehicleId);
+
+    const [fuelRes, serviceLogsRes, serviceDefsRes] = await Promise.all([
+      dbClient.from('fuel_logs').select('*').eq('user_id', userId),
+      dbClient.from('service_logs').select('*').eq('user_id', userId),
+      dbClient.from('service_definitions').select('*').eq('user_id', userId),
+    ]);
+
+    if (fuelRes.error) console.error('[CloudBackup] Error fetching fuel logs:', fuelRes.error);
+    if (serviceLogsRes.error) console.error('[CloudBackup] Error fetching service logs:', serviceLogsRes.error);
+    if (serviceDefsRes.error) console.error('[CloudBackup] Error fetching service definitions:', serviceDefsRes.error);
+
+    const result: RestoreResult = {
+      vehicle: mapDbToVehicle(vehicleRow),
+      fuelLogs: (fuelRes.data ?? []).map(mapDbToFuelLog),
+      serviceLogs: (serviceLogsRes.data ?? []).map(mapDbToServiceLog),
+      serviceDefinitions: (serviceDefsRes.data ?? []).map(mapDbToServiceDef),
+    };
+
+    console.log('[CloudBackup] Restore complete:', {
+      vehicle: result.vehicle?.brand + ' ' + result.vehicle?.model,
+      fuelLogs: result.fuelLogs.length,
+      serviceLogs: result.serviceLogs.length,
+      serviceDefinitions: result.serviceDefinitions.length,
+    });
+
+    return result;
+  } catch (e) {
+    console.error('[CloudBackup] Exception in restoreFromCloud:', e);
+    return empty;
   }
 };
 
