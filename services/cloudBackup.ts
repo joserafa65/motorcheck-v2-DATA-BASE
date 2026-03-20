@@ -61,14 +61,14 @@ const mapFuelLogToDb = (log: FuelLog, userId: string, vehicleId: string) => ({
   id: log.id,
   vehicle_id: vehicleId,
   user_id: userId,
-  date: log.date,
-  odometer: log.odometer,
-  volume: log.volume,
-  price_per_unit: log.pricePerUnit,
-  total_cost: log.totalCost,
+  date: log.date ?? new Date().toISOString(),
+  odometer: log.odometer ?? 0,
+  volume: log.volume ?? 0,
+  price_per_unit: log.pricePerUnit ?? 0,
+  total_cost: log.totalCost ?? 0,
   fuel_type: log.fuelType || null,
-  is_full_tank: log.isFullTank,
-  receipt_photo_url: null, // base64 not supported in cloud yet
+  is_full_tank: log.isFullTank ?? false,
+  receipt_photo_url: null,
   updated_at: new Date().toISOString()
 });
 
@@ -153,12 +153,14 @@ export const backupFuelLogs = async (logs: FuelLog[], userId: string): Promise<v
 
     // Insert all current logs
     const logsData = logs.map(log => mapFuelLogToDb(log, userId, vehicleId));
+    console.log('Fuel logs to insert:', logsData);
     const { error } = await dbClient
       .from('fuel_logs')
       .insert(logsData);
 
     if (error) {
       console.error('[CloudBackup] Error backing up fuel logs:', error);
+      console.error('Insert error:', error);
     }
   } catch (e) {
     console.error('[CloudBackup] Exception in backupFuelLogs:', e);

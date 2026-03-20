@@ -4,7 +4,7 @@ import { useVehicle } from '../contexts/VehicleContext';
 import { Button, Card, Input, Select, BackButton, PhotoInput } from '../components/UI';
 import { CURRENCY_FORMATTER, generateId, DATE_FORMATTER, roundToTwo } from '../constants';
 import { FuelLog } from '../types';
-import { Trash2, Trophy, AlertTriangle, Gauge } from 'lucide-react';
+import { Trash2, Trophy, TriangleAlert as AlertTriangle, Gauge } from 'lucide-react';
 
 interface FuelProps {
   onNavigate: (view: string, params?: any) => void;
@@ -159,8 +159,11 @@ const Fuel: React.FC<FuelProps> = ({ onNavigate, initialTab = 'log', editLogId, 
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const currentOdo = Number(formData.odometer);
-    const currentVol = Number(formData.volume);
+    const currentOdo = Number(formData.odometer) || 0;
+    const currentVol = Number(formData.volume) || 0;
+    const safeDate = formData.date && formData.date.trim() !== ''
+      ? formData.date
+      : new Date().toISOString();
 
     let feedback = null;
     if (!editingId && fuelLogs.length > 0) {
@@ -169,11 +172,11 @@ const Fuel: React.FC<FuelProps> = ({ onNavigate, initialTab = 'log', editLogId, 
 
     const logData: FuelLog = {
         id: editingId || generateId(),
-        date: formData.date,
+        date: safeDate,
         odometer: currentOdo,
         volume: roundToTwo(currentVol),
-        pricePerUnit: roundToTwo(Number(formData.price)),
-        totalCost: roundToTwo(Number(formData.total)),
+        pricePerUnit: roundToTwo(Number(formData.price) || 0),
+        totalCost: roundToTwo(Number(formData.total) || 0),
         fuelType: formData.type,
         isFullTank: true,
         receiptPhoto: formData.photo || undefined
