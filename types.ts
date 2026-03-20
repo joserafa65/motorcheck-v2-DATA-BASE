@@ -28,9 +28,10 @@ export interface FuelLog {
   volume: number; // stored in liters or gallons
   pricePerUnit: number;
   totalCost: number;
-  fuelType?: string; 
+  fuelType?: string;
   isFullTank: boolean;
   receiptPhoto?: string; // Base64 compressed string
+  receiptPhotoUrl?: string; // Supabase Storage public URL
 }
 
 export interface ServiceDefinition {
@@ -51,6 +52,7 @@ export interface ServiceLog {
   cost: number;
   notes: string;
   receiptPhoto?: string; // Base64 compressed string
+  receiptPhotoUrl?: string; // Supabase Storage public URL
 }
 
 export interface ServiceStatus {

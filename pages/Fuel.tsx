@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useVehicle } from '../contexts/VehicleContext';
+import { useAuth } from '../contexts/AuthContext';
 import { Button, Card, Input, Select, BackButton, PhotoInput } from '../components/UI';
 import { CURRENCY_FORMATTER, generateId, DATE_FORMATTER, roundToTwo } from '../constants';
 import { FuelLog } from '../types';
+import { uploadImage, base64ToFile } from '../services/imageUpload';
 import { Trash2, Trophy, TriangleAlert as AlertTriangle, Gauge } from 'lucide-react';
 
 interface FuelProps {
@@ -21,6 +23,7 @@ interface FeedbackData {
 
 const Fuel: React.FC<FuelProps> = ({ onNavigate, initialTab = 'log', editLogId, fromHistory }) => {
   const { addFuelLog, updateFuelLog, vehicle, fuelLogs, deleteFuelLog } = useVehicle();
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<'log' | 'history'>(initialTab);
   const [editingId, setEditingId] = useState<string | null>(null);
   
@@ -157,7 +160,7 @@ const Fuel: React.FC<FuelProps> = ({ onNavigate, initialTab = 'log', editLogId, 
       return null;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const currentOdo = Number(formData.odometer) || 0;
     const currentVol = Number(formData.volume) || 0;
@@ -170,6 +173,13 @@ const Fuel: React.FC<FuelProps> = ({ onNavigate, initialTab = 'log', editLogId, 
         feedback = calculateFeedback(currentOdo, currentVol);
     }
 
+    let receiptPhotoUrl: string | undefined;
+    if (formData.photo && user?.id) {
+        const file = base64ToFile(formData.photo);
+        const url = await uploadImage(file, user.id, 'fuel');
+        receiptPhotoUrl = url || undefined;
+    }
+
     const logData: FuelLog = {
         id: editingId || generateId(),
         date: safeDate,
@@ -179,7 +189,8 @@ const Fuel: React.FC<FuelProps> = ({ onNavigate, initialTab = 'log', editLogId, 
         totalCost: roundToTwo(Number(formData.total) || 0),
         fuelType: formData.type,
         isFullTank: true,
-        receiptPhoto: formData.photo || undefined
+        receiptPhoto: formData.photo || undefined,
+        receiptPhotoUrl
     };
 
     if (editingId) {

@@ -51,7 +51,7 @@ const mapVehicleToDb = (vehicle: VehicleSettings, userId: string) => ({
   oil_type_engine: vehicle.oilTypeEngine,
   oil_type_transmission: vehicle.oilTypeTransmission,
   unit_system: vehicle.unitSystem,
-  photo_url: null, // base64 not supported in cloud yet
+  photo_url: vehicle.photoUrl?.startsWith('http') ? vehicle.photoUrl : null,
   theme: vehicle.theme,
   updated_at: new Date().toISOString()
 });
@@ -67,7 +67,7 @@ const mapFuelLogToDb = (log: FuelLog, userId: string, vehicleId: string) => ({
   total_cost: log.totalCost ?? 0,
   fuel_type: log.fuelType || null,
   is_full_tank: log.isFullTank ?? false,
-  receipt_photo_url: null,
+  receipt_photo_url: log.receiptPhotoUrl || null,
   updated_at: new Date().toISOString()
 });
 
@@ -82,7 +82,7 @@ const mapServiceLogToDb = (log: ServiceLog, userId: string, vehicleId: string) =
   odometer: log.odometer,
   cost: log.cost,
   notes: log.notes,
-  receipt_photo_url: null, // base64 not supported in cloud yet
+  receipt_photo_url: log.receiptPhotoUrl || null,
   updated_at: new Date().toISOString()
 });
 

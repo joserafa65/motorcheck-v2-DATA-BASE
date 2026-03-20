@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useVehicle } from '../contexts/VehicleContext';
+import { useAuth } from '../contexts/AuthContext';
 import { Button, Card, Input, Select, BackButton, PhotoInput } from '../components/UI';
 import { ServiceLog, ServiceDefinition } from '../types';
 import { DATE_FORMATTER, CURRENCY_FORMATTER, generateId, roundToTwo } from '../constants';
-import { ArrowLeft, Edit2, Trash2, CalendarClock, ClipboardCheck, AlertCircle, Gauge, Plus } from 'lucide-react';
+import { uploadImage, base64ToFile } from '../services/imageUpload';
+import { ArrowLeft, CreditCard as Edit2, Trash2, CalendarClock, ClipboardCheck, CircleAlert as AlertCircle, Gauge, Plus } from 'lucide-react';
 
 interface ServicesProps {
   onNavigate: (view: string, params?: any) => void;
@@ -37,18 +39,19 @@ const COMMON_SERVICES = [
 ];
 
 const Services: React.FC<ServicesProps> = ({ onNavigate, initialServiceId, startInProgramMode, editLogId, fromHistory }) => {
-  const { 
-    serviceDefinitions, 
-    addServiceLog, 
-    updateServiceLog, 
-    deleteServiceLog, 
-    addServiceDefinition, 
+  const {
+    serviceDefinitions,
+    addServiceLog,
+    updateServiceLog,
+    deleteServiceLog,
+    addServiceDefinition,
     updateServiceDefinition,
     deleteServiceDefinition,
-    vehicle, 
-    serviceStatuses, 
-    serviceLogs 
+    vehicle,
+    serviceStatuses,
+    serviceLogs
   } = useVehicle();
+  const { user } = useAuth();
 
   const [activeServiceId, setActiveServiceId] = useState<string | null>(initialServiceId || null);
   const [showForm, setShowForm] = useState(!!startInProgramMode);
@@ -190,7 +193,7 @@ const Services: React.FC<ServicesProps> = ({ onNavigate, initialServiceId, start
       }
   };
 
-  const handleSubmitLog = (e: React.FormEvent) => {
+  const handleSubmitLog = async (e: React.FormEvent) => {
       e.preventDefault();
 
       let finalServiceId = logForm.serviceId;
@@ -209,10 +212,16 @@ const Services: React.FC<ServicesProps> = ({ onNavigate, initialServiceId, start
               finalServiceId = def.id;
               finalServiceName = def.name;
           } else {
-               // Fallback if somehow ID is invalid but not 'other'
-               finalServiceId = 'unknown_' + generateId();
-               finalServiceName = 'Servicio Desconocido';
+              finalServiceId = 'unknown_' + generateId();
+              finalServiceName = 'Servicio Desconocido';
           }
+      }
+
+      let receiptPhotoUrl: string | undefined;
+      if (logForm.photo && user?.id) {
+          const file = base64ToFile(logForm.photo);
+          const url = await uploadImage(file, user.id, 'service');
+          receiptPhotoUrl = url || undefined;
       }
 
       const newLog: ServiceLog = {
@@ -223,9 +232,10 @@ const Services: React.FC<ServicesProps> = ({ onNavigate, initialServiceId, start
           odometer: Number(logForm.odometer),
           cost: roundToTwo(Number(logForm.cost) || 0),
           notes: logForm.notes,
-          receiptPhoto: logForm.photo || undefined
+          receiptPhoto: logForm.photo || undefined,
+          receiptPhotoUrl
       };
-      
+
       if (editingLogId) {
           updateServiceLog(newLog);
           if (fromHistory) {

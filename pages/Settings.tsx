@@ -13,6 +13,7 @@ import {
 import { Paywall } from '../components/Paywall';
 import { UnitSystem } from '../types';
 import { PDFExportService } from '../services/pdfExport';
+import { uploadImage, base64ToFile } from '../services/imageUpload';
 import { Moon, Sun, Download, ShieldAlert, User, LogOut, LogIn, FileText, Scale, Sparkles, Star } from 'lucide-react';
 import { dbClient } from '../services/database';
 import { Capacitor } from '@capacitor/core';
@@ -63,8 +64,19 @@ const Settings: React.FC<SettingsProps> = ({ onNavigate }) => {
     updateVehicle(updated);
   };
 
-  const handleSave = () => {
-    updateVehicle(formData);
+  const handleSave = async () => {
+    let dataToSave = { ...formData };
+
+    if (formData.photoUrl && formData.photoUrl.startsWith('data:') && user?.id) {
+      const file = base64ToFile(formData.photoUrl);
+      const url = await uploadImage(file, user.id, 'vehicle');
+      if (url) {
+        dataToSave = { ...dataToSave, photoUrl: url };
+        setFormData(dataToSave);
+      }
+    }
+
+    updateVehicle(dataToSave);
     alert('Cambios guardados correctamente.');
     onNavigate('dashboard');
   };
