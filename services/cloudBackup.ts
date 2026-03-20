@@ -141,24 +141,16 @@ export const backupFuelLogs = async (logs: FuelLog[], userId: string): Promise<v
       return;
     }
 
-    // Delete all existing fuel logs for this vehicle
-    await dbClient
-      .from('fuel_logs')
-      .delete()
-      .eq('vehicle_id', vehicleId);
-
     if (logs.length === 0) return;
 
-    // Insert all current logs
     const logsData = logs.map(log => mapFuelLogToDb(log, userId, vehicleId));
-    console.log('Fuel logs to insert:', logsData);
+    console.log('[CloudBackup] Fuel logs to insert:', logsData);
     const { error } = await dbClient
       .from('fuel_logs')
       .insert(logsData);
 
     if (error) {
       console.error('[CloudBackup] Error backing up fuel logs:', error);
-      console.error('Insert error:', error);
     }
   } catch (e) {
     console.error('[CloudBackup] Exception in backupFuelLogs:', e);
@@ -174,16 +166,10 @@ export const backupServiceLogs = async (logs: ServiceLog[], userId: string): Pro
       return;
     }
 
-    // Delete all existing service logs for this vehicle
-    await dbClient
-      .from('service_logs')
-      .delete()
-      .eq('vehicle_id', vehicleId);
-
     if (logs.length === 0) return;
 
-    // Insert all current logs
     const logsData = logs.map(log => mapServiceLogToDb(log, userId, vehicleId));
+    console.log('[CloudBackup] Service logs to insert:', logsData);
     const { error } = await dbClient
       .from('service_logs')
       .insert(logsData);
@@ -205,19 +191,13 @@ export const backupServiceDefinitions = async (defs: ServiceDefinition[], userId
       return;
     }
 
-    // Delete all existing service definitions for this vehicle
-    await dbClient
-      .from('service_definitions')
-      .delete()
-      .eq('vehicle_id', vehicleId);
-
     if (defs.length === 0) return;
 
-    // Insert all current definitions
     const defsData = defs.map(def => mapServiceDefToDb(def, userId, vehicleId));
+    console.log('[CloudBackup] Service definitions to upsert:', defsData);
     const { error } = await dbClient
       .from('service_definitions')
-      .insert(defsData);
+      .upsert(defsData, { onConflict: 'vehicle_id,id' });
 
     if (error) {
       console.error('[CloudBackup] Error backing up service definitions:', error);
