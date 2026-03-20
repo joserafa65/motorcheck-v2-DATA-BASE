@@ -88,12 +88,13 @@ export const Paywall: React.FC<PaywallProps> = ({
   }, [isWeb, offerings]);
 
   const benefits = [
-    'Maximiza tu rentabilidad',
-    'Recordatorio de mantenimientos',
+    'Conoce exactamente cuanto te cuesta manejar',
+    'Estadísticas de conducción, gasto en gasolina y mantenimientos',
     'Backup automático en la nube',
+    'Recordatorio de mantenimientos',
     'Historial ilimitado',
     'Exportación de reportes PDF',
-    'Estadísticas de egresos y consumos',
+    ,
   ];
 
   const handleContinue = async () => {
