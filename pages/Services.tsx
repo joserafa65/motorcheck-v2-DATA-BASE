@@ -226,7 +226,7 @@ const Services: React.FC<ServicesProps> = ({ onNavigate, initialServiceId, start
 
       const newLog: ServiceLog = {
           id: editingLogId || generateId(),
-          serviceId: finalServiceId,
+          serviceId: null,
           serviceName: finalServiceName,
           date: logForm.date,
           odometer: Number(logForm.odometer),

@@ -45,7 +45,7 @@ export interface ServiceDefinition {
 
 export interface ServiceLog {
   id: string;
-  serviceId: string; // References ServiceDefinition
+  serviceId: string | null; // References ServiceDefinition
   serviceName: string; // Snapshot name
   date: string;
   odometer: number;
