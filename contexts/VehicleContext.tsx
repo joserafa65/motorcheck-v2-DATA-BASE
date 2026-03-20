@@ -87,40 +87,36 @@ export const VehicleProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
   }, [user?.id]);
 
-  // Restore cloud data on login when local data is empty
+  // [DEBUG] Restore cloud data on login - condition check REMOVED, always restores
   useEffect(() => {
     if (!user?.id) return;
 
     const localIsEmpty = !vehicle.brand && fuelLogs.length === 0 && serviceLogs.length === 0;
-    if (!localIsEmpty) {
-      console.log('[VehicleContext] Local data present, skipping cloud restore');
-      return;
-    }
 
-    console.log('[VehicleContext] Local data empty, attempting cloud restore...');
+    console.log('User detected:', user?.id);
+    console.log('Local state:', vehicle, fuelLogs.length, serviceLogs.length);
+    console.log('Should restore:', localIsEmpty, '(DEBUG: forcing restore regardless)');
+
     restoreFromCloud(user.id).then(result => {
       if (result.vehicle) {
         setVehicle(result.vehicle);
         StorageService.saveVehicle(result.vehicle);
-        console.log('[VehicleContext] Vehicle restored from cloud:', result.vehicle.brand, result.vehicle.model);
       }
       if (result.fuelLogs.length > 0) {
         const sorted = [...result.fuelLogs].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
         setFuelLogs(sorted);
         StorageService.saveFuelLogs(sorted);
-        console.log('[VehicleContext] Fuel logs restored from cloud:', sorted.length);
       }
       if (result.serviceLogs.length > 0) {
         const sorted = [...result.serviceLogs].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
         setServiceLogs(sorted);
         StorageService.saveServiceLogs(sorted);
-        console.log('[VehicleContext] Service logs restored from cloud:', sorted.length);
       }
       if (result.serviceDefinitions.length > 0) {
         setServiceDefinitions(result.serviceDefinitions);
         StorageService.saveServiceDefinitions(result.serviceDefinitions);
-        console.log('[VehicleContext] Service definitions restored from cloud:', result.serviceDefinitions.length);
       }
+      console.log('Restored data applied');
     });
   }, [user?.id]);
 

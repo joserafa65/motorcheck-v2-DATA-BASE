@@ -269,7 +269,7 @@ export const restoreFromCloud = async (userId: string): Promise<RestoreResult> =
   const empty: RestoreResult = { vehicle: null, fuelLogs: [], serviceLogs: [], serviceDefinitions: [] };
 
   try {
-    console.log('[CloudBackup] Starting restore from cloud for user:', userId);
+    console.log('RESTORE START', userId);
 
     const { data: vehicleRows, error: vehicleError } = await dbClient
       .from('vehicles')
@@ -284,12 +284,15 @@ export const restoreFromCloud = async (userId: string): Promise<RestoreResult> =
 
     if (!vehicleRows || vehicleRows.length === 0) {
       console.log('[CloudBackup] No cloud data found for user');
+      console.log('Vehicle from DB:', null);
       return empty;
     }
 
     const vehicleRow = vehicleRows[0];
     const vehicleId = vehicleRow.id;
     localStorage.setItem(CLOUD_KEYS.VEHICLE_ID, vehicleId);
+
+    console.log('Vehicle from DB:', vehicleRow);
 
     const [fuelRes, serviceLogsRes, serviceDefsRes] = await Promise.all([
       dbClient.from('fuel_logs').select('*').eq('user_id', userId),
@@ -301,19 +304,18 @@ export const restoreFromCloud = async (userId: string): Promise<RestoreResult> =
     if (serviceLogsRes.error) console.error('[CloudBackup] Error fetching service logs:', serviceLogsRes.error);
     if (serviceDefsRes.error) console.error('[CloudBackup] Error fetching service definitions:', serviceDefsRes.error);
 
+    const fuelLogsData = fuelRes.data ?? [];
+    const serviceLogsData = serviceLogsRes.data ?? [];
+
+    console.log('Fuel logs from DB:', fuelLogsData.length);
+    console.log('Service logs from DB:', serviceLogsData.length);
+
     const result: RestoreResult = {
       vehicle: mapDbToVehicle(vehicleRow),
-      fuelLogs: (fuelRes.data ?? []).map(mapDbToFuelLog),
-      serviceLogs: (serviceLogsRes.data ?? []).map(mapDbToServiceLog),
+      fuelLogs: fuelLogsData.map(mapDbToFuelLog),
+      serviceLogs: serviceLogsData.map(mapDbToServiceLog),
       serviceDefinitions: (serviceDefsRes.data ?? []).map(mapDbToServiceDef),
     };
-
-    console.log('[CloudBackup] Restore complete:', {
-      vehicle: result.vehicle?.brand + ' ' + result.vehicle?.model,
-      fuelLogs: result.fuelLogs.length,
-      serviceLogs: result.serviceLogs.length,
-      serviceDefinitions: result.serviceDefinitions.length,
-    });
 
     return result;
   } catch (e) {
