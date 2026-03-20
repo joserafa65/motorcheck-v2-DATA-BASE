@@ -76,7 +76,7 @@ const mapServiceLogToDb = (log: ServiceLog, userId: string, vehicleId: string) =
   id: log.id,
   vehicle_id: vehicleId,
   user_id: userId,
-  service_id: log.serviceId,
+  service_id: null,
   service_name: log.serviceName,
   date: log.date,
   odometer: log.odometer,
