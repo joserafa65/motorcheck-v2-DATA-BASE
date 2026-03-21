@@ -58,6 +58,7 @@ const mapVehicleToDb = (vehicle: VehicleSettings, userId: string) => ({
 
 // Map local FuelLog to database format
 const mapFuelLogToDb = (log: FuelLog, userId: string, vehicleId: string) => ({
+  external_id: log.id,
   vehicle_id: vehicleId,
   user_id: userId,
   date: log.date ?? new Date().toISOString(),
@@ -73,6 +74,7 @@ const mapFuelLogToDb = (log: FuelLog, userId: string, vehicleId: string) => ({
 
 // Map local ServiceLog to database format
 const mapServiceLogToDb = (log: ServiceLog, userId: string, vehicleId: string) => ({
+  external_id: log.id,
   vehicle_id: vehicleId,
   user_id: userId,
   service_id: log.serviceName || 'service',
@@ -144,10 +146,9 @@ export const backupFuelLogs = async (logs: FuelLog[], userId: string): Promise<v
     if (logs.length === 0) return;
 
     const logsData = logs.map(log => mapFuelLogToDb(log, userId, vehicleId));
-    console.log('[CloudBackup] Fuel logs to insert:', logsData);
     const { error } = await dbClient
       .from('fuel_logs')
-      .insert(logsData);
+      .upsert(logsData, { onConflict: 'external_id' });
 
     if (error) {
       console.error('[CloudBackup] Error backing up fuel logs:', error);
@@ -169,10 +170,9 @@ export const backupServiceLogs = async (logs: ServiceLog[], userId: string): Pro
     if (logs.length === 0) return;
 
     const logsData = logs.map(log => mapServiceLogToDb(log, userId, vehicleId));
-    console.log('[CloudBackup] Service logs to insert:', logsData);
     const { error } = await dbClient
       .from('service_logs')
-      .insert(logsData);
+      .upsert(logsData, { onConflict: 'external_id' });
 
     if (error) {
       console.error('[CloudBackup] Error backing up service logs:', error);
@@ -231,7 +231,7 @@ const mapDbToVehicle = (row: Record<string, any>): VehicleSettings => ({
 
 // Map DB fuel_log row back to local FuelLog
 const mapDbToFuelLog = (row: Record<string, any>): FuelLog => ({
-  id: row.id,
+  id: row.external_id ?? row.id,
   date: row.date,
   odometer: row.odometer ?? 0,
   volume: parseFloat(row.volume) ?? 0,
@@ -244,7 +244,7 @@ const mapDbToFuelLog = (row: Record<string, any>): FuelLog => ({
 
 // Map DB service_log row back to local ServiceLog
 const mapDbToServiceLog = (row: Record<string, any>): ServiceLog => ({
-  id: row.id,
+  id: row.external_id ?? row.id,
   serviceId: row.service_id ?? null,
   serviceName: row.service_name ?? '',
   date: row.date,
