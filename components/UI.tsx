@@ -44,10 +44,10 @@ export const Input: React.FC<React.InputHTMLAttributes<HTMLInputElement> & { lab
   };
 
   return (
-    <div className="mb-5 animate-enter">
+    <div className="mb-5 animate-enter min-w-0">
       <label className="block text-sm font-medium text-muted mb-2 tracking-wide">{label}</label>
       <input
-        className={`glass-input w-full rounded-xl px-4 py-3.5 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all text-base ${className}`}
+        className={`glass-input w-full min-w-0 rounded-xl px-4 py-3.5 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all text-base ${className}`}
         inputMode={getInputMode()}
         {...props}
       />
@@ -56,7 +56,7 @@ export const Input: React.FC<React.InputHTMLAttributes<HTMLInputElement> & { lab
 };
 
 export const Select: React.FC<React.SelectHTMLAttributes<HTMLSelectElement> & { label: string, options: {value: string, label: string}[] }> = ({ label, options, className = '', ...props }) => (
-  <div className="mb-5 animate-enter">
+  <div className="mb-5 animate-enter min-w-0">
     <label className="block text-sm font-medium text-muted mb-2 tracking-wide">{label}</label>
     <div className="relative">
       <select 
