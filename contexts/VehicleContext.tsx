@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { FuelLog, ServiceDefinition, ServiceLog, ServiceStatus, VehicleSettings, PREDEFINED_SERVICES_GAS, DEFAULT_VEHICLE } from '../types';
 import { StorageService } from '../services/storage';
 import { NotificationService } from '../services/notifications';
@@ -40,6 +40,7 @@ export const VehicleProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [serviceStatuses, setServiceStatuses] = useState<ServiceStatus[]>([]);
   const [urgentCount, setUrgentCount] = useState(0);
   const [upcomingCount, setUpcomingCount] = useState(0);
+  const isRestoringRef = useRef(false);
 
   // Apply Theme
   useEffect(() => {
@@ -54,28 +55,28 @@ export const VehicleProvider: React.FC<{ children: React.ReactNode }> = ({ child
   // Persist changes
   useEffect(() => {
     StorageService.saveVehicle(vehicle);
-    if (user?.id) {
+    if (user?.id && !isRestoringRef.current) {
       backupVehicle(vehicle, user.id);
     }
   }, [vehicle, user?.id]);
 
   useEffect(() => {
     StorageService.saveFuelLogs(fuelLogs);
-    if (user?.id) {
+    if (user?.id && !isRestoringRef.current) {
       backupFuelLogs(fuelLogs, user.id);
     }
   }, [fuelLogs, user?.id]);
 
   useEffect(() => {
     StorageService.saveServiceLogs(serviceLogs);
-    if (user?.id) {
+    if (user?.id && !isRestoringRef.current) {
       backupServiceLogs(serviceLogs, user.id);
     }
   }, [serviceLogs, user?.id]);
 
   useEffect(() => {
     StorageService.saveServiceDefinitions(serviceDefinitions);
-    if (user?.id) {
+    if (user?.id && !isRestoringRef.current) {
       backupServiceDefinitions(serviceDefinitions, user.id);
     }
   }, [serviceDefinitions, user?.id]);
@@ -98,6 +99,7 @@ export const VehicleProvider: React.FC<{ children: React.ReactNode }> = ({ child
     console.log('Should restore:', localIsEmpty, '(DEBUG: forcing restore regardless)');
 
     restoreFromCloud(user.id).then(result => {
+      isRestoringRef.current = true;
       if (result.vehicle) {
         setVehicle(result.vehicle);
         StorageService.saveVehicle(result.vehicle);
@@ -116,7 +118,7 @@ export const VehicleProvider: React.FC<{ children: React.ReactNode }> = ({ child
         setServiceDefinitions(result.serviceDefinitions);
         StorageService.saveServiceDefinitions(result.serviceDefinitions);
       }
-      console.log('Restored data applied');
+      setTimeout(() => { isRestoringRef.current = false; }, 0);
     });
   }, [user?.id]);
 

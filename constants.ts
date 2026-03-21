@@ -13,7 +13,15 @@ export const DATE_FORMATTER = new Intl.DateTimeFormat('es-ES', {
   day: 'numeric',
 });
 
-export const generateId = () => Math.random().toString(36).substr(2, 9);
+export const generateId = (): string => {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+    const r = (Math.random() * 16) | 0;
+    return (c === 'x' ? r : (r & 0x3) | 0x8).toString(16);
+  });
+};
 
 export const roundToTwo = (num: number): number => {
   return Math.round((num + Number.EPSILON) * 100) / 100;

@@ -1,5 +1,6 @@
 
 import { FuelLog, ServiceLog, VehicleSettings, ServiceDefinition, PREDEFINED_SERVICES_GAS, DEFAULT_VEHICLE } from '../types';
+import { generateId } from '../constants';
 
 const KEYS = {
   VEHICLE: 'motorcheck_vehicle',
@@ -32,7 +33,19 @@ export const StorageService = {
   getFuelLogs: (): FuelLog[] => {
     try {
       const data = localStorage.getItem(KEYS.FUEL_LOGS);
-      return data ? JSON.parse(data) : [];
+      const logs: FuelLog[] = data ? JSON.parse(data) : [];
+      let dirty = false;
+      const result = logs.map(log => {
+        if (!log.id) {
+          dirty = true;
+          return { ...log, id: generateId() };
+        }
+        return log;
+      });
+      if (dirty) {
+        localStorage.setItem(KEYS.FUEL_LOGS, JSON.stringify(result));
+      }
+      return result;
     } catch (e) {
       console.error("Error loading fuel logs", e);
       return [];
@@ -48,7 +61,19 @@ export const StorageService = {
   getServiceLogs: (): ServiceLog[] => {
     try {
       const data = localStorage.getItem(KEYS.SERVICE_LOGS);
-      return data ? JSON.parse(data) : [];
+      const logs: ServiceLog[] = data ? JSON.parse(data) : [];
+      let dirty = false;
+      const result = logs.map(log => {
+        if (!log.id) {
+          dirty = true;
+          return { ...log, id: generateId() };
+        }
+        return log;
+      });
+      if (dirty) {
+        localStorage.setItem(KEYS.SERVICE_LOGS, JSON.stringify(result));
+      }
+      return result;
     } catch (e) {
       console.error("Error loading service logs", e);
       return [];
