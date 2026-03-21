@@ -41,6 +41,7 @@ export const VehicleProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [urgentCount, setUrgentCount] = useState(0);
   const [upcomingCount, setUpcomingCount] = useState(0);
   const isRestoringRef = useRef(false);
+  const hasRestoredRef = useRef(false);
 
   // Apply Theme
   useEffect(() => {
@@ -111,38 +112,53 @@ export const VehicleProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
   }, [user?.id]);
 
-  // [DEBUG] Restore cloud data on login - condition check REMOVED, always restores
+  // Restore cloud data on login — runs only once per session, only if local data is empty
   useEffect(() => {
     if (!user?.id) return;
 
+    if (hasRestoredRef.current) {
+      console.log('[CloudBackup] Restore skipped: already restored');
+      return;
+    }
+
     const localIsEmpty = !vehicle.brand && fuelLogs.length === 0 && serviceLogs.length === 0;
+    if (!localIsEmpty) {
+      console.log('[CloudBackup] Restore skipped: local data exists');
+      return;
+    }
 
-    console.log('User detected:', user?.id);
-    console.log('Local state:', vehicle, fuelLogs.length, serviceLogs.length);
-    console.log('Should restore:', localIsEmpty, '(DEBUG: forcing restore regardless)');
-
+    console.log('[CloudBackup] Restore starting...');
     isRestoringRef.current = true;
-    restoreFromCloud(user.id).then(result => {
-      if (result.vehicle) {
-        setVehicle(result.vehicle);
-        StorageService.saveVehicle(result.vehicle);
+
+    (async () => {
+      try {
+        const result = await restoreFromCloud(user.id);
+        hasRestoredRef.current = true;
+
+        if (result.vehicle) {
+          setVehicle(result.vehicle);
+          StorageService.saveVehicle(result.vehicle);
+        }
+        if (result.fuelLogs.length > 0) {
+          const sorted = [...result.fuelLogs].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+          setFuelLogs(sorted);
+          StorageService.saveFuelLogs(sorted);
+        }
+        if (result.serviceLogs.length > 0) {
+          const sorted = [...result.serviceLogs].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+          setServiceLogs(sorted);
+          StorageService.saveServiceLogs(sorted);
+        }
+        if (result.serviceDefinitions.length > 0) {
+          setServiceDefinitions(result.serviceDefinitions);
+          StorageService.saveServiceDefinitions(result.serviceDefinitions);
+        }
+
+        console.log('[CloudBackup] Restore completed');
+      } finally {
+        setTimeout(() => { isRestoringRef.current = false; }, 300);
       }
-      if (result.fuelLogs.length > 0) {
-        const sorted = [...result.fuelLogs].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-        setFuelLogs(sorted);
-        StorageService.saveFuelLogs(sorted);
-      }
-      if (result.serviceLogs.length > 0) {
-        const sorted = [...result.serviceLogs].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-        setServiceLogs(sorted);
-        StorageService.saveServiceLogs(sorted);
-      }
-      if (result.serviceDefinitions.length > 0) {
-        setServiceDefinitions(result.serviceDefinitions);
-        StorageService.saveServiceDefinitions(result.serviceDefinitions);
-      }
-      setTimeout(() => { isRestoringRef.current = false; }, 500);
-    });
+    })();
   }, [user?.id]);
 
   // Calculate Statuses
