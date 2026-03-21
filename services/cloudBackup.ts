@@ -7,11 +7,34 @@ const CLOUD_KEYS = {
   MIGRATION_COMPLETED: 'motorcheck_cloud_migration_completed'
 };
 
+// In-memory cache to avoid redundant Supabase queries within a session
+let cachedVehicleId: string | null = null;
+
+const getCachedVehicleId = (): string | null => {
+  if (cachedVehicleId) return cachedVehicleId;
+  const stored = localStorage.getItem(CLOUD_KEYS.VEHICLE_ID);
+  if (stored) {
+    cachedVehicleId = stored;
+    console.log('[CloudBackup] Using cached vehicle_id:', cachedVehicleId);
+  }
+  return cachedVehicleId;
+};
+
+const setCachedVehicleId = (id: string): void => {
+  cachedVehicleId = id;
+  localStorage.setItem(CLOUD_KEYS.VEHICLE_ID, id);
+};
+
+export const clearCachedVehicleId = (): void => {
+  cachedVehicleId = null;
+  localStorage.removeItem(CLOUD_KEYS.VEHICLE_ID);
+};
+
 // Ensure vehicle exists in cloud and return its ID. Creates if missing.
 const ensureVehicleId = async (vehicle: VehicleSettings, userId: string): Promise<string | null> => {
   try {
-    const cachedId = localStorage.getItem(CLOUD_KEYS.VEHICLE_ID);
-    if (cachedId) return cachedId;
+    const cached = getCachedVehicleId();
+    if (cached) return cached;
 
     const { data: vehicles, error } = await dbClient
       .from('vehicles')
@@ -26,11 +49,11 @@ const ensureVehicleId = async (vehicle: VehicleSettings, userId: string): Promis
 
     if (vehicles && vehicles.length > 0) {
       const vehicleId = vehicles[0].id;
-      localStorage.setItem(CLOUD_KEYS.VEHICLE_ID, vehicleId);
+      setCachedVehicleId(vehicleId);
       return vehicleId;
     }
 
-    // Vehicle does not exist — create it now
+    // Vehicle does not exist — create it now and await response
     const vehicleData = mapVehicleToDb(vehicle, userId);
     const { data: created, error: createError } = await dbClient
       .from('vehicles')
@@ -44,7 +67,7 @@ const ensureVehicleId = async (vehicle: VehicleSettings, userId: string): Promis
 
     if (created && created.length > 0) {
       const newId = created[0].id;
-      localStorage.setItem(CLOUD_KEYS.VEHICLE_ID, newId);
+      setCachedVehicleId(newId);
       console.log('[CloudBackup] Vehicle created with id:', newId);
       return newId;
     }
@@ -56,11 +79,11 @@ const ensureVehicleId = async (vehicle: VehicleSettings, userId: string): Promis
   }
 };
 
-// Get vehicle_id from cache or cloud only (no create)
+// Get vehicle_id from memory/localStorage cache or Supabase — no create
 const getVehicleId = async (userId: string): Promise<string | null> => {
   try {
-    const cachedId = localStorage.getItem(CLOUD_KEYS.VEHICLE_ID);
-    if (cachedId) return cachedId;
+    const cached = getCachedVehicleId();
+    if (cached) return cached;
 
     const { data: vehicles, error } = await dbClient
       .from('vehicles')
@@ -75,7 +98,7 @@ const getVehicleId = async (userId: string): Promise<string | null> => {
 
     if (vehicles && vehicles.length > 0) {
       const vehicleId = vehicles[0].id;
-      localStorage.setItem(CLOUD_KEYS.VEHICLE_ID, vehicleId);
+      setCachedVehicleId(vehicleId);
       return vehicleId;
     }
 
@@ -147,12 +170,13 @@ const mapServiceDefToDb = (def: ServiceDefinition, userId: string, vehicleId: st
   updated_at: new Date().toISOString()
 });
 
-// Backup vehicle to cloud — always upserts, caches vehicle_id
+// Backup vehicle to cloud — ensures vehicle_id exists first, then updates
 export const backupVehicle = async (vehicle: VehicleSettings, userId: string): Promise<void> => {
   try {
+    console.log('[CloudBackup] Starting vehicle backup');
     const vehicleId = await ensureVehicleId(vehicle, userId);
     if (!vehicleId) {
-      console.warn('[CloudBackup] Skipping vehicle backup — could not resolve vehicle_id');
+      console.error('[CloudBackup] Backup aborted: missing vehicle_id');
       return;
     }
 
@@ -164,6 +188,8 @@ export const backupVehicle = async (vehicle: VehicleSettings, userId: string): P
 
     if (error) {
       console.error('[CloudBackup] Error updating vehicle:', error);
+    } else {
+      console.log('[CloudBackup] vehicle backup success');
     }
   } catch (e) {
     console.error('[CloudBackup] Exception in backupVehicle:', e);
@@ -173,18 +199,23 @@ export const backupVehicle = async (vehicle: VehicleSettings, userId: string): P
 // Backup fuel logs to cloud
 export const backupFuelLogs = async (logs: FuelLog[], userId: string): Promise<void> => {
   try {
+    console.log(`[CloudBackup] Starting fuel_logs backup: ${logs.length} items`);
+
     const vehicleId = await getVehicleId(userId);
     if (!vehicleId) {
-      console.warn('[CloudBackup] Skipping fuel logs backup — missing vehicle_id');
+      console.error('[CloudBackup] Backup aborted: missing vehicle_id');
       return;
     }
 
     if (logs.length === 0) return;
 
-    // Deduplicate by external_id (keep last occurrence)
+    // Deduplicate by external_id
     const seen = new Map<string, FuelLog>();
     for (const log of logs) seen.set(log.id, log);
     const unique = Array.from(seen.values());
+
+    console.log(`[CloudBackup] Fuel logs before dedup: ${logs.length}`);
+    console.log(`[CloudBackup] Fuel logs after dedup: ${unique.length}`);
 
     const logsData = unique.map(log => mapFuelLogToDb(log, userId, vehicleId));
     const { error } = await dbClient
@@ -193,6 +224,8 @@ export const backupFuelLogs = async (logs: FuelLog[], userId: string): Promise<v
 
     if (error) {
       console.error('[CloudBackup] Error backing up fuel logs:', error);
+    } else {
+      console.log('[CloudBackup] fuel_logs backup success');
     }
   } catch (e) {
     console.error('[CloudBackup] Exception in backupFuelLogs:', e);
@@ -202,18 +235,23 @@ export const backupFuelLogs = async (logs: FuelLog[], userId: string): Promise<v
 // Backup service logs to cloud
 export const backupServiceLogs = async (logs: ServiceLog[], userId: string): Promise<void> => {
   try {
+    console.log(`[CloudBackup] Starting service_logs backup: ${logs.length} items`);
+
     const vehicleId = await getVehicleId(userId);
     if (!vehicleId) {
-      console.warn('[CloudBackup] Skipping service logs backup — missing vehicle_id');
+      console.error('[CloudBackup] Backup aborted: missing vehicle_id');
       return;
     }
 
     if (logs.length === 0) return;
 
-    // Deduplicate by external_id (keep last occurrence)
+    // Deduplicate by external_id
     const seen = new Map<string, ServiceLog>();
     for (const log of logs) seen.set(log.id, log);
     const unique = Array.from(seen.values());
+
+    console.log(`[CloudBackup] Service logs before dedup: ${logs.length}`);
+    console.log(`[CloudBackup] Service logs after dedup: ${unique.length}`);
 
     const logsData = unique.map(log => mapServiceLogToDb(log, userId, vehicleId));
     const { error } = await dbClient
@@ -222,6 +260,8 @@ export const backupServiceLogs = async (logs: ServiceLog[], userId: string): Pro
 
     if (error) {
       console.error('[CloudBackup] Error backing up service logs:', error);
+    } else {
+      console.log('[CloudBackup] service_logs backup success');
     }
   } catch (e) {
     console.error('[CloudBackup] Exception in backupServiceLogs:', e);
@@ -231,18 +271,23 @@ export const backupServiceLogs = async (logs: ServiceLog[], userId: string): Pro
 // Backup service definitions to cloud
 export const backupServiceDefinitions = async (defs: ServiceDefinition[], userId: string): Promise<void> => {
   try {
+    console.log(`[CloudBackup] Starting service_definitions backup: ${defs.length} items`);
+
     const vehicleId = await getVehicleId(userId);
     if (!vehicleId) {
-      console.warn('[CloudBackup] Skipping service definitions backup — missing vehicle_id');
+      console.error('[CloudBackup] Backup aborted: missing vehicle_id');
       return;
     }
 
     if (defs.length === 0) return;
 
-    // Deduplicate by composite key id+vehicle_id (keep last occurrence)
+    // Deduplicate by composite key id + vehicle_id
     const seen = new Map<string, ServiceDefinition>();
     for (const def of defs) seen.set(`${def.id}::${vehicleId}`, def);
     const unique = Array.from(seen.values());
+
+    console.log(`[CloudBackup] Service definitions before dedup: ${defs.length}`);
+    console.log(`[CloudBackup] Service definitions after dedup: ${unique.length}`);
 
     const defsData = unique.map(def => mapServiceDefToDb(def, userId, vehicleId));
     const { error } = await dbClient
@@ -251,6 +296,8 @@ export const backupServiceDefinitions = async (defs: ServiceDefinition[], userId
 
     if (error) {
       console.error('[CloudBackup] Error backing up service definitions:', error);
+    } else {
+      console.log('[CloudBackup] service_definitions backup success');
     }
   } catch (e) {
     console.error('[CloudBackup] Exception in backupServiceDefinitions:', e);
@@ -339,7 +386,7 @@ export const restoreFromCloud = async (userId: string): Promise<RestoreResult> =
 
     const vehicleRow = vehicleRows[0];
     const vehicleId = vehicleRow.id;
-    localStorage.setItem(CLOUD_KEYS.VEHICLE_ID, vehicleId);
+    setCachedVehicleId(vehicleId);
 
     console.log('[CloudBackup] Vehicle from DB:', vehicleRow);
 
@@ -388,14 +435,14 @@ export const migrateLocalToCloud = async (
   try {
     console.log('[CloudBackup] Starting migration to cloud...');
 
-    // Step 1: ensure vehicle exists and get its ID
+    // Step 1: ensure vehicle exists and get its ID before anything else
     const vehicleId = await ensureVehicleId(vehicle, userId);
     if (!vehicleId) {
-      console.error('[CloudBackup] Migration aborted — could not create/resolve vehicle_id');
+      console.error('[CloudBackup] Migration aborted: missing vehicle_id');
       return;
     }
 
-    // Step 2: update vehicle data now that we have the ID
+    // Step 2: update vehicle data now that ID is confirmed
     await backupVehicle(vehicle, userId);
 
     // Step 3: backup logs only after vehicle is confirmed

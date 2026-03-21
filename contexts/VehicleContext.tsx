@@ -4,7 +4,7 @@ import { FuelLog, ServiceDefinition, ServiceLog, ServiceStatus, VehicleSettings,
 import { StorageService } from '../services/storage';
 import { NotificationService } from '../services/notifications';
 import { useAuth } from './AuthContext';
-import { backupVehicle, backupFuelLogs, backupServiceLogs, backupServiceDefinitions, migrateLocalToCloud, shouldMigrate, restoreFromCloud } from '../services/cloudBackup';
+import { backupVehicle, backupFuelLogs, backupServiceLogs, backupServiceDefinitions, migrateLocalToCloud, shouldMigrate, restoreFromCloud, clearCachedVehicleId } from '../services/cloudBackup';
 
 interface VehicleContextType {
   vehicle: VehicleSettings;
@@ -52,32 +52,55 @@ export const VehicleProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
   }, [vehicle.theme]);
 
+  // Clear memory cache when user logs out
+  useEffect(() => {
+    if (!user?.id) {
+      clearCachedVehicleId();
+    }
+  }, [user?.id]);
+
   // Persist changes
   useEffect(() => {
     StorageService.saveVehicle(vehicle);
-    if (user?.id && !isRestoringRef.current) {
-      backupVehicle(vehicle, user.id);
+    if (user?.id) {
+      if (isRestoringRef.current) {
+        console.log('[CloudBackup] Backup skipped: restoring in progress (vehicle)');
+      } else {
+        backupVehicle(vehicle, user.id);
+      }
     }
   }, [vehicle, user?.id]);
 
   useEffect(() => {
     StorageService.saveFuelLogs(fuelLogs);
-    if (user?.id && !isRestoringRef.current) {
-      backupFuelLogs(fuelLogs, user.id);
+    if (user?.id) {
+      if (isRestoringRef.current) {
+        console.log('[CloudBackup] Backup skipped: restoring in progress (fuel_logs)');
+      } else {
+        backupFuelLogs(fuelLogs, user.id);
+      }
     }
   }, [fuelLogs, user?.id]);
 
   useEffect(() => {
     StorageService.saveServiceLogs(serviceLogs);
-    if (user?.id && !isRestoringRef.current) {
-      backupServiceLogs(serviceLogs, user.id);
+    if (user?.id) {
+      if (isRestoringRef.current) {
+        console.log('[CloudBackup] Backup skipped: restoring in progress (service_logs)');
+      } else {
+        backupServiceLogs(serviceLogs, user.id);
+      }
     }
   }, [serviceLogs, user?.id]);
 
   useEffect(() => {
     StorageService.saveServiceDefinitions(serviceDefinitions);
-    if (user?.id && !isRestoringRef.current) {
-      backupServiceDefinitions(serviceDefinitions, user.id);
+    if (user?.id) {
+      if (isRestoringRef.current) {
+        console.log('[CloudBackup] Backup skipped: restoring in progress (service_definitions)');
+      } else {
+        backupServiceDefinitions(serviceDefinitions, user.id);
+      }
     }
   }, [serviceDefinitions, user?.id]);
 
