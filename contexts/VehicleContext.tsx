@@ -98,8 +98,8 @@ export const VehicleProvider: React.FC<{ children: React.ReactNode }> = ({ child
     console.log('Local state:', vehicle, fuelLogs.length, serviceLogs.length);
     console.log('Should restore:', localIsEmpty, '(DEBUG: forcing restore regardless)');
 
+    isRestoringRef.current = true;
     restoreFromCloud(user.id).then(result => {
-      isRestoringRef.current = true;
       if (result.vehicle) {
         setVehicle(result.vehicle);
         StorageService.saveVehicle(result.vehicle);
@@ -118,7 +118,7 @@ export const VehicleProvider: React.FC<{ children: React.ReactNode }> = ({ child
         setServiceDefinitions(result.serviceDefinitions);
         StorageService.saveServiceDefinitions(result.serviceDefinitions);
       }
-      setTimeout(() => { isRestoringRef.current = false; }, 0);
+      setTimeout(() => { isRestoringRef.current = false; }, 500);
     });
   }, [user?.id]);
 
