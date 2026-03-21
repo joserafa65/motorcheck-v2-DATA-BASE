@@ -7,6 +7,7 @@ import { ServiceLog, ServiceDefinition } from '../types';
 import { DATE_FORMATTER, CURRENCY_FORMATTER, generateId, roundToTwo } from '../constants';
 import { uploadImage, base64ToFile } from '../services/imageUpload';
 import { ArrowLeft, CreditCard as Edit2, Trash2, CalendarClock, ClipboardCheck, CircleAlert as AlertCircle, Gauge, Plus } from 'lucide-react';
+import { useToast } from '../contexts/ToastContext';
 
 interface ServicesProps {
   onNavigate: (view: string, params?: any) => void;
@@ -52,6 +53,7 @@ const Services: React.FC<ServicesProps> = ({ onNavigate, initialServiceId, start
     serviceLogs
   } = useVehicle();
   const { user } = useAuth();
+  const { showToast } = useToast();
 
   const [activeServiceId, setActiveServiceId] = useState<string | null>(initialServiceId || null);
   const [showForm, setShowForm] = useState(!!startInProgramMode);
@@ -244,6 +246,7 @@ const Services: React.FC<ServicesProps> = ({ onNavigate, initialServiceId, start
           }
       } else {
           addServiceLog(newLog);
+          showToast('Servicio registrado');
       }
 
       setShowForm(false);
@@ -266,6 +269,7 @@ const Services: React.FC<ServicesProps> = ({ onNavigate, initialServiceId, start
           updateServiceDefinition(newDef);
       } else {
           addServiceDefinition(newDef);
+          showToast('Mantenimiento programado');
       }
 
       setShowForm(false);

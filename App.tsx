@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { SubscriptionProvider, useSubscription } from './contexts/SubscriptionContext';
 import { VehicleProvider } from './contexts/VehicleContext';
+import { ToastProvider } from './contexts/ToastContext';
+import ToastContainer from './components/Toast';
 import Dashboard from './pages/Dashboard';
 import Fuel from './pages/Fuel';
 import Services from './pages/Services';
@@ -230,7 +232,9 @@ const SubscriptionGate: React.FC<{
   );
 
   return (
+    <ToastProvider>
     <VehicleProvider>
+      <ToastContainer />
       <div className="relative min-h-screen overflow-hidden selection:bg-blue-500/30">
         <div className="fixed top-[-10%] left-[-10%] w-[50%] h-[50%] bg-blue-500/20 dark:bg-blue-900/20 rounded-full blur-[100px] pointer-events-none" />
         <div className="fixed bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-purple-500/10 dark:bg-purple-900/10 rounded-full blur-[100px] pointer-events-none" />
@@ -256,6 +260,7 @@ const SubscriptionGate: React.FC<{
         </div>
       </div>
     </VehicleProvider>
+    </ToastProvider>
   );
 };
 

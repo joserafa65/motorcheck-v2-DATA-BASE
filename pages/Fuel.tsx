@@ -7,6 +7,7 @@ import { CURRENCY_FORMATTER, generateId, DATE_FORMATTER, roundToTwo } from '../c
 import { FuelLog } from '../types';
 import { uploadImage, base64ToFile } from '../services/imageUpload';
 import { Trash2, Trophy, TriangleAlert as AlertTriangle, Gauge } from 'lucide-react';
+import { useToast } from '../contexts/ToastContext';
 
 interface FuelProps {
   onNavigate: (view: string, params?: any) => void;
@@ -24,6 +25,7 @@ interface FeedbackData {
 const Fuel: React.FC<FuelProps> = ({ onNavigate, initialTab = 'log', editLogId, fromHistory }) => {
   const { addFuelLog, updateFuelLog, vehicle, fuelLogs, deleteFuelLog } = useVehicle();
   const { user } = useAuth();
+  const { showToast } = useToast();
   const [activeTab, setActiveTab] = useState<'log' | 'history'>(initialTab);
   const [editingId, setEditingId] = useState<string | null>(null);
   
@@ -224,11 +226,12 @@ const Fuel: React.FC<FuelProps> = ({ onNavigate, initialTab = 'log', editLogId, 
   };
 
   const finishSubmission = () => {
+        showToast('Tanqueo guardado');
         setFormData(prev => ({
             ...prev,
-            odometer: Number(prev.odometer) + 300, 
+            odometer: Number(prev.odometer) + 300,
             volume: '',
-            price: prev.price, 
+            price: prev.price,
             total: '',
             photo: ''
         }));
