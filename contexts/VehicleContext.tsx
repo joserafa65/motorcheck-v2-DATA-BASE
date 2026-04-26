@@ -14,6 +14,7 @@ interface VehicleContextType {
   serviceStatuses: ServiceStatus[];
   urgentCount: number;
   upcomingCount: number;
+  isRestoring: boolean;
   updateVehicle: (v: VehicleSettings) => void;
   addFuelLog: (log: FuelLog) => void;
   updateFuelLog: (log: FuelLog) => void;
@@ -40,6 +41,7 @@ export const VehicleProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [serviceStatuses, setServiceStatuses] = useState<ServiceStatus[]>([]);
   const [urgentCount, setUrgentCount] = useState(0);
   const [upcomingCount, setUpcomingCount] = useState(0);
+  const [isRestoring, setIsRestoring] = useState(false);
   const isRestoringRef = useRef(false);
   const hasRestoredRef = useRef(false);
 
@@ -53,10 +55,13 @@ export const VehicleProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
   }, [vehicle.theme]);
 
-  // Clear memory cache when user logs out
+  // Clear memory cache and restore flag when user logs out
   useEffect(() => {
     if (!user?.id) {
       clearCachedVehicleId();
+      hasRestoredRef.current = false;
+      isRestoringRef.current = false;
+      setIsRestoring(false);
     }
   }, [user?.id]);
 
@@ -129,6 +134,7 @@ export const VehicleProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
     console.log('[CloudBackup] Restore starting...');
     isRestoringRef.current = true;
+    setIsRestoring(true);
 
     (async () => {
       try {
@@ -156,7 +162,10 @@ export const VehicleProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
         console.log('[CloudBackup] Restore completed');
       } finally {
-        setTimeout(() => { isRestoringRef.current = false; }, 300);
+        setTimeout(() => {
+          isRestoringRef.current = false;
+          setIsRestoring(false);
+        }, 300);
       }
     })();
   }, [user?.id]);
@@ -328,6 +337,7 @@ export const VehicleProvider: React.FC<{ children: React.ReactNode }> = ({ child
       serviceStatuses,
       urgentCount,
       upcomingCount,
+      isRestoring,
       updateVehicle,
       addFuelLog,
       updateFuelLog,

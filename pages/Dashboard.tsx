@@ -3,18 +3,14 @@ import { createPortal } from 'react-dom';
 import { useVehicle } from '../contexts/VehicleContext';
 import { useSubscription } from '../contexts/SubscriptionContext';
 import { Card, Button } from '../components/UI';
-import {
-  AlertTriangle, CheckCircle, TrendingUp, ChevronRight, Calendar,
-  Gauge, CreditCard, History, Fuel, Wrench, X, Flag, Clock,
-  AlertOctagon, Settings, Send
-} from 'lucide-react';
+import { TriangleAlert as AlertTriangle, CircleCheck as CheckCircle, TrendingUp, ChevronRight, Calendar, Gauge, CreditCard, History, Fuel, Wrench, X, Flag, Clock, OctagonAlert as AlertOctagon, Settings, Send } from 'lucide-react';
 import { CURRENCY_FORMATTER, DATE_FORMATTER, roundToTwo } from '../constants';
 import { ServiceStatus, UnitSystem } from '../types';
 import { Share } from '@capacitor/share';
 import { dbClient } from '../services/database';
 
 const Dashboard: React.FC<{ onNavigate: (view: string, params?: any) => void }> = ({ onNavigate }) => {
-  const { vehicle, serviceStatuses, fuelLogs, urgentCount, upcomingCount, updateVehicle } = useVehicle();
+  const { vehicle, serviceStatuses, fuelLogs, urgentCount, upcomingCount, updateVehicle, isRestoring } = useVehicle();
   const { isTrialActive, showPaywall } = useSubscription();
 
   const [showOdoModal, setShowOdoModal] = useState(false);
@@ -180,6 +176,32 @@ const [shareMessage] = useState(
     }
   }, [serviceStatuses, vehicle.currentOdometer]);
 
+
+  if (isRestoring) {
+    return (
+      <div className="pb-24 space-y-4 animate-pulse">
+        <div className="relative w-full h-52 bg-zinc-800 rounded-b-[2.5rem] shadow-2xl overflow-hidden mb-3">
+          <div className="absolute bottom-0 left-0 right-0 p-4">
+            <div className="h-7 w-40 bg-zinc-700 rounded-lg mb-2" />
+            <div className="h-4 w-24 bg-zinc-700 rounded" />
+          </div>
+        </div>
+        <div className="px-4 space-y-4">
+          <div className="flex flex-col space-y-2">
+            {[0, 1, 2].map(i => (
+              <div key={i} className="h-12 bg-zinc-800 rounded-2xl" />
+            ))}
+          </div>
+          <div className="grid grid-cols-3 gap-2.5">
+            {[0, 1, 2].map(i => (
+              <div key={i} className="h-28 bg-zinc-800 rounded-2xl" />
+            ))}
+          </div>
+          <div className="h-40 bg-zinc-800 rounded-2xl" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="pb-24 space-y-4">

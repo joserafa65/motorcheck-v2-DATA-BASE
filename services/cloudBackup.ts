@@ -10,6 +10,9 @@ const CLOUD_KEYS = {
 // In-memory cache to avoid redundant Supabase queries within a session
 let cachedVehicleId: string | null = null;
 
+// Mutex to prevent concurrent ensureVehicleId calls from each inserting a new row
+let ensureVehicleIdPromise: Promise<string | null> | null = null;
+
 const getCachedVehicleId = (): string | null => {
   if (cachedVehicleId) return cachedVehicleId;
   const stored = localStorage.getItem(CLOUD_KEYS.VEHICLE_ID);
@@ -27,56 +30,66 @@ const setCachedVehicleId = (id: string): void => {
 
 export const clearCachedVehicleId = (): void => {
   cachedVehicleId = null;
+  ensureVehicleIdPromise = null;
   localStorage.removeItem(CLOUD_KEYS.VEHICLE_ID);
 };
 
 // Ensure vehicle exists in cloud and return its ID. Creates if missing.
-const ensureVehicleId = async (vehicle: VehicleSettings, userId: string): Promise<string | null> => {
-  try {
-    const cached = getCachedVehicleId();
-    if (cached) return cached;
+// Uses a shared promise to prevent concurrent callers from each inserting a new row.
+const ensureVehicleId = (vehicle: VehicleSettings, userId: string): Promise<string | null> => {
+  const cached = getCachedVehicleId();
+  if (cached) return Promise.resolve(cached);
 
-    const { data: vehicles, error } = await dbClient
-      .from('vehicles')
-      .select('id')
-      .eq('user_id', userId)
-      .limit(1);
+  if (ensureVehicleIdPromise) return ensureVehicleIdPromise;
 
-    if (error) {
-      console.error('[CloudBackup] Error fetching vehicle:', error);
+  ensureVehicleIdPromise = (async () => {
+    try {
+      const { data: vehicles, error } = await dbClient
+        .from('vehicles')
+        .select('id')
+        .eq('user_id', userId)
+        .limit(1);
+
+      if (error) {
+        console.error('[CloudBackup] Error fetching vehicle:', error);
+        return null;
+      }
+
+      if (vehicles && vehicles.length > 0) {
+        const vehicleId = vehicles[0].id;
+        setCachedVehicleId(vehicleId);
+        return vehicleId;
+      }
+
+      // Vehicle does not exist — create it now and await response
+      const vehicleData = mapVehicleToDb(vehicle, userId);
+      const { data: created, error: createError } = await dbClient
+        .from('vehicles')
+        .insert([vehicleData])
+        .select('id');
+
+      if (createError) {
+        console.error('[CloudBackup] Error creating vehicle:', createError);
+        return null;
+      }
+
+      if (created && created.length > 0) {
+        const newId = created[0].id;
+        setCachedVehicleId(newId);
+        console.log('[CloudBackup] Vehicle created with id:', newId);
+        return newId;
+      }
+
       return null;
-    }
-
-    if (vehicles && vehicles.length > 0) {
-      const vehicleId = vehicles[0].id;
-      setCachedVehicleId(vehicleId);
-      return vehicleId;
-    }
-
-    // Vehicle does not exist — create it now and await response
-    const vehicleData = mapVehicleToDb(vehicle, userId);
-    const { data: created, error: createError } = await dbClient
-      .from('vehicles')
-      .insert([vehicleData])
-      .select('id');
-
-    if (createError) {
-      console.error('[CloudBackup] Error creating vehicle:', createError);
+    } catch (e) {
+      console.error('[CloudBackup] Exception in ensureVehicleId:', e);
       return null;
+    } finally {
+      ensureVehicleIdPromise = null;
     }
+  })();
 
-    if (created && created.length > 0) {
-      const newId = created[0].id;
-      setCachedVehicleId(newId);
-      console.log('[CloudBackup] Vehicle created with id:', newId);
-      return newId;
-    }
-
-    return null;
-  } catch (e) {
-    console.error('[CloudBackup] Exception in ensureVehicleId:', e);
-    return null;
-  }
+  return ensureVehicleIdPromise;
 };
 
 // Get vehicle_id from memory/localStorage cache or Supabase — no create
