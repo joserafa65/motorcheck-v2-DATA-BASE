@@ -4,6 +4,7 @@ import { FuelLog, ServiceDefinition, ServiceLog, ServiceStatus, VehicleSettings,
 import { StorageService } from '../services/storage';
 import { NotificationService } from '../services/notifications';
 import { useAuth } from './AuthContext';
+import { useToast } from './ToastContext';
 import { backupVehicle, backupFuelLogs, backupServiceLogs, backupServiceDefinitions, migrateLocalToCloud, shouldMigrate, restoreFromCloud, clearCachedVehicleId } from '../services/cloudBackup';
 
 interface VehicleContextType {
@@ -34,6 +35,7 @@ const VehicleContext = createContext<VehicleContextType | undefined>(undefined);
 
 export const VehicleProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user } = useAuth();
+  const { showToast } = useToast();
   const [vehicle, setVehicle] = useState<VehicleSettings>(StorageService.getVehicle());
   const [fuelLogs, setFuelLogs] = useState<FuelLog[]>(StorageService.getFuelLogs());
   const [serviceLogs, setServiceLogs] = useState<ServiceLog[]>(StorageService.getServiceLogs());
@@ -72,7 +74,7 @@ export const VehicleProvider: React.FC<{ children: React.ReactNode }> = ({ child
       if (isRestoringRef.current) {
         console.log('[CloudBackup] Backup skipped: restoring in progress (vehicle)');
       } else {
-        backupVehicle(vehicle, user.id);
+        backupVehicle(vehicle, user.id, () => showToast('Error al sincronizar vehículo. Reintentando…'));
       }
     }
   }, [vehicle, user?.id]);
@@ -83,7 +85,7 @@ export const VehicleProvider: React.FC<{ children: React.ReactNode }> = ({ child
       if (isRestoringRef.current) {
         console.log('[CloudBackup] Backup skipped: restoring in progress (fuel_logs)');
       } else {
-        backupFuelLogs(fuelLogs, user.id);
+        backupFuelLogs(fuelLogs, user.id, vehicle, () => showToast('Error al sincronizar registros de combustible. Reintentando…'));
       }
     }
   }, [fuelLogs, user?.id]);
@@ -94,7 +96,7 @@ export const VehicleProvider: React.FC<{ children: React.ReactNode }> = ({ child
       if (isRestoringRef.current) {
         console.log('[CloudBackup] Backup skipped: restoring in progress (service_logs)');
       } else {
-        backupServiceLogs(serviceLogs, user.id);
+        backupServiceLogs(serviceLogs, user.id, vehicle, () => showToast('Error al sincronizar servicios. Reintentando…'));
       }
     }
   }, [serviceLogs, user?.id]);
@@ -105,7 +107,7 @@ export const VehicleProvider: React.FC<{ children: React.ReactNode }> = ({ child
       if (isRestoringRef.current) {
         console.log('[CloudBackup] Backup skipped: restoring in progress (service_definitions)');
       } else {
-        backupServiceDefinitions(serviceDefinitions, user.id);
+        backupServiceDefinitions(serviceDefinitions, user.id, vehicle, () => showToast('Error al sincronizar definiciones de servicio. Reintentando…'));
       }
     }
   }, [serviceDefinitions, user?.id]);

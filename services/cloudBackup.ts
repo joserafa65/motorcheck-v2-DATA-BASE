@@ -92,33 +92,22 @@ const ensureVehicleId = (vehicle: VehicleSettings, userId: string): Promise<stri
   return ensureVehicleIdPromise;
 };
 
-// Get vehicle_id from memory/localStorage cache or Supabase — no create
-const getVehicleId = async (userId: string): Promise<string | null> => {
-  try {
-    const cached = getCachedVehicleId();
-    if (cached) return cached;
+// Retry a backup operation once after a delay if the first attempt fails.
+const withRetry = async (
+  label: string,
+  fn: () => Promise<boolean>,
+  onError?: () => void
+): Promise<void> => {
+  const ok = await fn();
+  if (ok) return;
 
-    const { data: vehicles, error } = await dbClient
-      .from('vehicles')
-      .select('id')
-      .eq('user_id', userId)
-      .limit(1);
+  console.warn(`[CloudBackup] ${label} failed — retrying in 4 s`);
+  await new Promise(resolve => setTimeout(resolve, 4000));
 
-    if (error) {
-      console.error('[CloudBackup] Error fetching vehicle:', error);
-      return null;
-    }
-
-    if (vehicles && vehicles.length > 0) {
-      const vehicleId = vehicles[0].id;
-      setCachedVehicleId(vehicleId);
-      return vehicleId;
-    }
-
-    return null;
-  } catch (e) {
-    console.error('[CloudBackup] Exception in getVehicleId:', e);
-    return null;
+  const ok2 = await fn();
+  if (!ok2) {
+    console.error(`[CloudBackup] ${label} failed after retry`);
+    onError?.();
   }
 };
 
@@ -183,138 +172,177 @@ const mapServiceDefToDb = (def: ServiceDefinition, userId: string, vehicleId: st
   updated_at: new Date().toISOString()
 });
 
-// Backup vehicle to cloud — ensures vehicle_id exists first, then updates
-export const backupVehicle = async (vehicle: VehicleSettings, userId: string): Promise<void> => {
-  try {
-    console.log('[CloudBackup] Starting vehicle backup');
-    const vehicleId = await ensureVehicleId(vehicle, userId);
-    if (!vehicleId) {
-      console.error('[CloudBackup] Backup aborted: missing vehicle_id');
-      return;
-    }
+// Backup vehicle to cloud — ensures vehicle_id exists first, then updates.
+export const backupVehicle = async (
+  vehicle: VehicleSettings,
+  userId: string,
+  onError?: () => void
+): Promise<void> => {
+  await withRetry('backupVehicle', async () => {
+    try {
+      console.log('[CloudBackup] Starting vehicle backup');
+      const vehicleId = await ensureVehicleId(vehicle, userId);
+      if (!vehicleId) {
+        console.error('[CloudBackup] Backup aborted: missing vehicle_id');
+        return false;
+      }
 
-    const vehicleData = mapVehicleToDb(vehicle, userId);
-    const { error } = await dbClient
-      .from('vehicles')
-      .update(vehicleData)
-      .eq('id', vehicleId);
+      const vehicleData = mapVehicleToDb(vehicle, userId);
+      const { error } = await dbClient
+        .from('vehicles')
+        .update(vehicleData)
+        .eq('id', vehicleId);
 
-    if (error) {
-      console.error('[CloudBackup] Error updating vehicle:', error);
-    } else {
+      if (error) {
+        console.error('[CloudBackup] Error updating vehicle:', error);
+        return false;
+      }
+
       console.log('[CloudBackup] vehicle backup success');
+      return true;
+    } catch (e) {
+      console.error('[CloudBackup] Exception in backupVehicle:', e);
+      return false;
     }
-  } catch (e) {
-    console.error('[CloudBackup] Exception in backupVehicle:', e);
-  }
+  }, onError);
 };
 
-// Backup fuel logs to cloud
-export const backupFuelLogs = async (logs: FuelLog[], userId: string): Promise<void> => {
-  try {
-    console.log(`[CloudBackup] Starting fuel_logs backup: ${logs.length} items`);
+// Backup fuel logs to cloud.
+// Uses ensureVehicleId so a vehicle row is created first if it doesn't exist yet,
+// fixing the race condition on new devices where fuel logs were saved before the
+// vehicle backup had finished creating the row.
+export const backupFuelLogs = async (
+  logs: FuelLog[],
+  userId: string,
+  vehicle: VehicleSettings,
+  onError?: () => void
+): Promise<void> => {
+  if (logs.length === 0) return;
 
-    const vehicleId = await getVehicleId(userId);
-    if (!vehicleId) {
-      console.error('[CloudBackup] Backup aborted: missing vehicle_id');
-      return;
-    }
+  await withRetry('backupFuelLogs', async () => {
+    try {
+      console.log(`[CloudBackup] Starting fuel_logs backup: ${logs.length} items`);
 
-    if (logs.length === 0) return;
+      const vehicleId = await ensureVehicleId(vehicle, userId);
+      if (!vehicleId) {
+        console.error('[CloudBackup] Backup aborted: missing vehicle_id');
+        return false;
+      }
 
-    // Deduplicate by external_id
-    const seen = new Map<string, FuelLog>();
-    for (const log of logs) seen.set(log.id, log);
-    const unique = Array.from(seen.values());
+      // Deduplicate by external_id
+      const seen = new Map<string, FuelLog>();
+      for (const log of logs) seen.set(log.id, log);
+      const unique = Array.from(seen.values());
 
-    console.log(`[CloudBackup] Fuel logs before dedup: ${logs.length}`);
-    console.log(`[CloudBackup] Fuel logs after dedup: ${unique.length}`);
+      console.log(`[CloudBackup] Fuel logs after dedup: ${unique.length}`);
 
-    const logsData = unique.map(log => mapFuelLogToDb(log, userId, vehicleId));
-    const { error } = await dbClient
-      .from('fuel_logs')
-      .upsert(logsData, { onConflict: 'external_id' });
+      const logsData = unique.map(log => mapFuelLogToDb(log, userId, vehicleId));
+      const { error } = await dbClient
+        .from('fuel_logs')
+        .upsert(logsData, { onConflict: 'external_id' });
 
-    if (error) {
-      console.error('[CloudBackup] Error backing up fuel logs:', error);
-    } else {
+      if (error) {
+        console.error('[CloudBackup] Error backing up fuel logs:', error);
+        return false;
+      }
+
       console.log('[CloudBackup] fuel_logs backup success');
+      return true;
+    } catch (e) {
+      console.error('[CloudBackup] Exception in backupFuelLogs:', e);
+      return false;
     }
-  } catch (e) {
-    console.error('[CloudBackup] Exception in backupFuelLogs:', e);
-  }
+  }, onError);
 };
 
-// Backup service logs to cloud
-export const backupServiceLogs = async (logs: ServiceLog[], userId: string): Promise<void> => {
-  try {
-    console.log(`[CloudBackup] Starting service_logs backup: ${logs.length} items`);
+// Backup service logs to cloud.
+export const backupServiceLogs = async (
+  logs: ServiceLog[],
+  userId: string,
+  vehicle: VehicleSettings,
+  onError?: () => void
+): Promise<void> => {
+  if (logs.length === 0) return;
 
-    const vehicleId = await getVehicleId(userId);
-    if (!vehicleId) {
-      console.error('[CloudBackup] Backup aborted: missing vehicle_id');
-      return;
-    }
+  await withRetry('backupServiceLogs', async () => {
+    try {
+      console.log(`[CloudBackup] Starting service_logs backup: ${logs.length} items`);
 
-    if (logs.length === 0) return;
+      const vehicleId = await ensureVehicleId(vehicle, userId);
+      if (!vehicleId) {
+        console.error('[CloudBackup] Backup aborted: missing vehicle_id');
+        return false;
+      }
 
-    // Deduplicate by external_id
-    const seen = new Map<string, ServiceLog>();
-    for (const log of logs) seen.set(log.id, log);
-    const unique = Array.from(seen.values());
+      // Deduplicate by external_id
+      const seen = new Map<string, ServiceLog>();
+      for (const log of logs) seen.set(log.id, log);
+      const unique = Array.from(seen.values());
 
-    console.log(`[CloudBackup] Service logs before dedup: ${logs.length}`);
-    console.log(`[CloudBackup] Service logs after dedup: ${unique.length}`);
+      console.log(`[CloudBackup] Service logs after dedup: ${unique.length}`);
 
-    const logsData = unique.map(log => mapServiceLogToDb(log, userId, vehicleId));
-    const { error } = await dbClient
-      .from('service_logs')
-      .upsert(logsData, { onConflict: 'external_id' });
+      const logsData = unique.map(log => mapServiceLogToDb(log, userId, vehicleId));
+      const { error } = await dbClient
+        .from('service_logs')
+        .upsert(logsData, { onConflict: 'external_id' });
 
-    if (error) {
-      console.error('[CloudBackup] Error backing up service logs:', error);
-    } else {
+      if (error) {
+        console.error('[CloudBackup] Error backing up service logs:', error);
+        return false;
+      }
+
       console.log('[CloudBackup] service_logs backup success');
+      return true;
+    } catch (e) {
+      console.error('[CloudBackup] Exception in backupServiceLogs:', e);
+      return false;
     }
-  } catch (e) {
-    console.error('[CloudBackup] Exception in backupServiceLogs:', e);
-  }
+  }, onError);
 };
 
-// Backup service definitions to cloud
-export const backupServiceDefinitions = async (defs: ServiceDefinition[], userId: string): Promise<void> => {
-  try {
-    console.log(`[CloudBackup] Starting service_definitions backup: ${defs.length} items`);
+// Backup service definitions to cloud.
+export const backupServiceDefinitions = async (
+  defs: ServiceDefinition[],
+  userId: string,
+  vehicle: VehicleSettings,
+  onError?: () => void
+): Promise<void> => {
+  if (defs.length === 0) return;
 
-    const vehicleId = await getVehicleId(userId);
-    if (!vehicleId) {
-      console.error('[CloudBackup] Backup aborted: missing vehicle_id');
-      return;
-    }
+  await withRetry('backupServiceDefinitions', async () => {
+    try {
+      console.log(`[CloudBackup] Starting service_definitions backup: ${defs.length} items`);
 
-    if (defs.length === 0) return;
+      const vehicleId = await ensureVehicleId(vehicle, userId);
+      if (!vehicleId) {
+        console.error('[CloudBackup] Backup aborted: missing vehicle_id');
+        return false;
+      }
 
-    // Deduplicate by composite key id + vehicle_id
-    const seen = new Map<string, ServiceDefinition>();
-    for (const def of defs) seen.set(`${def.id}::${vehicleId}`, def);
-    const unique = Array.from(seen.values());
+      // Deduplicate by composite key id + vehicle_id
+      const seen = new Map<string, ServiceDefinition>();
+      for (const def of defs) seen.set(`${def.id}::${vehicleId}`, def);
+      const unique = Array.from(seen.values());
 
-    console.log(`[CloudBackup] Service definitions before dedup: ${defs.length}`);
-    console.log(`[CloudBackup] Service definitions after dedup: ${unique.length}`);
+      console.log(`[CloudBackup] Service definitions after dedup: ${unique.length}`);
 
-    const defsData = unique.map(def => mapServiceDefToDb(def, userId, vehicleId));
-    const { error } = await dbClient
-      .from('service_definitions')
-      .upsert(defsData, { onConflict: 'vehicle_id,id' });
+      const defsData = unique.map(def => mapServiceDefToDb(def, userId, vehicleId));
+      const { error } = await dbClient
+        .from('service_definitions')
+        .upsert(defsData, { onConflict: 'vehicle_id,id' });
 
-    if (error) {
-      console.error('[CloudBackup] Error backing up service definitions:', error);
-    } else {
+      if (error) {
+        console.error('[CloudBackup] Error backing up service definitions:', error);
+        return false;
+      }
+
       console.log('[CloudBackup] service_definitions backup success');
+      return true;
+    } catch (e) {
+      console.error('[CloudBackup] Exception in backupServiceDefinitions:', e);
+      return false;
     }
-  } catch (e) {
-    console.error('[CloudBackup] Exception in backupServiceDefinitions:', e);
-  }
+  }, onError);
 };
 
 export interface RestoreResult {
@@ -459,9 +487,9 @@ export const migrateLocalToCloud = async (
     await backupVehicle(vehicle, userId);
 
     // Step 3: backup logs only after vehicle is confirmed
-    await backupFuelLogs(fuelLogs, userId);
-    await backupServiceLogs(serviceLogs, userId);
-    await backupServiceDefinitions(serviceDefinitions, userId);
+    await backupFuelLogs(fuelLogs, userId, vehicle);
+    await backupServiceLogs(serviceLogs, userId, vehicle);
+    await backupServiceDefinitions(serviceDefinitions, userId, vehicle);
 
     localStorage.setItem(CLOUD_KEYS.MIGRATION_COMPLETED, 'true');
     console.log('[CloudBackup] Migration completed successfully');
