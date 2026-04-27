@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { dbClient } from '../services/database';
 import type { User, Session, AuthError } from '@supabase/supabase-js';
+import { Capacitor } from '@capacitor/core';
 
 interface AuthContextType {
   user: User | null;
@@ -22,27 +23,53 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    let unsub: any;
+    // Register listener BEFORE getSession so no events are missed
+    const { data: { subscription } } = dbClient.auth.onAuthStateChange((event, newSession) => {
+      // Only clear state on an explicit sign-out — not on token refresh failures
+      if (event === 'SIGNED_OUT') {
+        setSession(null);
+        setUser(null);
+      } else if (newSession) {
+        setSession(newSession);
+        setUser(newSession.user);
+      }
+    });
 
-    const initAuth = async () => {
-      const { data } = await dbClient.auth.getSession();
-      setSession(data.session);
-      setUser(data.session?.user ?? null);
+    dbClient.auth.getSession().then(({ data }) => {
+      if (data.session) {
+        setSession(data.session);
+        setUser(data.session.user);
+      }
       setLoading(false);
-
-      // solo escucha cambios después de la inicialización
-      unsub = dbClient.auth.onAuthStateChange((_event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-      }).subscription;
-    };
-
-    initAuth();
+    });
 
     return () => {
-      if (unsub && typeof unsub.unsubscribe === "function") {
-        unsub.unsubscribe();
-      }
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  // Refresh session when the app returns from background (Capacitor only)
+  useEffect(() => {
+    if (!Capacitor.isNativePlatform()) return;
+
+    let removeListener: (() => void) | undefined;
+
+    (async () => {
+      const { App } = await import('@capacitor/app');
+      const handle = await App.addListener('appStateChange', ({ isActive }) => {
+        if (!isActive) return;
+        (async () => {
+          const { data: { session: current } } = await dbClient.auth.getSession();
+          if (!current) {
+            await dbClient.auth.refreshSession();
+          }
+        })();
+      });
+      removeListener = () => handle.remove();
+    })();
+
+    return () => {
+      removeListener?.();
     };
   }, []);
 
