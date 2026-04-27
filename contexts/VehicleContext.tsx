@@ -6,7 +6,7 @@ import { NotificationService } from '../services/notifications';
 import { useAuth } from './AuthContext';
 import { useToast } from './ToastContext';
 import { backupVehicle, backupFuelLogs, backupServiceLogs, backupServiceDefinitions, deleteFuelLogFromCloud, deleteServiceLogFromCloud, deleteServiceDefinitionFromCloud, getCachedVehicleId, migrateLocalToCloud, shouldMigrate, restoreFromCloud, clearCachedVehicleId } from '../services/cloudBackup';
-import { getQueue, onQueueChange, registerOnlineListener } from '../services/offlineQueue';
+import { getQueue, onQueueChange, registerOnlineListener, clearQueue } from '../services/offlineQueue';
 
 interface VehicleContextType {
   vehicle: VehicleSettings;
@@ -83,6 +83,8 @@ export const VehicleProvider: React.FC<{ children: React.ReactNode }> = ({ child
     if (user?.id) {
       if (isRestoringRef.current) {
         console.log('[CloudBackup] Backup skipped: restoring in progress (vehicle)');
+      } else if (!vehicle.brand) {
+        console.log('[CloudBackup] Backup skipped: empty vehicle profile');
       } else {
         backupVehicle(vehicle, user.id, () => showToast('Error al sincronizar vehículo. Reintentando…'));
       }
@@ -116,6 +118,8 @@ export const VehicleProvider: React.FC<{ children: React.ReactNode }> = ({ child
     if (user?.id) {
       if (isRestoringRef.current) {
         console.log('[CloudBackup] Backup skipped: restoring in progress (service_definitions)');
+      } else if (!vehicle.brand) {
+        console.log('[CloudBackup] Backup skipped: empty vehicle profile (service_definitions)');
       } else {
         backupServiceDefinitions(serviceDefinitions, user.id, vehicle, () => showToast('Error al sincronizar definiciones de servicio. Reintentando…'));
       }
@@ -151,6 +155,8 @@ export const VehicleProvider: React.FC<{ children: React.ReactNode }> = ({ child
       return;
     }
 
+    // Set the restoring flag synchronously so backup effects firing in the same
+    // render cycle see it immediately and skip their writes.
     console.log('[CloudBackup] Restore starting...');
     isRestoringRef.current = true;
     setIsRestoring(true);
@@ -159,6 +165,10 @@ export const VehicleProvider: React.FC<{ children: React.ReactNode }> = ({ child
       try {
         const result = await restoreFromCloud(user.id);
         hasRestoredRef.current = true;
+
+        // Clear any queue entries that were enqueued before the restore completed
+        // (e.g. predefined service definitions backed up against an empty profile).
+        clearQueue();
 
         if (result.vehicle) {
           setVehicle(result.vehicle);

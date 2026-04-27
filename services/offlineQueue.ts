@@ -73,6 +73,11 @@ const removeItem = (itemId: string): void => {
   notify();
 };
 
+export const clearQueue = (): void => {
+  saveQueue([]);
+  notify();
+};
+
 // Derive a deduplication key for upsert items so newer state replaces older state.
 const deriveKey = (type: QueueItemType, payload: Record<string, any>): string => {
   switch (type) {

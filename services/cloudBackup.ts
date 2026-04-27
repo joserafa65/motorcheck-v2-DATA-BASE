@@ -599,6 +599,11 @@ export const migrateLocalToCloud = async (
   try {
     console.log('[CloudBackup] Starting migration to cloud...');
 
+    // Mark migration complete immediately so a failed network attempt doesn't
+    // re-run migration on every subsequent login. Any failed writes are queued
+    // for offline replay automatically via the withRetry + enqueue path.
+    localStorage.setItem(CLOUD_KEYS.MIGRATION_COMPLETED, 'true');
+
     // Step 1: ensure vehicle exists and get its ID before anything else
     const vehicleId = await ensureVehicleId(vehicle, userId);
     if (!vehicleId) {
@@ -614,7 +619,6 @@ export const migrateLocalToCloud = async (
     await backupServiceLogs(serviceLogs, userId, vehicle);
     await backupServiceDefinitions(serviceDefinitions, userId, vehicle);
 
-    localStorage.setItem(CLOUD_KEYS.MIGRATION_COMPLETED, 'true');
     console.log('[CloudBackup] Migration completed successfully');
   } catch (e) {
     console.error('[CloudBackup] Exception during migration:', e);
