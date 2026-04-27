@@ -329,15 +329,6 @@ const Fuel: React.FC<FuelProps> = ({ onNavigate, initialTab = 'log', editLogId, 
                     Estás editando un registro existente
                 </div>
             )}
-            <Input
-                label="Fecha y Hora"
-                type="datetime-local"
-                name="date"
-                required
-                value={formData.date}
-                onChange={handleInputChange}
-            />
-
             <div className="mb-3 bg-gray-50 dark:bg-white/5 rounded-xl p-4 border border-gray-100 dark:border-white/10 flex items-center justify-between">
                 <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400">
                     <Gauge size={18} />
@@ -392,6 +383,14 @@ const Fuel: React.FC<FuelProps> = ({ onNavigate, initialTab = 'log', editLogId, 
                 name="total"
                 required
                 value={formData.total}
+                onChange={handleInputChange}
+            />
+            <Input
+                label="Fecha y Hora"
+                type="datetime-local"
+                name="date"
+                required
+                value={formData.date}
                 onChange={handleInputChange}
             />
             <Select 
