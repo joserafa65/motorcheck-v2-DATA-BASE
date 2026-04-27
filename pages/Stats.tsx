@@ -367,21 +367,6 @@ const Stats: React.FC<StatsProps> = ({ onNavigate }) => {
         <Card className="py-4 px-5">
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-3 min-w-0">
-                <div className="p-2.5 rounded-xl bg-blue-500/10 shrink-0">
-                  <Wrench size={22} className="text-blue-500" />
-                </div>
-                <div className="min-w-0">
-                  <div className="text-gray-500 dark:text-gray-400 text-xs uppercase font-bold tracking-wider truncate">Visitas Mecánica</div>
-                  <div className="text-gray-500 text-xs font-medium truncate">servicios realizados</div>
-                </div>
-              </div>
-              <div className="text-xl font-bold text-gray-900 dark:text-white leading-none shrink-0 text-right">{metrics.serviceVisits}</div>
-            </div>
-        </Card>
-
-        <Card className="py-4 px-5">
-            <div className="flex items-center justify-between gap-3">
-              <div className="flex items-center gap-3 min-w-0">
                 <div className="p-2.5 rounded-xl bg-emerald-500/10 shrink-0">
                   <Droplet size={22} className="text-emerald-500 fill-current" />
                 </div>
@@ -408,6 +393,21 @@ const Stats: React.FC<StatsProps> = ({ onNavigate }) => {
               <div className="text-xl font-bold text-gray-900 dark:text-white leading-none shrink-0 text-right tracking-tight">
                 {CURRENCY_FORMATTER.format(metrics.avgCostPerRefuel)}
               </div>
+            </div>
+        </Card>
+
+        <Card className="py-4 px-5">
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="p-2.5 rounded-xl bg-blue-500/10 shrink-0">
+                  <Wrench size={22} className="text-blue-500" />
+                </div>
+                <div className="min-w-0">
+                  <div className="text-gray-500 dark:text-gray-400 text-xs uppercase font-bold tracking-wider truncate">Visitas Mecánica</div>
+                  <div className="text-gray-500 text-xs font-medium truncate">servicios realizados</div>
+                </div>
+              </div>
+              <div className="text-xl font-bold text-gray-900 dark:text-white leading-none shrink-0 text-right">{metrics.serviceVisits}</div>
             </div>
         </Card>
 
