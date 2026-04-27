@@ -400,7 +400,7 @@ const Stats: React.FC<StatsProps> = ({ onNavigate }) => {
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-3 min-w-0">
                 <div className="p-2.5 rounded-xl bg-blue-500/10 shrink-0">
-                  <Wrench size={22} className="text-blue-500" />
+                  <DollarSign size={22} className="text-blue-500" />
                 </div>
                 <div className="min-w-0">
                   <div className="text-gray-500 dark:text-gray-400 text-xs uppercase font-bold tracking-wider truncate">Visitas Mecánica</div>
