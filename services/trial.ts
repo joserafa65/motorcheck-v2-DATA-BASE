@@ -124,6 +124,20 @@ export const TrialService = {
     }
   },
 
+  async setSubscriptionActive(userId: string): Promise<void> {
+    try {
+      const { error } = await dbClient.rpc('set_subscription_active', {
+        p_user_id: userId
+      });
+
+      if (error) {
+        console.error('Error setting subscription active:', error);
+      }
+    } catch (error) {
+      console.error('Error calling set_subscription_active:', error);
+    }
+  },
+
   async validateUserAccess(userId: string): Promise<UserAccessValidation> {
     try {
       const isTrialActive = await this.checkTrialStatus(userId);

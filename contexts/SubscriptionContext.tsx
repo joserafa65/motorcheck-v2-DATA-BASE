@@ -30,7 +30,7 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const [customerInfo, setCustomerInfo] = useState<CustomerInfo | null>(null);
   const [offerings, setOfferings] = useState<PurchasesOffering[] | null>(null);
 
-  const initializeRevenueCat = async () => {
+  const initializeRevenueCat = async (userId: string) => {
     try {
       const platform = Capacitor.getPlatform();
       const apiKey =
@@ -45,10 +45,10 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
       await Purchases.configure({
         apiKey,
-        appUserID: undefined,
+        appUserID: userId,
       });
 
-      console.log('RevenueCat initialized successfully for platform:', platform);
+      console.log('RevenueCat initialized successfully for platform:', platform, 'userID:', userId);
     } catch (error) {
       console.error('Error initializing RevenueCat:', error);
     }
@@ -64,10 +64,9 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
     let hasActiveEntitlement = false;
 
     if (!isWeb) {
-      await initializeRevenueCat();
+      await initializeRevenueCat(userId);
 
-      // await Purchases.logIn({ appUserID: userId });
-      console.log('RevenueCat user logged in:', userId);
+      console.log('RevenueCat initialized with userID:', userId);
 
       const { customerInfo: info } = await Purchases.getCustomerInfo();
       setCustomerInfo(info);
@@ -118,7 +117,7 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
     setTrialEndDate(trialStatus.trialEndDate);
 
-    const shouldShowPaywall = !accessValidation.hasAccess;
+    const shouldShowPaywall = !hasActiveEntitlement && !accessValidation.hasAccess;
     setShowPaywall(shouldShowPaywall);
 
     console.log('=== SUBSCRIPTION STATUS ===');
@@ -192,6 +191,10 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
       if (hasActiveEntitlement) {
         setShowPaywall(false);
+        setSubscriptionStatus('active');
+        if (user?.id) {
+          await TrialService.setSubscriptionActive(user.id);
+        }
         console.log('Purchase successful, entitlement activated');
         return { success: true };
       }
@@ -225,6 +228,10 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
       if (hasActiveEntitlement) {
         setShowPaywall(false);
+        setSubscriptionStatus('active');
+        if (user?.id) {
+          await TrialService.setSubscriptionActive(user.id);
+        }
         console.log('Purchases restored successfully, entitlement activated');
         return { success: true };
       }
