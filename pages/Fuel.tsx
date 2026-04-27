@@ -393,18 +393,6 @@ const Fuel: React.FC<FuelProps> = ({ onNavigate, initialTab = 'log', editLogId, 
                 value={formData.date}
                 onChange={handleInputChange}
             />
-            <Select 
-                label="Tipo de Combustible"
-                name="type"
-                options={[
-                    { value: 'Premium', label: 'Premium / Súper' },
-                    { value: 'Regular', label: 'Regular / Extra' },
-                    { value: 'Diesel', label: 'Diesel' },
-                ]}
-                value={formData.type}
-                onChange={handleInputChange}
-            />
-            
             <PhotoInput 
                 value={formData.photo}
                 onChange={(base64) => setFormData(prev => ({...prev, photo: base64}))}
