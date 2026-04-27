@@ -316,20 +316,20 @@ const [shareMessage] = useState(
 
           {/* BOTONES DE ACCIÓN */}
           <div className="grid grid-cols-3 gap-2.5 animate-enter delay-300">
-            <Button onClick={() => onNavigate('fuel')} className="bg-blue-600 hover:bg-blue-500 h-28 flex-col !gap-1.5 px-2 shadow-blue-900/20">
-                <Fuel size={26} strokeWidth={2} className="mb-0.5 relative z-10" />
-                <span className="text-[10px] font-medium opacity-90 uppercase tracking-tight leading-tight relative z-10">Ingresa una</span>
-                <span className="text-sm font-bold leading-none relative z-10">Tanqueada</span>
+            <Button onClick={() => { setOdoInput(''); setShowOdoModal(true); }} className="h-28 flex-col !gap-1.5 px-2 !bg-purple-600 hover:!bg-purple-500 shadow-purple-900/20 !border-0 text-white">
+                <Gauge size={26} strokeWidth={2} className="mb-0.5 relative z-10" />
+                <span className="text-[10px] font-medium opacity-90 uppercase tracking-tight leading-tight relative z-10">Actualiza tu</span>
+                <span className="text-sm font-bold leading-none relative z-10">Odómetro</span>
             </Button>
             <Button onClick={() => onNavigate('services', { startInProgramMode: true })} className="h-28 flex-col !gap-1.5 px-2 !bg-orange-600 hover:!bg-orange-500 shadow-orange-900/20 !border-0 text-white">
                 <Wrench size={26} strokeWidth={2} className="mb-0.5 relative z-10" />
                 <span className="text-[10px] font-medium opacity-90 uppercase tracking-tight leading-tight relative z-10">Programa un</span>
                 <span className="text-sm font-bold leading-none relative z-10">Servicio</span>
             </Button>
-            <Button onClick={() => { setOdoInput(''); setShowOdoModal(true); }} className="h-28 flex-col !gap-1.5 px-2 !bg-purple-600 hover:!bg-purple-500 shadow-purple-900/20 !border-0 text-white">
-                <Gauge size={26} strokeWidth={2} className="mb-0.5 relative z-10" />
-                <span className="text-[10px] font-medium opacity-90 uppercase tracking-tight leading-tight relative z-10">Actualiza tu</span>
-                <span className="text-sm font-bold leading-none relative z-10">Odómetro</span>
+            <Button onClick={() => onNavigate('fuel')} className="bg-blue-600 hover:bg-blue-500 h-28 flex-col !gap-1.5 px-2 shadow-blue-900/20">
+                <Fuel size={26} strokeWidth={2} className="mb-0.5 relative z-10" />
+                <span className="text-[10px] font-medium opacity-90 uppercase tracking-tight leading-tight relative z-10">Ingresa una</span>
+                <span className="text-sm font-bold leading-none relative z-10">Tanqueada</span>
             </Button>
           </div>
 
