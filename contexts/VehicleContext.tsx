@@ -5,7 +5,7 @@ import { StorageService } from '../services/storage';
 import { NotificationService } from '../services/notifications';
 import { useAuth } from './AuthContext';
 import { useToast } from './ToastContext';
-import { backupVehicle, backupFuelLogs, backupServiceLogs, backupServiceDefinitions, migrateLocalToCloud, shouldMigrate, restoreFromCloud, clearCachedVehicleId } from '../services/cloudBackup';
+import { backupVehicle, backupFuelLogs, backupServiceLogs, backupServiceDefinitions, deleteFuelLogFromCloud, deleteServiceLogFromCloud, deleteServiceDefinitionFromCloud, migrateLocalToCloud, shouldMigrate, restoreFromCloud, clearCachedVehicleId } from '../services/cloudBackup';
 
 interface VehicleContextType {
   vehicle: VehicleSettings;
@@ -115,7 +115,14 @@ export const VehicleProvider: React.FC<{ children: React.ReactNode }> = ({ child
   // Migrate local data to cloud on first login
   useEffect(() => {
     if (user?.id && shouldMigrate()) {
-      migrateLocalToCloud(user.id, vehicle, fuelLogs, serviceLogs, serviceDefinitions);
+      (async () => {
+        try {
+          await migrateLocalToCloud(user.id, vehicle, fuelLogs, serviceLogs, serviceDefinitions);
+        } catch (e) {
+          console.error('[CloudBackup] Migration failed:', e);
+          showToast('Error al sincronizar datos por primera vez. Reintentando en el próximo inicio.');
+        }
+      })();
     }
   }, [user?.id]);
 
@@ -163,6 +170,9 @@ export const VehicleProvider: React.FC<{ children: React.ReactNode }> = ({ child
         }
 
         console.log('[CloudBackup] Restore completed');
+      } catch (e) {
+        console.error('[CloudBackup] Restore failed:', e);
+        showToast('No se pudo restaurar tu información. Revisa tu conexión.');
       } finally {
         setTimeout(() => {
           isRestoringRef.current = false;
@@ -301,9 +311,16 @@ export const VehicleProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setServiceLogs(prev => prev.map(l => l.id === updatedLog.id ? updatedLog : l).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
   };
 
-  const deleteFuelLog = (id: string) => setFuelLogs(prev => prev.filter(l => l.id !== id));
-  const deleteServiceLog = (id: string) => setServiceLogs(prev => prev.filter(l => l.id !== id));
-  
+  const deleteFuelLog = (id: string) => {
+    setFuelLogs(prev => prev.filter(l => l.id !== id));
+    if (user?.id) deleteFuelLogFromCloud(id, user.id);
+  };
+
+  const deleteServiceLog = (id: string) => {
+    setServiceLogs(prev => prev.filter(l => l.id !== id));
+    if (user?.id) deleteServiceLogFromCloud(id, user.id);
+  };
+
   const addServiceDefinition = (def: ServiceDefinition) => {
     setServiceDefinitions(prev => [...prev, def]);
   };
@@ -314,6 +331,7 @@ export const VehicleProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   const deleteServiceDefinition = (id: string) => {
     setServiceDefinitions(prev => prev.filter(d => d.id !== id));
+    if (user?.id) deleteServiceDefinitionFromCloud(id, user.id);
   };
 
   const updateServiceDefinitions = (defs: ServiceDefinition[]) => setServiceDefinitions(defs);

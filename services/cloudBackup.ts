@@ -345,6 +345,48 @@ export const backupServiceDefinitions = async (
   }, onError);
 };
 
+// Hard-delete a single fuel log from Supabase by its external_id.
+export const deleteFuelLogFromCloud = async (id: string, userId: string): Promise<void> => {
+  try {
+    const { error } = await dbClient
+      .from('fuel_logs')
+      .delete()
+      .eq('external_id', id)
+      .eq('user_id', userId);
+    if (error) console.error('[CloudBackup] Error deleting fuel log:', error);
+  } catch (e) {
+    console.error('[CloudBackup] Exception deleting fuel log:', e);
+  }
+};
+
+// Hard-delete a single service log from Supabase by its external_id.
+export const deleteServiceLogFromCloud = async (id: string, userId: string): Promise<void> => {
+  try {
+    const { error } = await dbClient
+      .from('service_logs')
+      .delete()
+      .eq('external_id', id)
+      .eq('user_id', userId);
+    if (error) console.error('[CloudBackup] Error deleting service log:', error);
+  } catch (e) {
+    console.error('[CloudBackup] Exception deleting service log:', e);
+  }
+};
+
+// Hard-delete a single service definition from Supabase by its id.
+export const deleteServiceDefinitionFromCloud = async (id: string, userId: string): Promise<void> => {
+  try {
+    const { error } = await dbClient
+      .from('service_definitions')
+      .delete()
+      .eq('id', id)
+      .eq('user_id', userId);
+    if (error) console.error('[CloudBackup] Error deleting service definition:', error);
+  } catch (e) {
+    console.error('[CloudBackup] Exception deleting service definition:', e);
+  }
+};
+
 export interface RestoreResult {
   vehicle: VehicleSettings | null;
   fuelLogs: FuelLog[];

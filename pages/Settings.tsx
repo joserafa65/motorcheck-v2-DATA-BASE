@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useVehicle } from '../contexts/VehicleContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useSubscription } from '../contexts/SubscriptionContext';
+import { useToast } from '../contexts/ToastContext';
+import { clearCachedVehicleId } from '../services/cloudBackup';
 import {
   Button,
   Input,
@@ -27,6 +29,7 @@ const Settings: React.FC<SettingsProps> = ({ onNavigate }) => {
     useVehicle();
   const { user, signOut } = useAuth();
   const { entitlementActive, isTrialActive, offerings, purchase, restore } = useSubscription();
+  const { showToast } = useToast();
 
   const [formData, setFormData] = useState(vehicle);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
@@ -109,61 +112,37 @@ const Settings: React.FC<SettingsProps> = ({ onNavigate }) => {
 
   const handleReset = async () => {
     if (
-      confirm(
+      !confirm(
         'Esta acción borrará toda la información actual del vehículo y su historial, tanto la almacenada en tu teléfono como la de la nube.\n\nEs ideal si cambiaste de vehículo o deseas comenzar de cero nuevamente.\n\n¿Confirmas que deseas continuar?'
       )
-    ) {
-      try {
-        // Delete cloud data if user is authenticated
-        if (user?.id) {
-          // Delete all vehicles and their related data for this user
-          const { error: vehiclesError } = await dbClient
-            .from('vehicles')
-            .delete()
-            .eq('user_id', user.id);
+    ) return;
 
-          if (vehiclesError) {
-            console.error('Error deleting vehicles:', vehiclesError);
-          }
+    try {
+      if (user?.id) {
+        const results = await Promise.all([
+          dbClient.from('vehicles').delete().eq('user_id', user.id),
+          dbClient.from('fuel_logs').delete().eq('user_id', user.id),
+          dbClient.from('service_logs').delete().eq('user_id', user.id),
+          dbClient.from('service_definitions').delete().eq('user_id', user.id),
+        ]);
 
-          // Delete fuel logs
-          const { error: fuelError } = await dbClient
-            .from('fuel_logs')
-            .delete()
-            .eq('user_id', user.id);
-
-          if (fuelError) {
-            console.error('Error deleting fuel logs:', fuelError);
-          }
-
-          // Delete service definitions
-          const { error: defsError } = await dbClient
-            .from('service_definitions')
-            .delete()
-            .eq('user_id', user.id);
-
-          if (defsError) {
-            console.error('Error deleting service definitions:', defsError);
-          }
-
-          // Delete service logs
-          const { error: logsError } = await dbClient
-            .from('service_logs')
-            .delete()
-            .eq('user_id', user.id);
-
-          if (logsError) {
-            console.error('Error deleting service logs:', logsError);
-          }
+        const cloudErrors = results.filter(r => r.error);
+        if (cloudErrors.length > 0) {
+          cloudErrors.forEach(r => console.error('Error deleting cloud data:', r.error));
+          showToast('Algunos datos en la nube no se pudieron borrar. Los datos locales sí fueron eliminados.');
         }
 
-        // Delete local data
-        resetAll();
-        window.location.reload();
-      } catch (error) {
-        console.error('Error resetting data:', error);
-        alert('Hubo un error al borrar los datos. Por favor, intenta de nuevo.');
+        // Clear the vehicle ID cache and migration flag so a fresh setup
+        // syncs correctly to Supabase from scratch.
+        clearCachedVehicleId();
+        localStorage.removeItem('motorcheck_cloud_migration_completed');
       }
+
+      resetAll();
+      window.location.reload();
+    } catch (error) {
+      console.error('Error resetting data:', error);
+      alert('Hubo un error al borrar los datos. Por favor, intenta de nuevo.');
     }
   };
 
