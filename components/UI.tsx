@@ -426,16 +426,14 @@ export const PhotoInput: React.FC<{
                 type="button"
                 onClick={handleCaptureClick}
                 disabled={isProcessing}
-                className="w-full h-36 border-2 border-dashed border-gray-300 dark:border-white/20 rounded-xl flex flex-col items-center justify-center gap-3 text-gray-500 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors active:scale-[0.98]"
+                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-200 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm font-medium hover:bg-gray-300 dark:hover:bg-white/15 transition-colors active:scale-[0.97] disabled:opacity-50"
               >
-                 {isProcessing ? (
-                     <div className="animate-spin h-6 w-6 border-2 border-blue-500 rounded-full border-t-transparent"></div>
-                 ) : (
-                     <>
-                        <Camera size={28} />
-                        <span className="text-sm font-medium">Tomar / Subir Foto</span>
-                     </>
-                 )}
+                {isProcessing ? (
+                    <div className="animate-spin h-4 w-4 border-2 border-gray-500 rounded-full border-t-transparent"></div>
+                ) : (
+                    <Camera size={16} />
+                )}
+                <span>Tomar / Subir Foto</span>
               </button>
             ) : (
               <div className="relative w-full h-56 rounded-xl overflow-hidden group animate-enter border border-gray-200 dark:border-white/10 shadow-sm bg-black">
