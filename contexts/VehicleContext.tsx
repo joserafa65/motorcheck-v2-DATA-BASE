@@ -6,6 +6,7 @@ import { NotificationService } from '../services/notifications';
 import { useAuth } from './AuthContext';
 import { useToast } from './ToastContext';
 import { backupVehicle, backupFuelLogs, backupServiceLogs, backupServiceDefinitions, deleteFuelLogFromCloud, deleteServiceLogFromCloud, deleteServiceDefinitionFromCloud, getCachedVehicleId, migrateLocalToCloud, shouldMigrate, restoreFromCloud, clearCachedVehicleId } from '../services/cloudBackup';
+import { getQueue, onQueueChange, registerOnlineListener } from '../services/offlineQueue';
 
 interface VehicleContextType {
   vehicle: VehicleSettings;
@@ -16,6 +17,7 @@ interface VehicleContextType {
   urgentCount: number;
   upcomingCount: number;
   isRestoring: boolean;
+  pendingCount: number;
   updateVehicle: (v: VehicleSettings) => void;
   addFuelLog: (log: FuelLog) => void;
   updateFuelLog: (log: FuelLog) => void;
@@ -44,8 +46,16 @@ export const VehicleProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [urgentCount, setUrgentCount] = useState(0);
   const [upcomingCount, setUpcomingCount] = useState(0);
   const [isRestoring, setIsRestoring] = useState(false);
+  const [pendingCount, setPendingCount] = useState(() => getQueue().length);
   const isRestoringRef = useRef(false);
   const hasRestoredRef = useRef(false);
+
+  // Register online listener once globally so offline writes are replayed on reconnect
+  useEffect(() => {
+    registerOnlineListener();
+    const unsubscribe = onQueueChange(setPendingCount);
+    return unsubscribe;
+  }, []);
 
   // Apply Theme
   useEffect(() => {
@@ -361,6 +371,7 @@ export const VehicleProvider: React.FC<{ children: React.ReactNode }> = ({ child
       urgentCount,
       upcomingCount,
       isRestoring,
+      pendingCount,
       updateVehicle,
       addFuelLog,
       updateFuelLog,

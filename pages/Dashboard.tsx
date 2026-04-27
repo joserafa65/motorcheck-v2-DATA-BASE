@@ -10,7 +10,7 @@ import { Share } from '@capacitor/share';
 import { dbClient } from '../services/database';
 
 const Dashboard: React.FC<{ onNavigate: (view: string, params?: any) => void }> = ({ onNavigate }) => {
-  const { vehicle, serviceStatuses, fuelLogs, urgentCount, upcomingCount, updateVehicle, isRestoring } = useVehicle();
+  const { vehicle, serviceStatuses, fuelLogs, urgentCount, upcomingCount, updateVehicle, isRestoring, pendingCount } = useVehicle();
   const { isTrialActive, showPaywall } = useSubscription();
 
   const [showOdoModal, setShowOdoModal] = useState(false);
@@ -205,6 +205,18 @@ const [shareMessage] = useState(
 
   return (
     <div className="pb-24 space-y-4">
+      {/* Offline queue indicator — shown when writes are pending sync */}
+      {pendingCount > 0 && (
+        <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-medium animate-enter">
+          <span className="relative flex h-2 w-2 flex-shrink-0">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75" />
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-400" />
+          </span>
+          {pendingCount === 1
+            ? '1 cambio pendiente de sincronizar'
+            : `${pendingCount} cambios pendientes de sincronizar`}
+        </div>
+      )}
       {/* HEADER / PORTADA */}
       <div className="relative w-full h-52 bg-gray-900 rounded-b-[2.5rem] shadow-2xl overflow-hidden mb-3 group animate-enter">
             {vehicle.photoUrl ? (

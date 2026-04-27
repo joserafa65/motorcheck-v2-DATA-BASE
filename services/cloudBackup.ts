@@ -1,6 +1,15 @@
 
 import { dbClient } from './database';
 import { FuelLog, ServiceLog, VehicleSettings, ServiceDefinition, UnitSystem, Theme } from '../types';
+import {
+  enqueueVehicleUpsert,
+  enqueueFuelLogUpsert,
+  enqueueServiceLogUpsert,
+  enqueueServiceDefUpsert,
+  enqueueFuelLogDelete,
+  enqueueServiceLogDelete,
+  enqueueServiceDefDelete,
+} from './offlineQueue';
 
 const CLOUD_KEYS = {
   VEHICLE_ID: 'motorcheck_cloud_vehicle_id',
@@ -109,10 +118,13 @@ const ensureVehicleId = (vehicle: VehicleSettings, userId: string): Promise<stri
 };
 
 // Retry a backup operation once after a delay if the first attempt fails.
+// If both attempts fail, calls onPermanentFailure (used to enqueue for offline replay)
+// and then calls onError (used to show a toast).
 const withRetry = async (
   label: string,
   fn: () => Promise<boolean>,
-  onError?: () => void
+  onError?: () => void,
+  onPermanentFailure?: () => void
 ): Promise<void> => {
   const ok = await fn();
   if (ok) return;
@@ -122,7 +134,8 @@ const withRetry = async (
 
   const ok2 = await fn();
   if (!ok2) {
-    console.error(`[CloudBackup] ${label} failed after retry`);
+    console.error(`[CloudBackup] ${label} failed after retry — enqueueing for offline replay`);
+    onPermanentFailure?.();
     onError?.();
   }
 };
@@ -194,6 +207,9 @@ export const backupVehicle = async (
   userId: string,
   onError?: () => void
 ): Promise<void> => {
+  let vehicleIdForQueue: string | null = null;
+  let vehicleDataForQueue: Record<string, any> | null = null;
+
   await withRetry('backupVehicle', async () => {
     try {
       console.log('[CloudBackup] Starting vehicle backup');
@@ -204,6 +220,9 @@ export const backupVehicle = async (
       }
 
       const vehicleData = mapVehicleToDb(vehicle, userId);
+      vehicleIdForQueue = vehicleId;
+      vehicleDataForQueue = vehicleData;
+
       const { error } = await dbClient
         .from('vehicles')
         .update(vehicleData)
@@ -220,7 +239,11 @@ export const backupVehicle = async (
       console.error('[CloudBackup] Exception in backupVehicle:', e);
       return false;
     }
-  }, onError);
+  }, onError, () => {
+    if (vehicleIdForQueue && vehicleDataForQueue) {
+      enqueueVehicleUpsert(vehicleDataForQueue, vehicleIdForQueue);
+    }
+  });
 };
 
 // Backup fuel logs to cloud.
@@ -234,6 +257,8 @@ export const backupFuelLogs = async (
   onError?: () => void
 ): Promise<void> => {
   if (logs.length === 0) return;
+
+  let logsDataForQueue: Record<string, any>[] | null = null;
 
   await withRetry('backupFuelLogs', async () => {
     try {
@@ -253,6 +278,8 @@ export const backupFuelLogs = async (
       console.log(`[CloudBackup] Fuel logs after dedup: ${unique.length}`);
 
       const logsData = unique.map(log => mapFuelLogToDb(log, userId, vehicleId));
+      logsDataForQueue = logsData;
+
       const { error } = await dbClient
         .from('fuel_logs')
         .upsert(logsData, { onConflict: 'external_id' });
@@ -268,7 +295,11 @@ export const backupFuelLogs = async (
       console.error('[CloudBackup] Exception in backupFuelLogs:', e);
       return false;
     }
-  }, onError);
+  }, onError, () => {
+    if (logsDataForQueue) {
+      for (const logData of logsDataForQueue) enqueueFuelLogUpsert(logData);
+    }
+  });
 };
 
 // Backup service logs to cloud.
@@ -279,6 +310,8 @@ export const backupServiceLogs = async (
   onError?: () => void
 ): Promise<void> => {
   if (logs.length === 0) return;
+
+  let logsDataForQueue: Record<string, any>[] | null = null;
 
   await withRetry('backupServiceLogs', async () => {
     try {
@@ -298,6 +331,8 @@ export const backupServiceLogs = async (
       console.log(`[CloudBackup] Service logs after dedup: ${unique.length}`);
 
       const logsData = unique.map(log => mapServiceLogToDb(log, userId, vehicleId));
+      logsDataForQueue = logsData;
+
       const { error } = await dbClient
         .from('service_logs')
         .upsert(logsData, { onConflict: 'external_id' });
@@ -313,7 +348,11 @@ export const backupServiceLogs = async (
       console.error('[CloudBackup] Exception in backupServiceLogs:', e);
       return false;
     }
-  }, onError);
+  }, onError, () => {
+    if (logsDataForQueue) {
+      for (const logData of logsDataForQueue) enqueueServiceLogUpsert(logData);
+    }
+  });
 };
 
 // Backup service definitions to cloud.
@@ -324,6 +363,8 @@ export const backupServiceDefinitions = async (
   onError?: () => void
 ): Promise<void> => {
   if (defs.length === 0) return;
+
+  let defsDataForQueue: Record<string, any>[] | null = null;
 
   await withRetry('backupServiceDefinitions', async () => {
     try {
@@ -343,6 +384,8 @@ export const backupServiceDefinitions = async (
       console.log(`[CloudBackup] Service definitions after dedup: ${unique.length}`);
 
       const defsData = unique.map(def => mapServiceDefToDb(def, userId, vehicleId));
+      defsDataForQueue = defsData;
+
       const { error } = await dbClient
         .from('service_definitions')
         .upsert(defsData, { onConflict: 'vehicle_id,id' });
@@ -358,10 +401,15 @@ export const backupServiceDefinitions = async (
       console.error('[CloudBackup] Exception in backupServiceDefinitions:', e);
       return false;
     }
-  }, onError);
+  }, onError, () => {
+    if (defsDataForQueue) {
+      for (const defData of defsDataForQueue) enqueueServiceDefUpsert(defData);
+    }
+  });
 };
 
 // Hard-delete a single fuel log from Supabase by its external_id.
+// Enqueues for offline replay if the delete fails.
 export const deleteFuelLogFromCloud = async (id: string, userId: string): Promise<void> => {
   try {
     const { error } = await dbClient
@@ -369,13 +417,18 @@ export const deleteFuelLogFromCloud = async (id: string, userId: string): Promis
       .delete()
       .eq('external_id', id)
       .eq('user_id', userId);
-    if (error) console.error('[CloudBackup] Error deleting fuel log:', error);
+    if (error) {
+      console.error('[CloudBackup] Error deleting fuel log:', error);
+      enqueueFuelLogDelete(id, userId);
+    }
   } catch (e) {
     console.error('[CloudBackup] Exception deleting fuel log:', e);
+    enqueueFuelLogDelete(id, userId);
   }
 };
 
 // Hard-delete a single service log from Supabase by its external_id.
+// Enqueues for offline replay if the delete fails.
 export const deleteServiceLogFromCloud = async (id: string, userId: string): Promise<void> => {
   try {
     const { error } = await dbClient
@@ -383,15 +436,20 @@ export const deleteServiceLogFromCloud = async (id: string, userId: string): Pro
       .delete()
       .eq('external_id', id)
       .eq('user_id', userId);
-    if (error) console.error('[CloudBackup] Error deleting service log:', error);
+    if (error) {
+      console.error('[CloudBackup] Error deleting service log:', error);
+      enqueueServiceLogDelete(id, userId);
+    }
   } catch (e) {
     console.error('[CloudBackup] Exception deleting service log:', e);
+    enqueueServiceLogDelete(id, userId);
   }
 };
 
 // Hard-delete a single service definition from Supabase.
 // Scoped by vehicle_id (part of the composite PK) to avoid deleting the same
 // service type from a different vehicle if multi-vehicle support is ever added.
+// Enqueues for offline replay if the delete fails.
 export const deleteServiceDefinitionFromCloud = async (id: string, userId: string, vehicleId: string): Promise<void> => {
   try {
     const { error } = await dbClient
@@ -400,9 +458,13 @@ export const deleteServiceDefinitionFromCloud = async (id: string, userId: strin
       .eq('id', id)
       .eq('user_id', userId)
       .eq('vehicle_id', vehicleId);
-    if (error) console.error('[CloudBackup] Error deleting service definition:', error);
+    if (error) {
+      console.error('[CloudBackup] Error deleting service definition:', error);
+      enqueueServiceDefDelete(id, userId, vehicleId);
+    }
   } catch (e) {
     console.error('[CloudBackup] Exception deleting service definition:', e);
+    enqueueServiceDefDelete(id, userId, vehicleId);
   }
 };
 
