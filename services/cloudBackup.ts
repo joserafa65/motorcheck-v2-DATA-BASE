@@ -13,7 +13,7 @@ let cachedVehicleId: string | null = null;
 // Mutex to prevent concurrent ensureVehicleId calls from each inserting a new row
 let ensureVehicleIdPromise: Promise<string | null> | null = null;
 
-const getCachedVehicleId = (): string | null => {
+export const getCachedVehicleId = (): string | null => {
   if (cachedVehicleId) return cachedVehicleId;
   const stored = localStorage.getItem(CLOUD_KEYS.VEHICLE_ID);
   if (stored) {
@@ -61,7 +61,23 @@ const ensureVehicleId = (vehicle: VehicleSettings, userId: string): Promise<stri
         return vehicleId;
       }
 
-      // Vehicle does not exist — create it now and await response
+      // Re-query before inserting — two devices can both see length===0 from the
+      // first query if they race; this second check is still inside the mutex so
+      // only one device ends up inserting.
+      const { data: recheck } = await dbClient
+        .from('vehicles')
+        .select('id')
+        .eq('user_id', userId)
+        .limit(1);
+
+      if (recheck && recheck.length > 0) {
+        const vehicleId = recheck[0].id;
+        setCachedVehicleId(vehicleId);
+        console.log('[CloudBackup] Vehicle found on recheck (cross-device race prevented):', vehicleId);
+        return vehicleId;
+      }
+
+      // Confirmed no vehicle exists — safe to insert
       const vehicleData = mapVehicleToDb(vehicle, userId);
       const { data: created, error: createError } = await dbClient
         .from('vehicles')
@@ -373,14 +389,17 @@ export const deleteServiceLogFromCloud = async (id: string, userId: string): Pro
   }
 };
 
-// Hard-delete a single service definition from Supabase by its id.
-export const deleteServiceDefinitionFromCloud = async (id: string, userId: string): Promise<void> => {
+// Hard-delete a single service definition from Supabase.
+// Scoped by vehicle_id (part of the composite PK) to avoid deleting the same
+// service type from a different vehicle if multi-vehicle support is ever added.
+export const deleteServiceDefinitionFromCloud = async (id: string, userId: string, vehicleId: string): Promise<void> => {
   try {
     const { error } = await dbClient
       .from('service_definitions')
       .delete()
       .eq('id', id)
-      .eq('user_id', userId);
+      .eq('user_id', userId)
+      .eq('vehicle_id', vehicleId);
     if (error) console.error('[CloudBackup] Error deleting service definition:', error);
   } catch (e) {
     console.error('[CloudBackup] Exception deleting service definition:', e);

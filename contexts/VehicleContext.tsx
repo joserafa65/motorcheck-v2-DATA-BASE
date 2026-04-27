@@ -5,7 +5,7 @@ import { StorageService } from '../services/storage';
 import { NotificationService } from '../services/notifications';
 import { useAuth } from './AuthContext';
 import { useToast } from './ToastContext';
-import { backupVehicle, backupFuelLogs, backupServiceLogs, backupServiceDefinitions, deleteFuelLogFromCloud, deleteServiceLogFromCloud, deleteServiceDefinitionFromCloud, migrateLocalToCloud, shouldMigrate, restoreFromCloud, clearCachedVehicleId } from '../services/cloudBackup';
+import { backupVehicle, backupFuelLogs, backupServiceLogs, backupServiceDefinitions, deleteFuelLogFromCloud, deleteServiceLogFromCloud, deleteServiceDefinitionFromCloud, getCachedVehicleId, migrateLocalToCloud, shouldMigrate, restoreFromCloud, clearCachedVehicleId } from '../services/cloudBackup';
 
 interface VehicleContextType {
   vehicle: VehicleSettings;
@@ -331,7 +331,10 @@ export const VehicleProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   const deleteServiceDefinition = (id: string) => {
     setServiceDefinitions(prev => prev.filter(d => d.id !== id));
-    if (user?.id) deleteServiceDefinitionFromCloud(id, user.id);
+    if (user?.id) {
+      const vehicleId = getCachedVehicleId();
+      if (vehicleId) deleteServiceDefinitionFromCloud(id, user.id, vehicleId);
+    }
   };
 
   const updateServiceDefinitions = (defs: ServiceDefinition[]) => setServiceDefinitions(defs);
