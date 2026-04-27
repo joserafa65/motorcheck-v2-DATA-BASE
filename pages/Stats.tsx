@@ -4,7 +4,7 @@ import { Card, BackButton } from '../components/UI';
 import { CURRENCY_FORMATTER, roundToTwo } from '../constants';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, AreaChart, Area } from 'recharts';
 import { UnitSystem } from '../types';
-import { Droplet, Wrench, DollarSign, MapPin } from 'lucide-react';
+import { Droplet, Wrench, DollarSign, MapPin, ShoppingCart } from 'lucide-react';
 
 interface StatsProps {
   onNavigate: (view: string) => void;
@@ -353,7 +353,7 @@ const Stats: React.FC<StatsProps> = ({ onNavigate }) => {
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-3 min-w-0">
                 <div className="p-2.5 rounded-xl bg-blue-500/10 shrink-0">
-                  <Droplet size={22} className="text-blue-500" />
+                  <ShoppingCart size={22} className="text-blue-500" />
                 </div>
                 <div className="min-w-0">
                   <div className="text-gray-500 dark:text-gray-400 text-xs uppercase font-bold tracking-wider truncate">Visitas Gasolinera</div>
@@ -462,7 +462,7 @@ const Stats: React.FC<StatsProps> = ({ onNavigate }) => {
           </div>
       </Card>
 
-      <Card className="p-4 mb-6 animate-enter delay-500">
+      {false && <Card className="p-4 mb-6 animate-enter delay-500">
           <h3 className="font-bold mb-6 text-sm uppercase tracking-wide text-gray-500 dark:text-gray-400">Recorrido ({getRangeLabel()})</h3>
           <div className="h-56 w-full">
             <ResponsiveContainer width="100%" height="100%">
@@ -484,7 +484,7 @@ const Stats: React.FC<StatsProps> = ({ onNavigate }) => {
                 </AreaChart>
             </ResponsiveContainer>
           </div>
-      </Card>
+      </Card>}
 
     </div>
   );
