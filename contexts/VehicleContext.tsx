@@ -48,6 +48,7 @@ export const VehicleProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [isRestoring, setIsRestoring] = useState(false);
   const [pendingCount, setPendingCount] = useState(() => getQueue().length);
   const isRestoringRef = useRef(false);
+  const isMigratingRef = useRef(false);
   const hasRestoredRef = useRef(false);
 
   // Register online listener once globally so offline writes are replayed on reconnect
@@ -81,8 +82,8 @@ export const VehicleProvider: React.FC<{ children: React.ReactNode }> = ({ child
   useEffect(() => {
     StorageService.saveVehicle(vehicle);
     if (user?.id) {
-      if (isRestoringRef.current) {
-        console.log('[CloudBackup] Backup skipped: restoring in progress (vehicle)');
+      if (isRestoringRef.current || isMigratingRef.current) {
+        console.log('[CloudBackup] Backup skipped: restore/migration in progress (vehicle)');
       } else if (!vehicle.brand) {
         console.log('[CloudBackup] Backup skipped: empty vehicle profile');
       } else {
@@ -94,8 +95,8 @@ export const VehicleProvider: React.FC<{ children: React.ReactNode }> = ({ child
   useEffect(() => {
     StorageService.saveFuelLogs(fuelLogs);
     if (user?.id) {
-      if (isRestoringRef.current) {
-        console.log('[CloudBackup] Backup skipped: restoring in progress (fuel_logs)');
+      if (isRestoringRef.current || isMigratingRef.current) {
+        console.log('[CloudBackup] Backup skipped: restore/migration in progress (fuel_logs)');
       } else {
         backupFuelLogs(fuelLogs, user.id, vehicle, () => showToast('Error al sincronizar registros de combustible. Reintentando…'));
       }
@@ -105,8 +106,8 @@ export const VehicleProvider: React.FC<{ children: React.ReactNode }> = ({ child
   useEffect(() => {
     StorageService.saveServiceLogs(serviceLogs);
     if (user?.id) {
-      if (isRestoringRef.current) {
-        console.log('[CloudBackup] Backup skipped: restoring in progress (service_logs)');
+      if (isRestoringRef.current || isMigratingRef.current) {
+        console.log('[CloudBackup] Backup skipped: restore/migration in progress (service_logs)');
       } else {
         backupServiceLogs(serviceLogs, user.id, vehicle, () => showToast('Error al sincronizar servicios. Reintentando…'));
       }
@@ -116,8 +117,8 @@ export const VehicleProvider: React.FC<{ children: React.ReactNode }> = ({ child
   useEffect(() => {
     StorageService.saveServiceDefinitions(serviceDefinitions);
     if (user?.id) {
-      if (isRestoringRef.current) {
-        console.log('[CloudBackup] Backup skipped: restoring in progress (service_definitions)');
+      if (isRestoringRef.current || isMigratingRef.current) {
+        console.log('[CloudBackup] Backup skipped: restore/migration in progress (service_definitions)');
       } else if (!vehicle.brand) {
         console.log('[CloudBackup] Backup skipped: empty vehicle profile (service_definitions)');
       } else {
@@ -129,12 +130,16 @@ export const VehicleProvider: React.FC<{ children: React.ReactNode }> = ({ child
   // Migrate local data to cloud on first login
   useEffect(() => {
     if (user?.id && shouldMigrate()) {
+      isMigratingRef.current = true;
       (async () => {
         try {
           await migrateLocalToCloud(user.id, vehicle, fuelLogs, serviceLogs, serviceDefinitions);
+          clearQueue();
         } catch (e) {
           console.error('[CloudBackup] Migration failed:', e);
           showToast('Error al sincronizar datos por primera vez. Reintentando en el próximo inicio.');
+        } finally {
+          isMigratingRef.current = false;
         }
       })();
     }
