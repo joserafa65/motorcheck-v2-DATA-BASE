@@ -422,19 +422,22 @@ export const PhotoInput: React.FC<{
             />
       
             {!value ? (
-              <button
-                type="button"
-                onClick={handleCaptureClick}
-                disabled={isProcessing}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-200 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm font-medium hover:bg-gray-300 dark:hover:bg-white/15 transition-colors active:scale-[0.97] disabled:opacity-50"
-              >
-                {isProcessing ? (
-                    <div className="animate-spin h-4 w-4 border-2 border-gray-500 rounded-full border-t-transparent"></div>
-                ) : (
-                    <Camera size={16} />
-                )}
-                <span>Tomar / Subir Foto</span>
-              </button>
+              <div className="flex justify-center">
+                <button
+                  type="button"
+                  onClick={handleCaptureClick}
+                  disabled={isProcessing}
+                  className="w-full py-4 rounded-2xl font-semibold transition-all duration-200 active:scale-95 flex items-center justify-center gap-2 text-sm relative overflow-hidden bg-gray-200 hover:bg-gray-300 text-gray-800 dark:bg-white/10 dark:hover:bg-white/20 dark:text-white border border-transparent dark:border-white/10 disabled:opacity-50"
+                >
+                  <span className="absolute inset-0 bg-gradient-to-b from-white/25 via-white/5 to-transparent pointer-events-none"></span>
+                  {isProcessing ? (
+                      <div className="animate-spin h-4 w-4 border-2 border-gray-500 dark:border-white/50 rounded-full border-t-transparent"></div>
+                  ) : (
+                      <Camera size={16} />
+                  )}
+                  <span>Tomar / Subir Foto</span>
+                </button>
+              </div>
             ) : (
               <div className="relative w-full h-56 rounded-xl overflow-hidden group animate-enter border border-gray-200 dark:border-white/10 shadow-sm bg-black">
                 <img src={value} alt="Preview" className="w-full h-full object-cover" />
