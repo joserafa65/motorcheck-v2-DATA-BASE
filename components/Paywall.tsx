@@ -259,13 +259,21 @@ export const Paywall: React.FC<PaywallProps> = ({
                             <div className="text-xs text-gray-400">
                               Menos de $0.83 al mes.
                             </div>
+                            <div className="text-xs text-gray-500 mt-0.5">
+                              15 días gratis, luego $9.99/año
+                            </div>
                           </>
                         )}
 
                         {isMonthly && (
-                          <div className="text-xs text-gray-400">
-                            Ideal si prefieres flexibilidad.
-                          </div>
+                          <>
+                            <div className="text-xs text-gray-400">
+                              Ideal si prefieres flexibilidad.
+                            </div>
+                            <div className="text-xs text-gray-500 mt-0.5">
+                              15 días gratis, luego $1.99/mes
+                            </div>
+                          </>
                         )}
                       </div>
                     </div>
