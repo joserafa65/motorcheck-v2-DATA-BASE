@@ -141,13 +141,41 @@ const Services: React.FC<ServicesProps> = ({ onNavigate, initialServiceId, start
     setTargetKmInput('');
   };
 
+  const checkOdometerChronology = (odometerValue: number, dateValue: string, excludeId?: string | null) => {
+      if (!odometerValue || !dateValue) return '';
+      const refDate = new Date(dateValue);
+      const allLogs = [
+          ...fuelLogs.map(l => ({ id: l.id, date: new Date(l.date), odometer: l.odometer })),
+          ...serviceLogs.map(l => ({ id: l.id, date: new Date(l.date), odometer: l.odometer }))
+      ].filter(l => l.id !== excludeId);
+
+      const before = allLogs.filter(l => l.date < refDate).map(l => l.odometer);
+      const after = allLogs.filter(l => l.date > refDate).map(l => l.odometer);
+      const maxBefore = before.length > 0 ? Math.max(...before) : null;
+      const minAfter = after.length > 0 ? Math.min(...after) : null;
+
+      if ((maxBefore !== null && odometerValue < maxBefore) || (minAfter !== null && odometerValue > minAfter)) {
+          return 'El kilometraje no coincide con tus registros anteriores. Verifica el valor ingresado.';
+      }
+      return '';
+  };
+
   const handleLogChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
       const { name, value } = e.target;
 
-      if (name === 'odometer' && !editingLogId) {
-          const odometerValue = Number(value);
-          if (value !== '' && odometerValue < vehicle.currentOdometer) {
-              setOdometerError(`Registro histórico: Este servicio se guardará como historial y no actualizará el odómetro master (${vehicle.currentOdometer.toLocaleString()} km).`);
+      if (name === 'odometer' || name === 'date') {
+          const odoVal = name === 'odometer' ? Number(value) : Number(logForm.odometer);
+          const dateVal = name === 'date' ? value : logForm.date;
+          const chronoError = checkOdometerChronology(odoVal, dateVal, editingLogId);
+          if (chronoError) {
+              setOdometerError(chronoError);
+          } else if (name === 'odometer' && !editingLogId) {
+              const odometerValue = Number(value);
+              if (value !== '' && odometerValue < vehicle.currentOdometer) {
+                  setOdometerError(`Registro histórico: Este servicio se guardará como historial y no actualizará el odómetro master (${vehicle.currentOdometer.toLocaleString()} km).`);
+              } else {
+                  setOdometerError('');
+              }
           } else {
               setOdometerError('');
           }
@@ -420,7 +448,7 @@ const Services: React.FC<ServicesProps> = ({ onNavigate, initialServiceId, start
                                     </div>
                             </div>
                             {odometerError && (
-                                <div className="flex items-center gap-2 -mt-3 mb-3 text-blue-600 dark:text-blue-400 text-sm font-medium animate-in slide-in-from-top-2 fade-in duration-200">
+                                <div className={`flex items-center gap-2 -mt-3 mb-3 text-sm font-medium animate-in slide-in-from-top-2 fade-in duration-200 ${odometerError.startsWith('El kilometraje') ? 'text-amber-600 dark:text-amber-400' : 'text-blue-600 dark:text-blue-400'}`}>
                                     <AlertCircle size={16} />
                                     <span>{odometerError}</span>
                                 </div>

@@ -23,7 +23,7 @@ interface FeedbackData {
 }
 
 const Fuel: React.FC<FuelProps> = ({ onNavigate, initialTab = 'log', editLogId, fromHistory }) => {
-  const { addFuelLog, updateFuelLog, vehicle, fuelLogs, deleteFuelLog } = useVehicle();
+  const { addFuelLog, updateFuelLog, vehicle, fuelLogs, deleteFuelLog, serviceLogs } = useVehicle();
   const { user } = useAuth();
   const { showToast } = useToast();
   const [activeTab, setActiveTab] = useState<'log' | 'history'>(initialTab);
@@ -75,13 +75,41 @@ const Fuel: React.FC<FuelProps> = ({ onNavigate, initialTab = 'log', editLogId, 
     }
   }, [editLogId, fuelLogs]);
 
+  const checkOdometerChronology = (odometerValue: number, dateValue: string, excludeId?: string | null) => {
+    if (!odometerValue || !dateValue) return '';
+    const refDate = new Date(dateValue);
+    const allLogs = [
+      ...fuelLogs.map(l => ({ id: l.id, date: new Date(l.date), odometer: l.odometer })),
+      ...serviceLogs.map(l => ({ id: l.id, date: new Date(l.date), odometer: l.odometer }))
+    ].filter(l => l.id !== excludeId);
+
+    const before = allLogs.filter(l => l.date < refDate).map(l => l.odometer);
+    const after = allLogs.filter(l => l.date > refDate).map(l => l.odometer);
+    const maxBefore = before.length > 0 ? Math.max(...before) : null;
+    const minAfter = after.length > 0 ? Math.min(...after) : null;
+
+    if ((maxBefore !== null && odometerValue < maxBefore) || (minAfter !== null && odometerValue > minAfter)) {
+      return 'El kilometraje no coincide con tus registros anteriores. Verifica el valor ingresado.';
+    }
+    return '';
+  };
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
 
-    if (name === 'odometer' && !editingId) {
-        const odometerValue = Number(value);
-        if (value !== '' && odometerValue < vehicle.currentOdometer) {
-            setOdometerError(`Registro histórico: Esta tanqueada se guardará como historial y no actualizará el odómetro master (${vehicle.currentOdometer.toLocaleString()} km).`);
+    if (name === 'odometer' || name === 'date') {
+        const odoVal = name === 'odometer' ? Number(value) : Number(formData.odometer);
+        const dateVal = name === 'date' ? value : formData.date;
+        const chronoError = checkOdometerChronology(odoVal, dateVal, editingId);
+        if (chronoError) {
+            setOdometerError(chronoError);
+        } else if (name === 'odometer' && !editingId) {
+            const odometerValue = Number(value);
+            if (value !== '' && odometerValue < vehicle.currentOdometer) {
+                setOdometerError(`Registro histórico: Esta tanqueada se guardará como historial y no actualizará el odómetro master (${vehicle.currentOdometer.toLocaleString()} km).`);
+            } else {
+                setOdometerError('');
+            }
         } else {
             setOdometerError('');
         }
@@ -350,7 +378,7 @@ const Fuel: React.FC<FuelProps> = ({ onNavigate, initialTab = 'log', editLogId, 
                     className={odometerError ? 'border-blue-500 focus:ring-blue-500' : ''}
                 />
                 {odometerError && (
-                    <div className="flex items-center gap-2 mt-2 text-blue-600 dark:text-blue-400 text-sm font-medium animate-in slide-in-from-top-2 fade-in duration-200">
+                    <div className={`flex items-center gap-2 mt-2 text-sm font-medium animate-in slide-in-from-top-2 fade-in duration-200 ${odometerError.startsWith('El kilometraje') ? 'text-amber-600 dark:text-amber-400' : 'text-blue-600 dark:text-blue-400'}`}>
                         <AlertTriangle size={16} />
                         <span>{odometerError}</span>
                     </div>
