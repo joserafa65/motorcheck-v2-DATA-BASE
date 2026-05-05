@@ -288,7 +288,7 @@ const Stats: React.FC<StatsProps> = ({ onNavigate }) => {
 
         {/* Custom Date Range Inputs */}
         {range === 'custom' && (
-          <Card className="p-4 animate-enter">
+          <Card className="p-4 animate-enter relative z-20">
             <div className="flex flex-col gap-3">
               <div>
                 <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1.5">

@@ -142,6 +142,13 @@
         -moz-appearance: textfield !important;
       }
 
+      /* Ensure date inputs are never clipped by parent overflow */
+      input[type="date"],
+      input[type="datetime-local"] {
+        position: relative;
+        z-index: 1;
+      }
+
       /* Calendar icon styles for dark theme */
       .dark input[type="date"]::-webkit-calendar-picker-indicator,
       .dark input[type="datetime-local"]::-webkit-calendar-picker-indicator {

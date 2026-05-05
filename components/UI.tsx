@@ -44,7 +44,7 @@ export const Input: React.FC<React.InputHTMLAttributes<HTMLInputElement> & { lab
   };
 
   return (
-    <div className="mb-5 animate-enter min-w-0 overflow-hidden">
+    <div className="mb-5 animate-enter min-w-0">
       <label className="block text-sm font-medium text-muted mb-2 tracking-wide">{label}</label>
       <input
         className={`glass-input w-full min-w-0 rounded-xl px-4 py-3.5 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all text-base truncate ${className}`}
