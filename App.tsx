@@ -235,12 +235,12 @@ const SubscriptionGate: React.FC<{
     <ToastProvider>
     <VehicleProvider>
       <ToastContainer />
-      <div className="relative min-h-screen overflow-hidden selection:bg-blue-500/30">
+      <div className="relative min-h-screen selection:bg-blue-500/30">
         <div className="fixed top-[-10%] left-[-10%] w-[50%] h-[50%] bg-blue-500/20 dark:bg-blue-900/20 rounded-full blur-[100px] pointer-events-none" />
         <div className="fixed bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-purple-500/10 dark:bg-purple-900/10 rounded-full blur-[100px] pointer-events-none" />
 
         <div
-          className="relative z-10 max-w-lg mx-auto px-4 pb-28 overflow-y-auto"
+          className="relative z-10 max-w-lg mx-auto px-4 pb-28"
           style={{ paddingTop: 'env(safe-area-inset-top)' }}
         >
           {renderView()}
