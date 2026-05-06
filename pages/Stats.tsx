@@ -404,7 +404,7 @@ const Stats: React.FC<StatsProps> = ({ onNavigate }) => {
                   <Fuel size={22} className="text-blue-500" />
                 </div>
                 <div className="min-w-0">
-                  <div className="text-gray-500 dark:text-gray-400 text-xs uppercase font-bold tracking-wider truncate">Gasto en Gasolina</div>
+                  <div className="text-gray-500 dark:text-gray-400 text-xs uppercase font-bold tracking-wider truncate">Gasto Total en Gasolina</div>
                 </div>
               </div>
               <div className="text-xl font-bold text-gray-900 dark:text-white leading-none shrink-0 text-right tracking-tight">
