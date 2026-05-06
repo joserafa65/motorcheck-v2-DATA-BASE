@@ -320,36 +320,7 @@ const Stats: React.FC<StatsProps> = ({ onNavigate }) => {
 
       {/* All KPI Cards (Dynamic based on filter) - Vertical Layout */}
       <div className="space-y-3 mb-6 animate-enter delay-200">
-        <Card className="py-4 px-5">
-            <div className="flex items-center justify-between gap-3">
-              <div className="flex items-center gap-3 min-w-0">
-                <div className="p-2.5 rounded-xl bg-blue-500/10 shrink-0">
-                  <Droplet size={22} className="text-blue-500" />
-                </div>
-                <div className="min-w-0">
-                  <div className="text-gray-500 dark:text-gray-400 text-xs uppercase font-bold tracking-wider truncate">Consumo Prom.</div>
-                  <div className="text-gray-500 text-xs font-medium truncate">{getUnitLabel()}</div>
-                </div>
-              </div>
-              <div className="text-xl font-bold text-blue-600 dark:text-blue-400 leading-none shrink-0 text-right">{metrics.eff.toFixed(1)}</div>
-            </div>
-        </Card>
-
-        <Card className="py-4 px-5">
-            <div className="flex items-center justify-between gap-3">
-              <div className="flex items-center gap-3 min-w-0">
-                <div className="p-2.5 rounded-xl bg-emerald-500/10 shrink-0">
-                  <MapPin size={22} className="text-emerald-500" />
-                </div>
-                <div className="min-w-0">
-                  <div className="text-gray-500 dark:text-gray-400 text-xs uppercase font-bold tracking-wider truncate">Distancia</div>
-                  <div className="text-gray-500 text-xs font-medium truncate">km recorridos</div>
-                </div>
-              </div>
-              <div className="text-xl font-bold text-emerald-500 dark:text-emerald-400 leading-none shrink-0 text-right">{metrics.distance.toLocaleString()}</div>
-            </div>
-        </Card>
-
+        {/* 1. Gasto Total en Gasolina */}
         <Card className="py-4 px-5">
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-3 min-w-0">
@@ -357,29 +328,16 @@ const Stats: React.FC<StatsProps> = ({ onNavigate }) => {
                   <Fuel size={22} className="text-blue-500" />
                 </div>
                 <div className="min-w-0">
-                  <div className="text-gray-500 dark:text-gray-400 text-xs uppercase font-bold tracking-wider truncate">Visitas Gasolinera</div>
-                  <div className="text-gray-500 text-xs font-medium truncate">total de recargas</div>
+                  <div className="text-gray-500 dark:text-gray-400 text-xs uppercase font-bold tracking-wider truncate">Gasto Total en Gasolina</div>
                 </div>
               </div>
-              <div className="text-xl font-bold text-gray-900 dark:text-white leading-none shrink-0 text-right">{metrics.fuelVisits}</div>
+              <div className="text-xl font-bold text-gray-900 dark:text-white leading-none shrink-0 text-right tracking-tight">
+                {CURRENCY_FORMATTER.format(metrics.totalFuelCost)}
+              </div>
             </div>
         </Card>
 
-        <Card className="py-4 px-5">
-            <div className="flex items-center justify-between gap-3">
-              <div className="flex items-center gap-3 min-w-0">
-                <div className="p-2.5 rounded-xl bg-emerald-500/10 shrink-0">
-                  <Car size={22} className="text-emerald-500" />
-                </div>
-                <div className="min-w-0">
-                  <div className="text-gray-500 dark:text-gray-400 text-xs uppercase font-bold tracking-wider truncate">{getVolUnit()} Consumidos</div>
-                  <div className="text-gray-500 text-xs font-medium truncate">volumen total</div>
-                </div>
-              </div>
-              <div className="text-xl font-bold text-gray-900 dark:text-white leading-none shrink-0 text-right">{metrics.totalVolume.toFixed(1)}</div>
-            </div>
-        </Card>
-
+        {/* 2. Costo / Tanqueada */}
         <Card className="py-4 px-5">
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-3 min-w-0">
@@ -397,37 +355,7 @@ const Stats: React.FC<StatsProps> = ({ onNavigate }) => {
             </div>
         </Card>
 
-        <Card className="py-4 px-5">
-            <div className="flex items-center justify-between gap-3">
-              <div className="flex items-center gap-3 min-w-0">
-                <div className="p-2.5 rounded-xl bg-blue-500/10 shrink-0">
-                  <Fuel size={22} className="text-blue-500" />
-                </div>
-                <div className="min-w-0">
-                  <div className="text-gray-500 dark:text-gray-400 text-xs uppercase font-bold tracking-wider truncate">Gasto Total en Gasolina</div>
-                </div>
-              </div>
-              <div className="text-xl font-bold text-gray-900 dark:text-white leading-none shrink-0 text-right tracking-tight">
-                {CURRENCY_FORMATTER.format(metrics.totalFuelCost)}
-              </div>
-            </div>
-        </Card>
-
-        <Card className="py-4 px-5">
-            <div className="flex items-center justify-between gap-3">
-              <div className="flex items-center gap-3 min-w-0">
-                <div className="p-2.5 rounded-xl bg-blue-500/10 shrink-0">
-                  <Warehouse size={22} className="text-blue-500" />
-                </div>
-                <div className="min-w-0">
-                  <div className="text-gray-500 dark:text-gray-400 text-xs uppercase font-bold tracking-wider truncate">Visitas Mecánica</div>
-                  <div className="text-gray-500 text-xs font-medium truncate">servicios realizados</div>
-                </div>
-              </div>
-              <div className="text-xl font-bold text-gray-900 dark:text-white leading-none shrink-0 text-right">{metrics.serviceVisits}</div>
-            </div>
-        </Card>
-
+        {/* 3. Costo en Servicios */}
         <Card className="py-4 px-5">
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-3 min-w-0">
@@ -442,6 +370,86 @@ const Stats: React.FC<StatsProps> = ({ onNavigate }) => {
               <div className="text-xl font-bold text-gray-900 dark:text-white leading-none shrink-0 text-right tracking-tight">
                 {CURRENCY_FORMATTER.format(metrics.avgCostPerService)}
               </div>
+            </div>
+        </Card>
+
+        {/* 4. Visitas Gasolinera */}
+        <Card className="py-4 px-5">
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="p-2.5 rounded-xl bg-blue-500/10 shrink-0">
+                  <Fuel size={22} className="text-blue-500" />
+                </div>
+                <div className="min-w-0">
+                  <div className="text-gray-500 dark:text-gray-400 text-xs uppercase font-bold tracking-wider truncate">Visitas Gasolinera</div>
+                  <div className="text-gray-500 text-xs font-medium truncate">total de recargas</div>
+                </div>
+              </div>
+              <div className="text-xl font-bold text-gray-900 dark:text-white leading-none shrink-0 text-right">{metrics.fuelVisits}</div>
+            </div>
+        </Card>
+
+        {/* 5. Gal/L Consumidos */}
+        <Card className="py-4 px-5">
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="p-2.5 rounded-xl bg-emerald-500/10 shrink-0">
+                  <Car size={22} className="text-emerald-500" />
+                </div>
+                <div className="min-w-0">
+                  <div className="text-gray-500 dark:text-gray-400 text-xs uppercase font-bold tracking-wider truncate">{getVolUnit()} Consumidos</div>
+                  <div className="text-gray-500 text-xs font-medium truncate">volumen total</div>
+                </div>
+              </div>
+              <div className="text-xl font-bold text-gray-900 dark:text-white leading-none shrink-0 text-right">{metrics.totalVolume.toFixed(1)}</div>
+            </div>
+        </Card>
+
+        {/* 6. Consumo Prom. */}
+        <Card className="py-4 px-5">
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="p-2.5 rounded-xl bg-blue-500/10 shrink-0">
+                  <Droplet size={22} className="text-blue-500" />
+                </div>
+                <div className="min-w-0">
+                  <div className="text-gray-500 dark:text-gray-400 text-xs uppercase font-bold tracking-wider truncate">Consumo Prom.</div>
+                  <div className="text-gray-500 text-xs font-medium truncate">{getUnitLabel()}</div>
+                </div>
+              </div>
+              <div className="text-xl font-bold text-blue-600 dark:text-blue-400 leading-none shrink-0 text-right">{metrics.eff.toFixed(1)}</div>
+            </div>
+        </Card>
+
+        {/* 7. Distancia */}
+        <Card className="py-4 px-5">
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="p-2.5 rounded-xl bg-emerald-500/10 shrink-0">
+                  <MapPin size={22} className="text-emerald-500" />
+                </div>
+                <div className="min-w-0">
+                  <div className="text-gray-500 dark:text-gray-400 text-xs uppercase font-bold tracking-wider truncate">Distancia</div>
+                  <div className="text-gray-500 text-xs font-medium truncate">km recorridos</div>
+                </div>
+              </div>
+              <div className="text-xl font-bold text-emerald-500 dark:text-emerald-400 leading-none shrink-0 text-right">{metrics.distance.toLocaleString()}</div>
+            </div>
+        </Card>
+
+        {/* 8. Visitas Mecánica */}
+        <Card className="py-4 px-5">
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="p-2.5 rounded-xl bg-blue-500/10 shrink-0">
+                  <Warehouse size={22} className="text-blue-500" />
+                </div>
+                <div className="min-w-0">
+                  <div className="text-gray-500 dark:text-gray-400 text-xs uppercase font-bold tracking-wider truncate">Visitas Mecánica</div>
+                  <div className="text-gray-500 text-xs font-medium truncate">servicios realizados</div>
+                </div>
+              </div>
+              <div className="text-xl font-bold text-gray-900 dark:text-white leading-none shrink-0 text-right">{metrics.serviceVisits}</div>
             </div>
         </Card>
       </div>
