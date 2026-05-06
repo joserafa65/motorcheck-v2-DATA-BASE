@@ -218,6 +218,7 @@ const Stats: React.FC<StatsProps> = ({ onNavigate }) => {
           fuelVisits,
           serviceVisits,
           totalVolume,
+          totalFuelCost,
           avgCostPerRefuel,
           avgCostPerService,
           distance,
@@ -392,6 +393,22 @@ const Stats: React.FC<StatsProps> = ({ onNavigate }) => {
               </div>
               <div className="text-xl font-bold text-gray-900 dark:text-white leading-none shrink-0 text-right tracking-tight">
                 {CURRENCY_FORMATTER.format(metrics.avgCostPerRefuel)}
+              </div>
+            </div>
+        </Card>
+
+        <Card className="py-4 px-5">
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="p-2.5 rounded-xl bg-blue-500/10 shrink-0">
+                  <Fuel size={22} className="text-blue-500" />
+                </div>
+                <div className="min-w-0">
+                  <div className="text-gray-500 dark:text-gray-400 text-xs uppercase font-bold tracking-wider truncate">Gasto en Gasolina</div>
+                </div>
+              </div>
+              <div className="text-xl font-bold text-gray-900 dark:text-white leading-none shrink-0 text-right tracking-tight">
+                {CURRENCY_FORMATTER.format(metrics.totalFuelCost)}
               </div>
             </div>
         </Card>
