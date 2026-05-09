@@ -412,13 +412,13 @@ const Services: React.FC<ServicesProps> = ({ onNavigate, initialServiceId, start
                     <div className="flex p-1 bg-gray-100 dark:bg-white/5 rounded-xl mb-6">
                         <button
                             onClick={() => setFormMode('log')}
-                            className={`flex-1 py-2 text-base font-bold rounded-lg flex items-center justify-center transition-all ${formMode === 'log' ? 'bg-blue-600 text-white shadow-lg' : 'text-gray-500 dark:text-gray-400'}`}
+                            className={`flex-1 py-2 text-base font-bold rounded-lg flex items-center justify-center transition-all ${formMode === 'log' ? 'bg-accent text-white shadow-lg' : 'text-gray-500 dark:text-gray-400'}`}
                         >
                             Servicio Realizado
                         </button>
                         <button
                             onClick={() => setFormMode('program')}
-                            className={`flex-1 py-2 text-base font-bold rounded-lg flex items-center justify-center transition-all ${formMode === 'program' ? 'bg-purple-600 text-white shadow-lg' : 'text-gray-500 dark:text-gray-400'}`}
+                            className={`flex-1 py-2 text-base font-bold rounded-lg flex items-center justify-center transition-all ${formMode === 'program' ? 'bg-accent text-white shadow-lg' : 'text-gray-500 dark:text-gray-400'}`}
                         >
                             Programar Servicio
                         </button>
@@ -443,12 +443,12 @@ const Services: React.FC<ServicesProps> = ({ onNavigate, initialServiceId, start
                                             value={logForm.odometer}
                                             onChange={handleLogChange}
                                             required
-                                            className={odometerError ? 'border-blue-500 focus:ring-blue-500' : ''}
+                                            className={odometerError ? 'border-accent focus:ring-accent' : ''}
                                         />
                                     </div>
                             </div>
                             {odometerError && (
-                                <div className={`flex items-center gap-2 -mt-3 mb-3 text-sm font-medium animate-in slide-in-from-top-2 fade-in duration-200 ${odometerError.startsWith('El kilometraje') ? 'text-amber-600 dark:text-amber-400' : 'text-blue-600 dark:text-blue-400'}`}>
+                                <div className={`flex items-center gap-2 -mt-3 mb-3 text-sm font-medium animate-in slide-in-from-top-2 fade-in duration-200 ${odometerError.startsWith('El kilometraje') ? 'text-amber-600 dark:text-amber-400' : 'text-accent'}`}>
                                     <AlertCircle size={16} />
                                     <span>{odometerError}</span>
                                 </div>
@@ -465,7 +465,7 @@ const Services: React.FC<ServicesProps> = ({ onNavigate, initialServiceId, start
                             <div className="mb-5">
                                     <label className="block text-sm font-medium text-muted mb-2 tracking-wide">Notas</label>
                                     <textarea 
-                                        className="glass-input w-full rounded-xl px-4 py-3 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 h-24 text-base"
+                                        className="glass-input w-full rounded-xl px-4 py-3 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent/50 h-24 text-base"
                                         name="notes"
                                         value={logForm.notes}
                                         onChange={handleLogChange}
@@ -485,7 +485,7 @@ const Services: React.FC<ServicesProps> = ({ onNavigate, initialServiceId, start
                         </form>
                     ) : (
                         <form onSubmit={handleSubmitDef}>
-                             <div className="bg-purple-100 dark:bg-purple-900/20 border border-purple-300 dark:border-purple-500/30 p-4 rounded-xl mb-5 text-sm font-medium text-purple-700 dark:text-purple-200">
+                             <div className="bg-accent/10 border border-accent/30 p-4 rounded-xl mb-5 text-sm font-medium text-accent">
                                  Estás editando la configuración de alertas para este servicio.
                              </div>
                              
@@ -494,7 +494,7 @@ const Services: React.FC<ServicesProps> = ({ onNavigate, initialServiceId, start
                                 <label className="block text-sm font-medium text-muted mb-2 tracking-wide">Nombre del Servicio</label>
                                 <div className="relative">
                                     <select
-                                        className="glass-input w-full rounded-xl px-4 py-3.5 appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all bg-transparent text-gray-900 dark:text-white text-base"
+                                        className="glass-input w-full rounded-xl px-4 py-3.5 appearance-none focus:outline-none focus:ring-2 focus:ring-accent/50 transition-all bg-transparent text-gray-900 dark:text-white text-base"
                                         value={nameSelection}
                                         onChange={handleNameSelectChange}
                                     >
@@ -536,7 +536,7 @@ const Services: React.FC<ServicesProps> = ({ onNavigate, initialServiceId, start
                                 <button 
                                     type="button"
                                     onClick={() => handleAddKm(5000)}
-                                    className="text-xs font-bold text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-500/10 px-3 py-2 rounded-lg border border-blue-200 dark:border-blue-500/20 active:scale-95 transition-all flex items-center gap-1.5 hover:bg-blue-200 dark:hover:bg-blue-500/20"
+                                    className="text-xs font-bold text-accent bg-accent/10 px-3 py-2 rounded-lg border border-accent/20 active:scale-95 transition-all flex items-center gap-1.5 hover:bg-accent/20"
                                 >
                                     <Plus size={14} />
                                     <span>5,000 km</span>
@@ -556,7 +556,7 @@ const Services: React.FC<ServicesProps> = ({ onNavigate, initialServiceId, start
                                         className="mb-1"
                                     />
                                     {defForm.intervalKm && (
-                                         <div className="text-xs text-blue-600 dark:text-blue-400 font-medium text-right -mt-4 mb-4 pr-1">
+                                         <div className="text-xs text-accent font-medium text-right -mt-4 mb-4 pr-1">
                                              Intervalo: <span className="font-bold">{Number(defForm.intervalKm).toLocaleString()} km</span>
                                          </div>
                                     )}
@@ -576,7 +576,7 @@ const Services: React.FC<ServicesProps> = ({ onNavigate, initialServiceId, start
                              <div className="mb-5">
                                 <label className="block text-sm font-medium text-muted mb-2 tracking-wide">Notas del Servicio</label>
                                 <textarea 
-                                    className="glass-input w-full rounded-xl px-4 py-3 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 h-24 text-base"
+                                    className="glass-input w-full rounded-xl px-4 py-3 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent/50 h-24 text-base"
                                     name="notes"
                                     placeholder="Ej: Usar aceite sintético 5W-30..."
                                     value={defForm.notes}
@@ -638,9 +638,9 @@ const Services: React.FC<ServicesProps> = ({ onNavigate, initialServiceId, start
                                     {log.notes && <div className="text-gray-500 dark:text-gray-500 text-sm mt-2 italic">"{log.notes}"</div>}
                                 </div>
                                 <div className="text-right">
-                                    <div className="font-mono text-purple-600 dark:text-purple-400 font-bold text-base mb-3">{CURRENCY_FORMATTER.format(log.cost)}</div>
+                                    <div className="font-mono text-accent font-bold text-base mb-3">{CURRENCY_FORMATTER.format(log.cost)}</div>
                                     <div className="flex gap-2 justify-end">
-                                        <button onClick={() => startEditLog(log)} className="p-2 bg-blue-100 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-500/30 transition-colors">
+                                        <button onClick={() => startEditLog(log)} className="p-2 bg-accent/10 text-accent rounded-lg hover:bg-accent/20 transition-colors">
                                             <Edit2 size={16} />
                                         </button>
                                         <button onClick={() => { if(confirm('Borrar?')) deleteServiceLog(log.id); }} className="p-2 bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-200 dark:hover:bg-red-500/30 transition-colors">
@@ -770,12 +770,12 @@ const Services: React.FC<ServicesProps> = ({ onNavigate, initialServiceId, start
                                     value={logForm.odometer}
                                     onChange={handleLogChange}
                                     required
-                                    className={odometerError ? 'border-blue-500 focus:ring-blue-500' : ''}
+                                    className={odometerError ? 'border-accent focus:ring-accent' : ''}
                                 />
                              </div>
                        </div>
                        {odometerError && (
-                           <div className="flex items-center gap-2 -mt-3 mb-3 text-blue-600 dark:text-blue-400 text-sm font-medium animate-in slide-in-from-top-2 fade-in duration-200">
+                           <div className="flex items-center gap-2 -mt-3 mb-3 text-accent text-sm font-medium animate-in slide-in-from-top-2 fade-in duration-200">
                                <AlertCircle size={16} />
                                <span>{odometerError}</span>
                            </div>
@@ -792,7 +792,7 @@ const Services: React.FC<ServicesProps> = ({ onNavigate, initialServiceId, start
                        <div className="mb-5">
                             <label className="block text-sm font-medium text-muted mb-2 tracking-wide">Notas</label>
                             <textarea 
-                                className="glass-input w-full rounded-xl px-4 py-3 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 h-24 text-base"
+                                className="glass-input w-full rounded-xl px-4 py-3 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent/50 h-24 text-base"
                                 name="notes"
                                 value={logForm.notes}
                                 onChange={handleLogChange}
@@ -826,7 +826,7 @@ const Services: React.FC<ServicesProps> = ({ onNavigate, initialServiceId, start
                             <label className="block text-sm font-medium text-muted mb-2 tracking-wide">Nombre del Servicio</label>
                             <div className="relative">
                                 <select
-                                    className="glass-input w-full rounded-xl px-4 py-3.5 appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all bg-transparent text-gray-900 dark:text-white text-base"
+                                    className="glass-input w-full rounded-xl px-4 py-3.5 appearance-none focus:outline-none focus:ring-2 focus:ring-accent/50 transition-all bg-transparent text-gray-900 dark:text-white text-base"
                                     value={nameSelection}
                                     onChange={handleNameSelectChange}
                                     required={!nameSelection}
@@ -911,14 +911,14 @@ const Services: React.FC<ServicesProps> = ({ onNavigate, initialServiceId, start
                        <div className="mb-5">
                             <label className="block text-sm font-medium text-muted mb-2 tracking-wide">Notas del Servicio</label>
                             <textarea 
-                                className="glass-input w-full rounded-xl px-4 py-3 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 h-24 text-base"
+                                className="glass-input w-full rounded-xl px-4 py-3 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent/50 h-24 text-base"
                                 name="notes"
                                 placeholder="Ej: Usar aceite sintético 5W-30..."
                                 value={defForm.notes}
                                 onChange={handleDefChange}
                             />
                        </div>
-                       <Button type="submit" className="bg-purple-600 hover:bg-purple-500 mt-2">
+                       <Button type="submit" className="!bg-accent hover:!bg-accent/90 mt-2">
                            Crear Servicio
                        </Button>
                    </form>

@@ -225,7 +225,7 @@ const [shareMessage] = useState(
                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent opacity-90"></div>
                </div>
             ) : (
-               <div className="w-full h-full bg-gradient-to-br from-blue-900 via-zinc-900 to-black relative">
+               <div className="w-full h-full bg-gradient-to-br from-zinc-900 via-zinc-900 to-black relative">
                   <div className="absolute inset-0 opacity-20" style={{backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '32px 32px'}}></div>
                   <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent"></div>
                </div>
@@ -256,7 +256,7 @@ const [shareMessage] = useState(
                     </div>
                     <div className="text-right">
                         <div className="text-xs text-white/60 uppercase tracking-wide mb-0.5 font-bold">Kilometraje</div>
-                        <div className="text-2xl font-mono text-blue-400 font-bold drop-shadow-md leading-none">
+                        <div className="text-2xl font-mono text-accent font-bold drop-shadow-md leading-none">
                             {vehicle.currentOdometer.toLocaleString()} <span className="text-xs text-white/50 font-sans">km</span>
                         </div>
                     </div>
@@ -269,7 +269,7 @@ const [shareMessage] = useState(
           <div className="animate-enter delay-100 flex flex-col space-y-2">
                   <Card className="py-2.5 px-4 bg-white/60 dark:bg-zinc-900/50 flex flex-row items-center justify-between border-gray-200 dark:border-white/5">
                       <div className="flex items-center gap-2.5">
-                          <div className="p-1.5 rounded-xl bg-blue-100 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400">
+                          <div className="p-1.5 rounded-xl bg-accent/10 text-accent">
                              <TrendingUp size={16} />
                           </div>
                           <span className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Eficiencia</span>
@@ -284,7 +284,7 @@ const [shareMessage] = useState(
                   
                   <Card className="py-2.5 px-4 bg-white/60 dark:bg-zinc-900/50 flex flex-row items-center justify-between border-gray-200 dark:border-white/5">
                       <div className="flex items-center gap-2.5">
-                          <div className="p-1.5 rounded-xl bg-purple-100 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400">
+                          <div className="p-1.5 rounded-xl bg-accent/10 text-accent">
                              <CreditCard size={16} />
                           </div>
                           <span className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Gasolina x mes</span>
@@ -316,17 +316,17 @@ const [shareMessage] = useState(
 
           {/* BOTONES DE ACCIÓN */}
           <div className="grid grid-cols-3 gap-2.5 animate-enter delay-300">
-            <Button onClick={() => { setOdoInput(''); setShowOdoModal(true); }} className="h-28 flex-col !gap-1.5 px-2 !bg-purple-600 hover:!bg-purple-500 shadow-purple-900/20 !border-0 text-white">
+            <Button onClick={() => { setOdoInput(''); setShowOdoModal(true); }} className="h-28 flex-col !gap-1.5 px-2 !bg-accent hover:!bg-accent/90 shadow-accent/20 !border-0 text-white">
                 <Gauge size={26} strokeWidth={2} className="mb-0.5 relative z-10" />
                 <span className="text-[10px] font-medium opacity-90 uppercase tracking-tight leading-tight relative z-10">Actualiza tu</span>
                 <span className="text-sm font-bold leading-none relative z-10">Odómetro</span>
             </Button>
-            <Button onClick={() => onNavigate('services', { startInProgramMode: true })} className="h-28 flex-col !gap-1.5 px-2 !bg-orange-600 hover:!bg-orange-500 shadow-orange-900/20 !border-0 text-white">
+            <Button onClick={() => onNavigate('services', { startInProgramMode: true })} className="h-28 flex-col !gap-1.5 px-2 !bg-accent hover:!bg-accent/90 shadow-accent/20 !border-0 text-white">
                 <Wrench size={26} strokeWidth={2} className="mb-0.5 relative z-10" />
                 <span className="text-[10px] font-medium opacity-90 uppercase tracking-tight leading-tight relative z-10">Programa un</span>
                 <span className="text-sm font-bold leading-none relative z-10">Servicio</span>
             </Button>
-            <Button onClick={() => onNavigate('fuel')} className="bg-blue-600 hover:bg-blue-500 h-28 flex-col !gap-1.5 px-2 shadow-blue-900/20">
+            <Button onClick={() => onNavigate('fuel')} className="!bg-accent hover:!bg-accent/90 h-28 flex-col !gap-1.5 px-2 shadow-accent/20">
                 <Fuel size={26} strokeWidth={2} className="mb-0.5 relative z-10" />
                 <span className="text-[10px] font-medium opacity-90 uppercase tracking-tight leading-tight relative z-10">Ingresa una</span>
                 <span className="text-sm font-bold leading-none relative z-10">Tanqueada</span>
@@ -391,7 +391,7 @@ const [shareMessage] = useState(
           <div className="animate-enter delay-400">
             <button
               onClick={handleShareApp}
-              className="w-full py-3 px-4 bg-blue-500 hover:bg-blue-600 active:scale-95 dark:bg-blue-600 dark:hover:bg-blue-700 rounded-2xl flex items-center justify-center gap-2.5 transition-all shadow-sm shadow-blue-500/20"
+              className="w-full py-3 px-4 bg-accent hover:bg-accent/90 active:scale-95 rounded-2xl flex items-center justify-center gap-2.5 transition-all shadow-sm shadow-accent/20"
             >
               <Send size={17} className="text-white" />
               <span className="text-sm font-semibold text-white tracking-wide">
@@ -438,8 +438,8 @@ const [shareMessage] = useState(
       {showTrialReminder && createPortal(
           <div className="fixed inset-0 z-[155] flex items-center justify-center bg-black/80 backdrop-blur-md p-5 animate-in fade-in duration-500">
               <div className="bg-white dark:bg-zinc-900 w-full max-w-sm rounded-3xl p-6 shadow-2xl relative animate-in zoom-in-95 slide-in-from-bottom-4 duration-500 border border-white/10 text-center overflow-hidden">
-                  <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-500 via-blue-600 to-blue-500" />
-                  <div className="mx-auto w-20 h-20 rounded-full flex items-center justify-center mb-5 shadow-xl bg-blue-500/10 text-blue-500">
+                  <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-accent via-accent/80 to-accent" />
+                  <div className="mx-auto w-20 h-20 rounded-full flex items-center justify-center mb-5 shadow-xl bg-accent/10 text-accent">
                       <CreditCard size={44} strokeWidth={2.5} />
                   </div>
                   <h2 className="text-2xl font-black mb-2 text-gray-900 dark:text-white leading-tight">
@@ -451,7 +451,7 @@ const [shareMessage] = useState(
                   <div className="space-y-3">
                       <Button
                           onClick={() => { handleCloseTrialReminder(); onNavigate('settings'); }}
-                          className="text-base font-bold !bg-blue-600 hover:!bg-blue-500"
+                          className="text-base font-bold !bg-accent hover:!bg-accent/90"
                       >
                           ACTIVAR MI PLAN
                       </Button>
@@ -474,14 +474,14 @@ const [shareMessage] = useState(
                    <X size={18} />
                 </button>
                 <div className="text-center mb-6">
-                    <div className="w-14 h-14 bg-blue-100 dark:bg-blue-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4 text-blue-600 dark:text-blue-400 shadow-inner">
+                    <div className="w-14 h-14 bg-accent/10 rounded-2xl flex items-center justify-center mx-auto mb-4 text-accent shadow-inner">
                         <Gauge size={28} />
                     </div>
                     <h3 className="text-xl font-black text-gray-900 dark:text-white">Odómetro</h3>
                     <p className="text-sm text-gray-500 mt-1.5 font-medium">Kilometraje actual</p>
                 </div>
                 <div className="relative mb-6">
-                    <input type="number" inputMode="numeric" value={odoInput} onChange={(e) => setOdoInput(e.target.value)} className="w-full bg-gray-50 dark:bg-black/40 border-2 border-gray-200 dark:border-white/10 focus:border-blue-500 rounded-2xl py-4 px-4 text-center text-3xl font-mono font-black text-gray-900 dark:text-white outline-none transition-colors" placeholder={vehicle.currentOdometer.toString()} autoFocus />
+                    <input type="number" inputMode="numeric" value={odoInput} onChange={(e) => setOdoInput(e.target.value)} className="w-full bg-gray-50 dark:bg-black/40 border-2 border-gray-200 dark:border-white/10 focus:border-accent rounded-2xl py-4 px-4 text-center text-3xl font-mono font-black text-gray-900 dark:text-white outline-none transition-colors" placeholder={vehicle.currentOdometer.toString()} autoFocus />
                     <span className="absolute right-4 top-1/2 -translate-y-1/2 text-base text-gray-400 font-black">km</span>
                 </div>
                 <Button onClick={handleSaveOdo} className="text-lg font-bold shadow-blue-900/30">Guardar</Button>

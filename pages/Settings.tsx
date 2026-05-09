@@ -214,10 +214,10 @@ const Settings: React.FC<SettingsProps> = ({ onNavigate }) => {
         {/* Suscripción */}
         <Card className="py-4 px-4">
           <div className="flex items-center gap-2.5 mb-4">
-            <div className="p-2 rounded-xl bg-blue-500/10 shrink-0">
-              <Sparkles size={18} className="text-blue-500" />
+            <div className="p-2 rounded-xl bg-accent/10 shrink-0">
+              <Sparkles size={18} className="text-accent" />
             </div>
-            <h3 className="text-xs font-bold text-blue-500 uppercase tracking-wider">
+            <h3 className="text-xs font-bold text-accent uppercase tracking-wider">
               Suscripción
             </h3>
           </div>
@@ -226,7 +226,7 @@ const Settings: React.FC<SettingsProps> = ({ onNavigate }) => {
             <div className="space-y-2.5">
               <button
                 onClick={handleOpenPaywall}
-                className="w-full bg-blue-600 hover:bg-blue-500 active:scale-95 text-white py-3.5 px-5 rounded-xl font-bold text-sm transition-all shadow-lg flex items-center justify-center gap-2"
+                className="w-full bg-accent hover:bg-accent/90 active:scale-95 text-white py-3.5 px-5 rounded-xl font-bold text-sm transition-all shadow-lg flex items-center justify-center gap-2"
               >
                 <Sparkles size={18} />
                 Mejorar a Premium
@@ -237,9 +237,9 @@ const Settings: React.FC<SettingsProps> = ({ onNavigate }) => {
             </div>
           ) : (
             <div className="space-y-2.5">
-              <div className="px-3 py-2 bg-blue-500/10 rounded-xl border border-blue-500/20 flex items-center justify-center gap-2">
-                <Star size={17} className="text-blue-500 fill-blue-500" />
-                <p className="text-sm font-bold text-blue-600 dark:text-blue-400">
+              <div className="px-3 py-2 bg-accent/10 rounded-xl border border-accent/20 flex items-center justify-center gap-2">
+                <Star size={17} className="text-accent fill-accent" />
+                <p className="text-sm font-bold text-accent">
                   {entitlementActive ? '⭐ Premium Activo' : isTrialActive ? '🧪 Prueba Activa' : 'Sin suscripción'}
                 </p>
               </div>
@@ -257,10 +257,10 @@ const Settings: React.FC<SettingsProps> = ({ onNavigate }) => {
         {/* Datos del vehículo */}
         <Card className="py-4 px-4">
           <div className="flex items-center gap-2.5 mb-4">
-            <div className="p-2 rounded-xl bg-blue-500/10 shrink-0">
-              <User size={18} className="text-blue-500" />
+            <div className="p-2 rounded-xl bg-accent/10 shrink-0">
+              <User size={18} className="text-accent" />
             </div>
-            <h3 className="text-xs font-bold text-blue-500 uppercase tracking-wider">
+            <h3 className="text-xs font-bold text-accent uppercase tracking-wider">
               Datos del Vehículo
             </h3>
           </div>
@@ -325,10 +325,10 @@ const Settings: React.FC<SettingsProps> = ({ onNavigate }) => {
         {/* Preferencias */}
         <Card className="py-4 px-4">
           <div className="flex items-center gap-2.5 mb-4">
-            <div className="p-2 rounded-xl bg-blue-500/10 shrink-0">
-              <Scale size={18} className="text-blue-500" />
+            <div className="p-2 rounded-xl bg-accent/10 shrink-0">
+              <Scale size={18} className="text-accent" />
             </div>
-            <h3 className="text-xs font-bold text-blue-500 uppercase tracking-wider">
+            <h3 className="text-xs font-bold text-accent uppercase tracking-wider">
               Preferencias
             </h3>
           </div>
@@ -348,7 +348,7 @@ const Settings: React.FC<SettingsProps> = ({ onNavigate }) => {
 
         <Button
           onClick={handleSave}
-          className="bg-emerald-600 hover:bg-emerald-500 font-bold"
+          className="!bg-accent hover:!bg-accent/90 font-bold"
         >
           Guardar Cambios
         </Button>
@@ -357,7 +357,7 @@ const Settings: React.FC<SettingsProps> = ({ onNavigate }) => {
         <Button
           onClick={handleExportPDF}
           disabled={isGeneratingPdf}
-          className="bg-blue-600 hover:bg-blue-500 font-bold"
+          className="!bg-accent hover:!bg-accent/90 font-bold"
         >
           {isGeneratingPdf ? (
             'Generando…'
@@ -372,10 +372,10 @@ const Settings: React.FC<SettingsProps> = ({ onNavigate }) => {
         {/* Cuenta */}
         <Card className="py-4 px-4">
           <div className="flex items-center gap-2.5 mb-4">
-            <div className="p-2 rounded-xl bg-blue-500/10 shrink-0">
-              <User size={18} className="text-blue-500" />
+            <div className="p-2 rounded-xl bg-accent/10 shrink-0">
+              <User size={18} className="text-accent" />
             </div>
-            <h3 className="text-xs font-bold text-blue-500 uppercase tracking-wider">
+            <h3 className="text-xs font-bold text-accent uppercase tracking-wider">
               Cuenta
             </h3>
           </div>
@@ -401,7 +401,7 @@ const Settings: React.FC<SettingsProps> = ({ onNavigate }) => {
           ) : (
             <Button
               onClick={handleSignIn}
-              className="bg-blue-600 hover:bg-blue-500 font-bold"
+              className="!bg-accent hover:!bg-accent/90 font-bold"
             >
               <LogIn size={18} />
               Iniciar Sesión / Cambiar de Cuenta

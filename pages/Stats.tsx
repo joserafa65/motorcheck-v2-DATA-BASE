@@ -263,25 +263,25 @@ const Stats: React.FC<StatsProps> = ({ onNavigate }) => {
         <div className="grid grid-cols-4 gap-1 p-1 bg-gray-200 dark:bg-white/10 rounded-xl animate-enter delay-100">
             <button
                 onClick={() => setRange('7d')}
-                className={`py-1.5 text-xs font-bold rounded-lg transition-all ${range === '7d' ? 'bg-blue-600 text-white shadow-md' : 'text-gray-500 dark:text-gray-400'}`}
+                className={`py-1.5 text-xs font-bold rounded-lg transition-all ${range === '7d' ? 'bg-accent text-white shadow-md' : 'text-gray-500 dark:text-gray-400'}`}
             >
                 ESTA SEMANA
             </button>
             <button
                 onClick={() => setRange('month')}
-                className={`py-1.5 text-xs font-bold rounded-lg transition-all ${range === 'month' ? 'bg-blue-600 text-white shadow-md' : 'text-gray-500 dark:text-gray-400'}`}
+                className={`py-1.5 text-xs font-bold rounded-lg transition-all ${range === 'month' ? 'bg-accent text-white shadow-md' : 'text-gray-500 dark:text-gray-400'}`}
             >
                 ESTE MES
             </button>
             <button
                 onClick={() => setRange('year')}
-                className={`py-1.5 text-xs font-bold rounded-lg transition-all ${range === 'year' ? 'bg-blue-600 text-white shadow-md' : 'text-gray-500 dark:text-gray-400'}`}
+                className={`py-1.5 text-xs font-bold rounded-lg transition-all ${range === 'year' ? 'bg-accent text-white shadow-md' : 'text-gray-500 dark:text-gray-400'}`}
             >
                 ESTE AÑO
             </button>
             <button
                 onClick={() => setRange('custom')}
-                className={`py-1.5 text-xs font-bold rounded-lg transition-all ${range === 'custom' ? 'bg-blue-600 text-white shadow-md' : 'text-gray-500 dark:text-gray-400'}`}
+                className={`py-1.5 text-xs font-bold rounded-lg transition-all ${range === 'custom' ? 'bg-accent text-white shadow-md' : 'text-gray-500 dark:text-gray-400'}`}
             >
                 POR FECHAS
             </button>
@@ -299,7 +299,7 @@ const Stats: React.FC<StatsProps> = ({ onNavigate }) => {
                   type="date"
                   value={customStartDate}
                   onChange={(e) => setCustomStartDate(e.target.value)}
-                  className="w-full px-3 py-2 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-sm font-medium text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-sm font-medium text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-accent"
                 />
               </div>
               <div>
@@ -310,7 +310,7 @@ const Stats: React.FC<StatsProps> = ({ onNavigate }) => {
                   type="date"
                   value={customEndDate}
                   onChange={(e) => setCustomEndDate(e.target.value)}
-                  className="w-full px-3 py-2 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-sm font-medium text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-sm font-medium text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-accent"
                 />
               </div>
             </div>
@@ -324,8 +324,8 @@ const Stats: React.FC<StatsProps> = ({ onNavigate }) => {
         <Card className="py-4 px-5">
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-3 min-w-0">
-                <div className="p-2.5 rounded-xl bg-blue-500/10 shrink-0">
-                  <Fuel size={22} className="text-blue-500" />
+                <div className="p-2.5 rounded-xl bg-accent/10 shrink-0">
+                  <Fuel size={22} className="text-accent" />
                 </div>
                 <div className="min-w-0">
                   <div className="text-gray-500 dark:text-gray-400 text-xs uppercase font-bold tracking-wider truncate">Gasto Total en Gasolina</div>
@@ -359,8 +359,8 @@ const Stats: React.FC<StatsProps> = ({ onNavigate }) => {
         <Card className="py-4 px-5">
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-3 min-w-0">
-                <div className="p-2.5 rounded-xl bg-blue-500/10 shrink-0">
-                  <Wrench size={22} className="text-blue-500" />
+                <div className="p-2.5 rounded-xl bg-accent/10 shrink-0">
+                  <Wrench size={22} className="text-accent" />
                 </div>
                 <div className="min-w-0">
                   <div className="text-gray-500 dark:text-gray-400 text-xs uppercase font-bold tracking-wider truncate">Costo en Servicios</div>
@@ -377,8 +377,8 @@ const Stats: React.FC<StatsProps> = ({ onNavigate }) => {
         <Card className="py-4 px-5">
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-3 min-w-0">
-                <div className="p-2.5 rounded-xl bg-blue-500/10 shrink-0">
-                  <Fuel size={22} className="text-blue-500" />
+                <div className="p-2.5 rounded-xl bg-accent/10 shrink-0">
+                  <Fuel size={22} className="text-accent" />
                 </div>
                 <div className="min-w-0">
                   <div className="text-gray-500 dark:text-gray-400 text-xs uppercase font-bold tracking-wider truncate">Visitas Gasolinera</div>
@@ -409,15 +409,15 @@ const Stats: React.FC<StatsProps> = ({ onNavigate }) => {
         <Card className="py-4 px-5">
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-3 min-w-0">
-                <div className="p-2.5 rounded-xl bg-blue-500/10 shrink-0">
-                  <Droplet size={22} className="text-blue-500" />
+                <div className="p-2.5 rounded-xl bg-accent/10 shrink-0">
+                  <Droplet size={22} className="text-accent" />
                 </div>
                 <div className="min-w-0">
                   <div className="text-gray-500 dark:text-gray-400 text-xs uppercase font-bold tracking-wider truncate">Consumo Prom.</div>
                   <div className="text-gray-500 text-xs font-medium truncate">{getUnitLabel()}</div>
                 </div>
               </div>
-              <div className="text-xl font-bold text-blue-600 dark:text-blue-400 leading-none shrink-0 text-right">{metrics.eff.toFixed(1)}</div>
+              <div className="text-xl font-bold text-accent leading-none shrink-0 text-right">{metrics.eff.toFixed(1)}</div>
             </div>
         </Card>
 
@@ -441,8 +441,8 @@ const Stats: React.FC<StatsProps> = ({ onNavigate }) => {
         <Card className="py-4 px-5">
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-3 min-w-0">
-                <div className="p-2.5 rounded-xl bg-blue-500/10 shrink-0">
-                  <Warehouse size={22} className="text-blue-500" />
+                <div className="p-2.5 rounded-xl bg-accent/10 shrink-0">
+                  <Warehouse size={22} className="text-accent" />
                 </div>
                 <div className="min-w-0">
                   <div className="text-gray-500 dark:text-gray-400 text-xs uppercase font-bold tracking-wider truncate">Visitas Mecánica</div>
@@ -470,18 +470,18 @@ const Stats: React.FC<StatsProps> = ({ onNavigate }) => {
                         contentStyle={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)', borderRadius: '12px', color: 'var(--text-color)', fontSize: '14px', fontWeight: 600 }}
                         formatter={(value: number) => CURRENCY_FORMATTER.format(value)}
                     />
-                    <Bar dataKey="fuel" name="Gasolina" stackId="a" fill="#3b82f6" radius={[0, 0, 0, 0]} />
-                    <Bar dataKey="service" name="Servicio" stackId="a" fill="#a855f7" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="fuel" name="Gasolina" stackId="a" fill="#FF6B35" radius={[0, 0, 0, 0]} />
+                    <Bar dataKey="service" name="Servicio" stackId="a" fill="#CC5500" radius={[4, 4, 0, 0]} />
                 </BarChart>
             </ResponsiveContainer>
           </div>
           <div className="flex justify-center gap-6 mt-6">
               <div className="flex items-center gap-2">
-                  <div className="w-2.5 h-2.5 rounded-full bg-blue-500"></div>
+                  <div className="w-2.5 h-2.5 rounded-full bg-accent"></div>
                   <span className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase">Gasolina</span>
               </div>
               <div className="flex items-center gap-2">
-                  <div className="w-2.5 h-2.5 rounded-full bg-purple-500"></div>
+                  <div className="w-2.5 h-2.5 rounded-full bg-accent/50"></div>
                   <span className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase">Servicio</span>
               </div>
           </div>

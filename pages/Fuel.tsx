@@ -337,13 +337,13 @@ const Fuel: React.FC<FuelProps> = ({ onNavigate, initialTab = 'log', editLogId, 
         <div className="flex p-1 bg-gray-100 dark:bg-white/5 rounded-xl mb-5">
             <button
                 onClick={() => { setActiveTab('history'); handleCancelEdit(); }}
-                className={`flex-1 py-2 text-base font-bold rounded-lg transition-all ${activeTab === 'history' ? 'bg-purple-600 text-white shadow-lg shadow-purple-500/30' : 'text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400'}`}
+                className={`flex-1 py-2 text-base font-bold rounded-lg transition-all ${activeTab === 'history' ? 'bg-accent text-white shadow-lg shadow-accent/30' : 'text-gray-500 dark:text-gray-400 hover:text-accent'}`}
             >
                 Recientes
             </button>
             <button
                 onClick={() => { setActiveTab('log'); handleCancelEdit(); }}
-                className={`flex-1 py-2 text-base font-bold rounded-lg transition-all ${activeTab === 'log' ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30' : 'text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400'}`}
+                className={`flex-1 py-2 text-base font-bold rounded-lg transition-all ${activeTab === 'log' ? 'bg-accent text-white shadow-lg shadow-accent/30' : 'text-gray-500 dark:text-gray-400 hover:text-accent'}`}
             >
                 {editingId ? 'Editando' : 'Registrar'}
             </button>
@@ -457,7 +457,7 @@ const Fuel: React.FC<FuelProps> = ({ onNavigate, initialTab = 'log', editLogId, 
                                     <span className="text-2xl font-black text-gray-900 dark:text-white tracking-tight leading-none">{log.volume}</span>
                                     <span className="text-sm font-bold text-gray-500">{getVolumeUnit()}</span>
                                 </div>
-                                <div className="text-xs font-bold text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/30 px-2.5 py-0.5 rounded inline-block mt-2">
+                                <div className="text-xs font-bold text-accent bg-accent/10 px-2.5 py-0.5 rounded inline-block mt-2">
                                     {log.fuelType}
                                 </div>
                             </div>

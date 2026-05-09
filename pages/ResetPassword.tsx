@@ -114,12 +114,12 @@ const ResetPassword: React.FC = () => {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-red-600 mb-4">
+          <h1 className="text-2xl font-bold text-danger mb-4">
             {error}
           </h1>
           <button
             onClick={() => window.location.href = '/'}
-            className="px-6 py-3 bg-blue-600 text-white rounded-lg"
+            className="px-6 py-3 bg-accent text-white rounded-lg"
           >
             Volver al inicio
           </button>
@@ -132,7 +132,7 @@ const ResetPassword: React.FC = () => {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-green-600 mb-4">
+          <h1 className="text-2xl font-bold text-success mb-4">
             ¡Contraseña actualizada!
           </h1>
           <p>Redirigiendo...</p>
@@ -190,7 +190,7 @@ const ResetPassword: React.FC = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 bg-blue-600 text-white rounded-lg"
+            className="w-full py-3 bg-accent text-white rounded-lg"
           >
             {loading ? 'Actualizando...' : 'Actualizar contraseña'}
           </button>

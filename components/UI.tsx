@@ -17,9 +17,9 @@ export const Button: React.FC<React.ButtonHTMLAttributes<HTMLButtonElement> & { 
 }) => {
   const baseStyle = "w-full py-4 rounded-2xl font-semibold transition-all duration-200 active:scale-95 active-bounce flex items-center justify-center gap-2 text-sm sm:text-base relative overflow-hidden";
   const variants = {
-    primary: "bg-blue-600 hover:bg-blue-500 text-white shadow-blue-900/20 shadow-lg dark:shadow-blue-900/20 shadow-blue-500/10",
+    primary: "bg-accent hover:bg-accent/90 text-white shadow-lg shadow-accent/20",
     secondary: "bg-gray-200 hover:bg-gray-300 text-gray-800 dark:bg-white/10 dark:hover:bg-white/20 dark:text-white border border-transparent dark:border-white/10",
-    danger: "bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/20",
+    danger: "bg-danger/10 hover:bg-danger/20 text-danger border border-danger/20",
   };
 
   return (
@@ -47,7 +47,7 @@ export const Input: React.FC<React.InputHTMLAttributes<HTMLInputElement> & { lab
     <div className="mb-5 animate-enter min-w-0">
       <label className="block text-sm font-medium text-muted mb-2 tracking-wide">{label}</label>
       <input
-        className={`glass-input w-full min-w-0 rounded-xl px-4 py-3.5 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all text-base truncate ${className}`}
+        className={`glass-input w-full min-w-0 rounded-xl px-4 py-3.5 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent/50 transition-all text-base truncate ${className}`}
         inputMode={getInputMode()}
         {...props}
       />
@@ -60,14 +60,14 @@ export const Select: React.FC<React.SelectHTMLAttributes<HTMLSelectElement> & { 
     <label className="block text-sm font-medium text-muted mb-2 tracking-wide">{label}</label>
     <div className="relative min-w-0">
       <select
-        className={`glass-input w-full min-w-0 rounded-xl px-4 py-3.5 appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all text-base truncate ${className}`}
+        className={`glass-input w-full min-w-0 rounded-xl px-4 py-3.5 appearance-none focus:outline-none focus:ring-2 focus:ring-accent/50 transition-all text-base truncate ${className}`}
         {...props} 
       >
         {options.map(opt => (
           <option key={opt.value} value={opt.value} className="bg-gray-100 text-gray-900 dark:bg-gray-900 dark:text-white">{opt.label}</option>
         ))}
       </select>
-      <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-blue-600 dark:text-gray-400">
+      <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-accent dark:text-gray-400">
         <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
       </div>
     </div>
@@ -81,8 +81,8 @@ export const Switch: React.FC<{ checked: boolean; onChange: (checked: boolean) =
     aria-checked={checked}
     onClick={() => onChange(!checked)}
     className={`${
-      checked ? 'bg-green-500' : 'bg-gray-300 dark:bg-white/10'
-    } relative inline-flex h-7 w-12 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 active:scale-95 transition-transform duration-150`}
+      checked ? 'bg-accent' : 'bg-gray-300 dark:bg-white/10'
+    } relative inline-flex h-7 w-12 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 active:scale-95 transition-transform duration-150`}
   >
     <span
       className={`${
@@ -94,9 +94,9 @@ export const Switch: React.FC<{ checked: boolean; onChange: (checked: boolean) =
 
 export const StatusBadge: React.FC<{ status: 'ok' | 'warning' | 'danger' }> = ({ status }) => {
   const styles = {
-    ok: 'bg-green-500/20 text-green-600 dark:text-green-400 border-green-500/30',
-    warning: 'bg-yellow-500/20 text-yellow-600 dark:text-yellow-400 border-yellow-500/30',
-    danger: 'bg-red-500/20 text-red-600 dark:text-red-400 border-red-500/30',
+    ok: 'bg-success/20 text-success border-success/30',
+    warning: 'bg-warning/20 text-warning border-warning/20',
+    danger: 'bg-danger/20 text-danger border-danger/20',
   };
   const labels = {
     ok: 'OK',
@@ -272,7 +272,7 @@ const ImageCropper: React.FC<{
                       step="0.05"
                       value={scale}
                       onChange={(e) => setScale(parseFloat(e.target.value))}
-                      className="w-full accent-blue-500"
+                      className="w-full accent-accent"
                   />
               </div>
 
@@ -285,7 +285,7 @@ const ImageCropper: React.FC<{
                       step="1"
                       value={rotation}
                       onChange={(e) => setRotation(parseFloat(e.target.value))}
-                      className="w-full accent-blue-500"
+                      className="w-full accent-accent"
                   />
               </div>
 
@@ -299,7 +299,7 @@ const ImageCropper: React.FC<{
 
                   <button 
                       onClick={handleSave}
-                      className="px-8 py-3 rounded-xl font-bold bg-blue-600 text-white hover:bg-blue-500 flex items-center gap-2"
+                      className="px-8 py-3 rounded-xl font-bold bg-accent text-white hover:bg-accent/90 flex items-center gap-2"
                   >
                       <Check size={18} />
                       Guardar

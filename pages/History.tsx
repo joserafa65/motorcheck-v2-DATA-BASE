@@ -4,7 +4,7 @@ import { useVehicle } from '../contexts/VehicleContext';
 import { Card, BackButton, Button } from '../components/UI';
 import { CURRENCY_FORMATTER, DATE_FORMATTER } from '../constants';
 import { FuelLog, ServiceLog } from '../types';
-import { Filter, Droplet, Wrench, X, Check, Image as ImageIcon, Edit2 } from 'lucide-react';
+import { ListFilter as Filter, Droplet, Wrench, X, Check, Image as ImageIcon, CreditCard as Edit2 } from 'lucide-react';
 
 interface HistoryProps {
   onNavigate: (view: string, params?: any) => void;
@@ -118,7 +118,7 @@ const History: React.FC<HistoryProps> = ({ onNavigate }) => {
           <BackButton onClick={() => onNavigate('dashboard')} title="Historial" />
           <button 
             onClick={() => setIsFilterOpen(true)}
-            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl transition-all font-bold text-sm active:scale-95 ${activeFilterCount > 0 ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30' : 'bg-gray-200 dark:bg-white/10 text-gray-700 dark:text-white'}`}
+            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl transition-all font-bold text-sm active:scale-95 ${activeFilterCount > 0 ? 'bg-accent text-white shadow-lg shadow-accent/30' : 'bg-gray-200 dark:bg-white/10 text-gray-700 dark:text-white'}`}
           >
               <Filter size={20} />
               <span>Filtros</span>
@@ -159,7 +159,7 @@ const History: React.FC<HistoryProps> = ({ onNavigate }) => {
                 <div className="flex gap-4">
                   <button 
                     onClick={() => setFilters(prev => ({ ...prev, showFuel: !prev.showFuel }))}
-                    className={`flex-1 p-4 rounded-xl border-2 flex items-center justify-center gap-2 transition-all active:scale-95 ${filters.showFuel ? 'border-blue-500 bg-blue-500/10 text-blue-600 dark:text-blue-400' : 'border-gray-200 dark:border-white/10 text-gray-400'}`}
+                    className={`flex-1 p-4 rounded-xl border-2 flex items-center justify-center gap-2 transition-all active:scale-95 ${filters.showFuel ? 'border-accent bg-accent/10 text-accent' : 'border-gray-200 dark:border-white/10 text-gray-400'}`}
                   >
                     {filters.showFuel && <Check size={18} />}
                     <Droplet size={20} />
@@ -167,7 +167,7 @@ const History: React.FC<HistoryProps> = ({ onNavigate }) => {
                   </button>
                   <button 
                     onClick={() => setFilters(prev => ({ ...prev, showService: !prev.showService }))}
-                    className={`flex-1 p-4 rounded-xl border-2 flex items-center justify-center gap-2 transition-all active:scale-95 ${filters.showService ? 'border-purple-500 bg-purple-500/10 text-purple-600 dark:text-purple-400' : 'border-gray-200 dark:border-white/10 text-gray-400'}`}
+                    className={`flex-1 p-4 rounded-xl border-2 flex items-center justify-center gap-2 transition-all active:scale-95 ${filters.showService ? 'border-accent bg-accent/10 text-accent' : 'border-gray-200 dark:border-white/10 text-gray-400'}`}
                   >
                     {filters.showService && <Check size={18} />}
                     <Wrench size={20} />
@@ -185,7 +185,7 @@ const History: React.FC<HistoryProps> = ({ onNavigate }) => {
                         <button
                           key={type}
                           onClick={() => toggleFuelType(type)}
-                          className={`px-3 py-2 rounded-lg text-sm font-medium border transition-all active:scale-95 ${filters.fuelTypes.includes(type) ? 'bg-blue-600 text-white border-blue-600' : 'bg-transparent border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-300'}`}
+                          className={`px-3 py-2 rounded-lg text-sm font-medium border transition-all active:scale-95 ${filters.fuelTypes.includes(type) ? 'bg-accent text-white border-accent' : 'bg-transparent border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-300'}`}
                         >
                           {type}
                         </button>
@@ -204,7 +204,7 @@ const History: React.FC<HistoryProps> = ({ onNavigate }) => {
                         <button
                           key={def.id}
                           onClick={() => toggleServiceId(def.id)}
-                          className={`px-3 py-2 rounded-lg text-sm font-medium border transition-all active:scale-95 ${filters.serviceIds.includes(def.id) ? 'bg-purple-600 text-white border-purple-600' : 'bg-transparent border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-300'}`}
+                          className={`px-3 py-2 rounded-lg text-sm font-medium border transition-all active:scale-95 ${filters.serviceIds.includes(def.id) ? 'bg-accent text-white border-accent' : 'bg-transparent border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-300'}`}
                         >
                           {def.name}
                         </button>
@@ -239,7 +239,7 @@ const History: React.FC<HistoryProps> = ({ onNavigate }) => {
                 style={{ animationDelay: `${Math.min(idx * 50, 500)}ms` }}
               >
                   {/* Timeline Dot */}
-                  <div className={`absolute -left-[32px] top-5 w-4 h-4 rounded-full border-2 border-white dark:border-black shadow-sm z-10 ${item.type === 'fuel' ? 'bg-blue-500' : 'bg-purple-500'}`} />
+                  <div className={`absolute -left-[32px] top-5 w-4 h-4 rounded-full border-2 border-white dark:border-black shadow-sm z-10 ${item.type === 'fuel' ? 'bg-accent' : 'bg-accent/70'}`} />
 
                   <Card
                       className="p-4 active:scale-[0.98] transition-all cursor-pointer hover:bg-white/40 dark:hover:bg-white/5"
@@ -268,11 +268,11 @@ const History: React.FC<HistoryProps> = ({ onNavigate }) => {
                               )}
                           </div>
                           <div className="text-right flex flex-col items-end gap-2">
-                              <div className={`font-bold font-mono text-lg ${item.type === 'fuel' ? 'text-blue-600 dark:text-blue-400' : 'text-purple-600 dark:text-purple-400'}`}>
+                              <div className={`font-bold font-mono text-lg ${item.type === 'fuel' ? 'text-accent' : 'text-accent/80'}`}>
                                   {item.type === 'fuel' ? CURRENCY_FORMATTER.format(item.totalCost) : (item.cost > 0 ? CURRENCY_FORMATTER.format(item.cost) : '---')}
                               </div>
                               <div className="flex gap-2">
-                                  <button className="text-xs font-bold text-blue-500 hover:text-blue-400 uppercase transition-colors px-1 flex items-center gap-1">
+                                  <button className="text-xs font-bold text-accent hover:text-accent/70 uppercase transition-colors px-1 flex items-center gap-1">
                                       <Edit2 size={12} /> Editar
                                   </button>
                                   {item.receiptPhoto && (
@@ -296,7 +296,7 @@ const History: React.FC<HistoryProps> = ({ onNavigate }) => {
                     <Filter size={48} className="mx-auto opacity-20" />
                 </div>
                 <p className="text-gray-500 italic text-sm">No hay registros que coincidan con los filtros seleccionados.</p>
-                <button onClick={() => setIsFilterOpen(true)} className="text-blue-500 text-sm mt-2 font-bold hover:underline">Modificar filtros</button>
+                <button onClick={() => setIsFilterOpen(true)} className="text-accent text-sm mt-2 font-bold hover:underline">Modificar filtros</button>
               </div>
           )}
       </div>

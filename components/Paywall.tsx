@@ -214,7 +214,7 @@ export const Paywall: React.FC<PaywallProps> = ({
                     ${isSelected
                       ? isLifetime
                         ? 'border-amber-400 bg-white/10'
-                        : 'border-blue-500 bg-white/10'
+                        : 'border-accent bg-white/10'
                       : isLifetime
                         ? 'border-amber-400/40 bg-white/5 hover:bg-white/10'
                         : 'border-white/10 bg-white/5 hover:bg-white/10'}
@@ -225,12 +225,12 @@ export const Paywall: React.FC<PaywallProps> = ({
                       <div
                         className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0
                           ${isSelected
-                            ? isLifetime ? 'border-amber-400' : 'border-blue-500'
+                            ? isLifetime ? 'border-amber-400' : 'border-accent'
                             : 'border-white/30'}
                         `}
                       >
                         {isSelected && (
-                          <div className={`w-2 h-2 rounded-full ${isLifetime ? 'bg-amber-400' : 'bg-blue-500'}`} />
+                          <div className={`w-2 h-2 rounded-full ${isLifetime ? 'bg-amber-400' : 'bg-accent'}`} />
                         )}
                       </div>
 
@@ -291,7 +291,7 @@ export const Paywall: React.FC<PaywallProps> = ({
         <button
           onClick={handleContinue}
           disabled={loadingId !== null || restoring}
-          className="w-full py-3 rounded-xl text-base font-semibold bg-blue-600 hover:bg-blue-700 text-white transition-all"
+          className="w-full py-3 rounded-xl text-base font-semibold bg-accent hover:bg-accent/90 text-white transition-all"
         >
           {loadingId ? 'Procesando…' : 'Desbloquear MOTORCHECK'}
         </button>
