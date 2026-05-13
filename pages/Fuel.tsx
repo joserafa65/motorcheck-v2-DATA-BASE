@@ -315,7 +315,7 @@ const Fuel: React.FC<FuelProps> = ({ onNavigate, initialTab = 'log', editLogId, 
                         </>
                     ) : (
                         <>
-                            Este periodo has consumido más gasolina de lo normal. Procura mejorar tu conducción en tu siguiente tanqueada.
+                            En los últimos <span className="font-bold text-gray-900 dark:text-white">{feedbackData.distance.toLocaleString()} km</span> recorridos has consumido un <span className="font-bold text-red-500">{feedbackData.percent.toFixed(1)}%</span> más gasolina de lo normal. Procura mejorar tu conducción en tu siguiente tanqueada.
                         </>
                     )}
                 </p>
